@@ -1,4 +1,4 @@
-function [hObject, eventdata, handles] = pushbuttonDrawContou(hObject, eventdata, handles)
+function [hObject, eventdata, handles] = DrawContour(hObject, eventdata, handles)
 % hObject    handle to pushbuttonDrawContour (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -8,4 +8,4 @@ end
 h = imfreehand(handles.axesIMG);
 handles.bwContour(:,:,handles.slice) = createMask(h);
 guidata(hObject, handles);
-updateImage(hObject,eventdata,handles);
+UpdateImage(hObject,eventdata,handles);

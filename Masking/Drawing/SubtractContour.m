@@ -6,4 +6,4 @@ tmp2 = handles.bwContour(:,:,handles.slice);
 tmp2(tmp) = 0;
 handles.bwContour(:,:,handles.slice) = tmp2;
 guidata(hObject, handles);
-updateImage(hObject,eventdata,handles);
+UpdateImage(hObject,eventdata,handles);

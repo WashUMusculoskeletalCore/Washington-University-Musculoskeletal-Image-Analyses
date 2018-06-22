@@ -9,4 +9,4 @@ else
     colormap(handles.axesIMG,handles.colormap);
 end
 impixelinfo(handles.axesIMG);
-guidata(hObject,eventdata,handles);
+guidata(hObject,handles);
