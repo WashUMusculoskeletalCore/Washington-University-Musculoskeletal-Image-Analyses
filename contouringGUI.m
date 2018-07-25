@@ -64,6 +64,7 @@ handles.pathstr = getenv('USERPROFILE');
 % system(sysLine);
 handles.sigma = 0.8;
 handles.radius = 3;
+handles.robust = 0;
 
 %initialize contouring values
 handles.contourMethod = 'Chan-Vese';
@@ -2169,8 +2170,10 @@ end
 function togglebuttonRobustThickness_Callback(hObject, eventdata, handles)
     if get(handles.togglebuttonRobustThickness,'Value') == 1
         set(handles.togglebuttonRobustThickness,'BackgroundColor',[1 0 0]);
+        handles.robust = 1;
     elseif get(handles.togglebuttonRobustThickness,'Value') == 0
         set(handles.togglebuttonRobustThickness,'BackgroundColor',[.94 .94 .94]);
+        handles.robust = 0;
     end
     guidata(hObject, handles);
 
