@@ -1,4 +1,4 @@
-function [handles] = loadTifStack(handles,hObject)
+function [hObject,eventdata,handles] = LoadTifStack(hObject,eventdata,handles)
 
 try
     set(handles.textBusy,'String','Busy');
