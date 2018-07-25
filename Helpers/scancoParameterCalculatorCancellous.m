@@ -33,7 +33,7 @@ if robust == 1
 %     try
 %         [meanRad,stdRad] = calculateThicknessGPU(D2,10);
 %     catch
-        [meanRad,stdRad] = calculateThickness(D2,10);
+        [meanRad,stdRad,D2] = calculateThickness(D2,10);
 %     end
     [meanRadSpace,stdRadSpace] = calculateThickness(D1,10);
     TbTh = meanRad * 2 * info.SliceThickness;
