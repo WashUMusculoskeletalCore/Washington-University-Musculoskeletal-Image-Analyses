@@ -11,10 +11,10 @@ try
         answer = inputdlg("Please enter the last slice to use");
         last = str2num(answer{1});
         img = handles.img(:,:,first:last);
-        degree = rotateWidestHorizontal(img, handles.bwContour);    
+        degree = RotateWidestHorizontal(img, handles.bwContour);    
         clear img;
     else
-        degree = rotateWidestHorizontal(handles.img, handles.bwContour);    
+        degree = RotateWidestHorizontal(handles.img, handles.bwContour);    
     end
     [a b c] = size(handles.img);
     for i = 1:c
