@@ -90,7 +90,7 @@ try
     
     set(handles.textBusy,'String','Not Busy');
     
-    %         guidata(hObject, handles);
+    guidata(hObject, handles);
     
 catch
     set(handles.textBusy,'String','Failed');
