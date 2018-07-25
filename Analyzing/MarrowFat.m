@@ -110,7 +110,6 @@ try
         imwrite(handles.blended(:,:,i),fullfile(pathTemp,fName));
     end
     
-    StackSlider(handles.blended);
     set(handles.textBusy,'String','Not Busy');
 catch
     set(handles.textBusy,'String','Failed');
