@@ -54,7 +54,7 @@ bwBackground = ~bwForLargeCalculations;
 % catch
     D2 = bwdist(bwBackground);%does what I want for thickness of structures
 % end
-D2(~bwUlt) = 0;
+%D2(~bwUlt) = 0;
 
 if robust == 1
     [meanRad,stdRad] = calculateThickness(D2,7);
