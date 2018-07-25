@@ -35,7 +35,6 @@ try
         plot(shp,'FaceColor','r','LineStyle','none');
         camlight();
         saveas(gcf,fullfile(handles.pathstr,'Disc.fig'));
-        close all;
     end
     
     fid = fopen(fullfile(handles.pathstr,'TangIVDPMAResults.txt'),'a');
