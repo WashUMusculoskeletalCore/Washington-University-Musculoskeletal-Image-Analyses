@@ -57,7 +57,7 @@ bwBackground = ~bwForLargeCalculations;
 %D2(~bwUlt) = 0;
 
 if robust == 1
-    [meanRad,stdRad] = calculateThickness(D2,7);
+    [meanRad,stdRad,D2] = calculateThickness(D2,7);
     TbTh = meanRad * 2 * info.SliceThickness;
     TbThSTD = stdRad * 2 * info.SliceThickness;
 else
