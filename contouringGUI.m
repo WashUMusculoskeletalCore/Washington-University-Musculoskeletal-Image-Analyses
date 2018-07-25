@@ -1250,7 +1250,6 @@ if strcmpi(handles.primitive,'oval') == 1
         tmp = false(size(handles.bwContour(:,:,handles.slice)));
     end
     for i = 1:length(xq)
-        progressbar(i/length(xq))
         if ((xq(i)-xc)*cos(0)-(yq(i)-yc)*sin(0)).^2/a^2 + ((xq(i)-xc)*sin(0)+(yq(i)-yc)*cos(0)).^2/b^2 <= 1
             tmp(round(yq(i)),round(xq(i))) = 1;
         end
