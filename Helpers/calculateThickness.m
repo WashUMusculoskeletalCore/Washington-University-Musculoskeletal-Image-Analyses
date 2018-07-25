@@ -1,4 +1,4 @@
-function [meanRad,stdRad] = calculateThickness(D2,suppress)
+function [meanRad,stdRad,D2] = calculateThickness(D2,suppress)
 
 tic;
 D2 = double(D2);
