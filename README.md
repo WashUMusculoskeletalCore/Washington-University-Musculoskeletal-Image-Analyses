@@ -84,3 +84,10 @@ Common masking tools
 > Inputs - Mask representing total volume of interest, lower threshold and upper threshold isolating globules
 
 > Outputs - mean results text file, individual spehericity text file, individual volume text file, 3D image of volume and globules
+
+- Tang IVD PMA
+> This analysis was originally intended as a pilot study script for Simon Tang, but can be used to investigate the morphology of murine intervertebral disks that have been contrast enhanced with PMA. It requires that the user (typically heavily) filters the scan, then creates two masks that are saved: One representing the nucleus pulposis, one representing the complete disc.
+
+> Inputs - NP and Disc masks (when prompted), PMA contrast enhanced disc scan.
+
+> Outputs - Image of disc parts (if desired), volumes in text file.
