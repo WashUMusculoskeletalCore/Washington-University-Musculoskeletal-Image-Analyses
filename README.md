@@ -20,6 +20,8 @@ medical image processing software
 **Run analysis:**
 > Select the appropriate analysis from the dropdown menu and click Execute Analysis.
 
-**Maski
+**Masking/Contouring**
+There are three main options for creating a mask in this software: Directly by drawing, by thresholding, and by creating primitive shapes. 
+- Direct drawing > Select 
 
 
