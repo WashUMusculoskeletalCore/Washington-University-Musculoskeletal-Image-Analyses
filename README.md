@@ -42,7 +42,17 @@ Common masking tools
 **Analyzing Data**
 - Volume Render
 > This analysis is currently broken, as The Mathworks broke their own built-in volume visualziation algorithm. It may be fixed in future MATLAB updates.
+
 - Cortical
 > Performs a standard cortical bone analysis
 
 > Inputs - A mask which covers the tissue considered to be cortical bone (NOT including medullary area), a lower (and upper) threshold set, and the background image cropped to only slices containing mask.
+
+> Outputs - writes line to a text file in the folder containing the DICOM files loaded.
+
+- Cancellous
+> Performs a standard cancellous bone analysis
+
+> Inputs - A mask covering the full medullary volume (not the outer shell), lower and upper threshold, and background image cropped to only slices containing mask.
+
+> Outputs - writes line to a text file in the folder containing the DICOM files loaded.
