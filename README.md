@@ -71,3 +71,12 @@ Common masking tools
 
 > Outputs - writes line to a text file in the folder containing the DICOM files loaded.
 
+- Arterial
+> This is a custom analysis script written for Olga Agapova at Wash U. It isn't meant to be used by others.
+
+> Inputs - single scan of contrast enhanced arterial tissue.
+
+> Outputs - 3D image of tissue and text file containing desired values
+
+- Marrow Fat
+> 
