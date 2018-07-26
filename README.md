@@ -79,4 +79,8 @@ Common masking tools
 > Outputs - 3D image of tissue and text file containing desired values
 
 - Marrow Fat
-> 
+> This analysis is intended to characterize the contrast-enhanced marrow fat globules present in a given volume, usually the medullary volume of a tiba. It attempts to analyze individual globules, which works well when voxel size is a little below 2um. If using scans with larger voxel sizes, do no interpret values related to individual globules. Globules should be brighter than background.
+
+> Inputs - Mask representing total volume of interest, lower threshold and upper threshold isolating globules
+
+> Outputs - mean results text file, individual spehericity text file, individual volume text file, 3D image of volume and globules
