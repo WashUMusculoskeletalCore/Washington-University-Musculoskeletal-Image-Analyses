@@ -22,6 +22,7 @@ medical image processing software
 
 **Masking/Contouring**
 There are three main options for creating a mask in this software: Directly by drawing, by thresholding, and by creating primitive shapes. 
-- Direct drawing > Select 
+- Direct drawing 
+> Select Draw Contour and then draw a contour by hand. If there is sufficient difference between the background and the object of interest (such as with a cortical bone scan), you can use the Adjust Current Slice button to automatically attempt to adjust to the object's edges. You may also then try to iterate forwards or backwards to automatically add a contour to the next slice and adjust it. Controls are the Method, Smoothing Factor, Contraction Bias, and Iterations. Fewer iterations are required if the geometry doesn't change much.
 
 
