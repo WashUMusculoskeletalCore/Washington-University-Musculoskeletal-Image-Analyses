@@ -65,4 +65,9 @@ Common masking tools
 > Outputs - values displayed on popup window.
 
 - Fracture Callus Vascularity
->
+> Generates the same parameters as a cancellous bone analysis, but customized for fracture callus vasculature.
+
+> Inputs - "Football" mask representing complete callus, lower threshold, upper threshold, background image with contrast agent that shows up as different than bone and background
+
+> Outputs - writes line to a text file in the folder containing the DICOM files loaded.
+
