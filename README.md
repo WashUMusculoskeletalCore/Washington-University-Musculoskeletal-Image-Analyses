@@ -57,9 +57,12 @@ Common masking tools
 
 > Outputs - writes line to a text file in the folder containing the DICOM files loaded.
 
--Linear Measure
+- Linear Measure
 > Allows the user to to drag the ends of a line where desired to perform a linear measurement on a 2D slice. 
 
 > Inputs - loaded image stack.
 
 > Outputs - values displayed on popup window.
+
+- Fracture Callus Vascularity
+>
