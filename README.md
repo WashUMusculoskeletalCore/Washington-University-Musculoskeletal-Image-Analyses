@@ -38,3 +38,11 @@ Common masking tools
 - Principle plan rotation: Use Rotate 90 Deg, which will rotate about the axis selected in the dropdown below it.
 - Brightness: Use the Window Location and Window Width sliders to adjust the brightness. This only changes the image for visualization, it doesn't change the underlying values.
 - Color mapping: You can choose a different color map than grayscale values by pressing Set Color Map after changing the dropdown to what you'd like.
+
+**Analyzing Data**
+- Volume Render
+> This analysis is currently broken, as The Mathworks broke their own built-in volume visualziation algorithm. It may be fixed in future MATLAB updates.
+- Cortical
+> Performs a standard cortical bone analysis
+--Inputs
+> A mask which covers the tissue considered to be cortical bone (NOT including medullary area), a lower (and upper) threshold set, and the background image cropped to only slices containing mask.
