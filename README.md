@@ -40,7 +40,7 @@ Common masking tools
 - Color mapping: You can choose a different color map than grayscale values by pressing Set Color Map after changing the dropdown to what you'd like.
 
 **Analyzing Data**
-- Volume Render
+- VolumeRender
 > This analysis is currently broken, as The Mathworks broke their own built-in volume visualziation algorithm. It may be fixed in future MATLAB updates.
 
 - Cortical
@@ -57,14 +57,14 @@ Common masking tools
 
 > Outputs - writes line to a text file in the folder containing the DICOM files loaded.
 
-- Linear Measure
+- LinearMeasure
 > Allows the user to to drag the ends of a line where desired to perform a linear measurement on a 2D slice. 
 
 > Inputs - loaded image stack.
 
 > Outputs - values displayed on popup window.
 
-- Fracture Callus Vascularity
+- FractureCallusVascularity
 > Generates the same parameters as a cancellous bone analysis, but customized for fracture callus vasculature.
 
 > Inputs - "Football" mask representing complete callus, lower threshold, upper threshold, background image with contrast agent that shows up as different than bone and background
@@ -78,14 +78,14 @@ Common masking tools
 
 > Outputs - 3D image of tissue and text file containing desired values
 
-- Marrow Fat
+- MarrowFat
 > This analysis is intended to characterize the contrast-enhanced marrow fat globules present in a given volume, usually the medullary volume of a tiba. It attempts to analyze individual globules, which works well when voxel size is a little below 2um. If using scans with larger voxel sizes, do no interpret values related to individual globules. Globules should be brighter than background.
 
 > Inputs - Mask representing total volume of interest, lower threshold and upper threshold isolating globules
 
 > Outputs - mean results text file, individual spehericity text file, individual volume text file, 3D image of volume and globules
 
-- Tang IVD PMA
+- TangIVDPMA
 > This analysis was originally intended as a pilot study script for Simon Tang, but can be used to investigate the morphology of murine intervertebral disks that have been contrast enhanced with PMA. It requires that the user (typically heavily) filters the scan, then creates two masks that are saved: One representing the nucleus pulposis, one representing the complete disc.
 
 > Inputs - NP and Disc masks (when prompted), PMA contrast enhanced disc scan.
