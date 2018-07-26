@@ -37,3 +37,4 @@ Common masking tools
 - Planar rotation: Use the Rotate Image button, which reads from the text field below it.
 - Principle plan rotation: Use Rotate 90 Deg, which will rotate about the axis selected in the dropdown below it.
 - Brightness: Use the Window Location and Window Width sliders to adjust the brightness. This only changes the image for visualization, it doesn't change the underlying values.
+- Color mapping: You can choose a different color map than grayscale values by pressing Set Color Map after changing the dropdown to what you'd like.
