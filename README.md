@@ -32,3 +32,7 @@ There are three main options for creating a mask in this software: Directly by d
 Common masking tools
 - Morph All will perform a linear interpolation between any drawn mask and the next mask it encounters in the stack. As such, when using it, make sure you draw masks on enough key frames to get the shape you want.
 - Set Mask by Clicking will allow the user to click on a pixel in a mask of interest and then hit enter, removing any parts of masks that aren't attached to the one clicked on. Useful after setting a global threshold when only one object is desired.
+
+**Image Manipulation**
+- Planar rotation: Use the Rotate Image button, which reads from the text field below it.
+- Principle plan rotation: Use Rotate 90 Deg, which will rotate about the axis selected in the dropdown below it.
