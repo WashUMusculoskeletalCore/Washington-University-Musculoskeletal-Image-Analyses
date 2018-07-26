@@ -56,3 +56,10 @@ Common masking tools
 > Inputs - A mask covering the full medullary volume (not the outer shell), lower and upper threshold, and background image cropped to only slices containing mask.
 
 > Outputs - writes line to a text file in the folder containing the DICOM files loaded.
+
+-Linear Measure
+> Allows the user to to drag the ends of a line where desired to perform a linear measurement on a 2D slice. 
+
+> Inputs - loaded image stack.
+
+> Outputs - values displayed on popup window.
