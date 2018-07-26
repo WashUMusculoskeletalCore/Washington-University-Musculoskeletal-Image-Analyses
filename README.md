@@ -44,5 +44,6 @@ Common masking tools
 > This analysis is currently broken, as The Mathworks broke their own built-in volume visualziation algorithm. It may be fixed in future MATLAB updates.
 - Cortical
 > Performs a standard cortical bone analysis
---Inputs
-> A mask which covers the tissue considered to be cortical bone (NOT including medullary area), a lower (and upper) threshold set, and the background image cropped to only slices containing mask.
+
+
+> Inputs - A mask which covers the tissue considered to be cortical bone (NOT including medullary area), a lower (and upper) threshold set, and the background image cropped to only slices containing mask.
