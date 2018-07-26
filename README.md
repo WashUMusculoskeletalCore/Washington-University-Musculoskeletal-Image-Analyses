@@ -45,5 +45,4 @@ Common masking tools
 - Cortical
 > Performs a standard cortical bone analysis
 
-
 > Inputs - A mask which covers the tissue considered to be cortical bone (NOT including medullary area), a lower (and upper) threshold set, and the background image cropped to only slices containing mask.
