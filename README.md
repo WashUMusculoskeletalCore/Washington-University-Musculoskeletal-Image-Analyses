@@ -1,9 +1,8 @@
 # ContouringGUI
 medical image processing software
 
-**General usage**
+**General Workflow**
 
-> The general workflow of this software is intended to be:
   - Load data
   - Minimize to relevant data
   - Identify region of interest
