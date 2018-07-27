@@ -107,3 +107,10 @@ Common masking tools
 
 > Outputs - Animated .gif image
 
+- ObjectAndVoids
+> Generates an image in the overall volume defined by a mask, separating what is the object and what is the void using a global threshold. Useful for visualizing a porus structure.
+
+> Inputs - Mask, image stack, lower threshold, upper threshold
+
+> Outputs - Plot of object (blue) and voids (red)
+
