@@ -93,10 +93,17 @@ Common masking tools
 
 > Outputs - Image of disc parts (if desired), volumes in text file.
 
--TendonFootprint
+- TendonFootprint
 > Analyzes the surface area representing the footprint of where a tendon inserts into a bone, or, more generally,  the surface area of the "bone" mask contained within the "tendon" mask. 
 
 >Inputs - Mask representing the bone (will prompt for name), mask representing the tendon (will prompt for name).
 
 >Outputs - A figure of the 3D surfaces of the two masks used, STL files of surfaces, text file with surface area.
+
+- MakeGIF
+> This function writes out the current image stack as a .gif file to the directory where the current images were loaded from.
+
+> Inputs - image stack.
+
+> Outputs - Animated .gif image
 
