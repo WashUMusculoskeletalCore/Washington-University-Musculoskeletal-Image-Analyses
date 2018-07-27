@@ -127,3 +127,10 @@ Common masking tools
 > Inputs - mask representing bone (when prompted), mask representing puncture volume (when prompted).
 
 > Outputs - image of bone with puncture.
+
+- CalculateMaskVolume
+> Calculates the volume of the current mask.
+
+> Inputs - mask.
+
+> Outputs - popup with mask volume displayed.
