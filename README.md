@@ -23,7 +23,8 @@ medical image processing software
 **Masking/Contouring**
 There are three main options for creating a mask in this software: Directly by drawing, by thresholding, and by creating primitive shapes. 
 - Direct drawing 
-> Select Draw Contour and then draw a contour by hand. If there is sufficient difference between the background and the object of interest (such as with a cortical bone scan), you can use the Adjust Current Slice button to automatically attempt to adjust to the object's edges. You may also then try to iterate forwards or backwards to automatically add a contour to the next slice and adjust it. Controls are the Method, Smoothing Factor, Contraction Bias, and Iterations. Fewer iterations are required if the geometry doesn't change much.
+> Select Draw Contour and then draw a contour by hand. If there is sufficient difference between the background and the object of interest (such as with a cortical bone scan), you can use the Adjust Current Slice button to automatically attempt to adjust to the object's edges. You may also then try to iterate forwards or backwards to automatically add a contour to the next slice and adjust it. Controls are the Method, Smoothing Factor, Contraction Bias, and Iterations. Fewer iterations are required if the geometry doesn't change much. Details on how these values influence mask shape can be found here: https://www.mathworks.com/help/images/ref/activecontour.html
+
 - Thresholding
 > A mask may be created by using a global threshold. Adjust the slider to identify an appropriate threshold, then click Set Lower Threshold (and find an upper threshold if needed), then click Set Mask to Current Threshold. All pixels in the desired range will now form your mask.
 -Primitives
