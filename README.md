@@ -158,3 +158,7 @@ Common masking tools
 
 - SkeltonizationAnalysis
 > Not fully tested! This is a start of a method by which to analyze skeletonized structures, as may be used with trabecular networks, contrast enhanced vasculature, etc. The intended input mask should represent the network to be skeletonized and analyzed. That, and the image stack of course, are the only inputs. 
+
+> Inputs - mask representing network structure, image stack
+
+> Outputs - Figure showing skeletonized structure and thickness along that skeleton, 
