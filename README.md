@@ -136,7 +136,7 @@ Common masking tools
 > Outputs - popup with mask volume displayed.
 
 - RegisterVolumes
-> This part of the software may be run as a separate program if needed, but is usually launched from ContouringGUI as part of a more complex workflow. It is intended to register a "moving" dataset to a "fixed" dataset, wherein the newly registered dataset can then be written out as a new DICOM stack. The user may also perform some basic movement operations to improve the initial conditions of the registration.
+> This part of the software may be run as a separate program if needed, but is usually launched from ContouringGUI as part of a more complex workflow. It is intended to register a "moving" dataset to a "fixed" dataset, wherein the newly registered dataset can then be written out as a new DICOM stack. The user may also perform some basic movement operations to improve the initial conditions of the registration. The number of iterations required will increase as the disparity between original image sets increases.
 
 > Inputs - Fixed DICOM stack, Moving DICOM stack.
 
