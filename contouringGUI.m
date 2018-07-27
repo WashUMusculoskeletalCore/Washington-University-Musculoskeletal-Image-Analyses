@@ -276,7 +276,7 @@ elseif strcmpi(handles.analysis,'RegisterVolumes') == 1
 elseif strcmpi(handles.analysis,'2D-Analysis') == 1
     [hObject,eventdata,handles] = TwoDAnalysis(hObject,eventdata,handles);
     
-elseif strcmpi(handles.analysis,'FractureCallus3PtBendBreak') == 1
+elseif strcmpi(handles.analysis,'FractureCallusFullFracture') == 1
     [hObject,eventdata,handles] = FractureCallus3PtBendBreak(hObject,eventdata,handles);
     
 %elseif strcmpi(handles.analysis,'GuilakKneeSurface') == 1
