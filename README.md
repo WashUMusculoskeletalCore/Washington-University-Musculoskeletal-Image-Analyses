@@ -120,3 +120,10 @@ Common masking tools
 > Inputs - Mask representing the nucleus pulposis (when prompted), mask representing the full disk (when prompted), lower threshold representing cutoff for notochord remnant cells.
 
 > Outputs - Volumes of whole disc, AP, NF, and notochord remnant cells, image of disk if required.
+
+- NeedlePuncture
+> Generates an image showing where a needle has punctured a bone/other structure.
+
+> Inputs - mask representing bone (when prompted), mask representing puncture volume (when prompted).
+
+> Outputs - image of bone with puncture.
