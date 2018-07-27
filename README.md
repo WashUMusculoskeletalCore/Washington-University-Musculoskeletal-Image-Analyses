@@ -150,4 +150,8 @@ Common masking tools
 > Outputs - text file containing calculated parameters
 
 - FractureCallusFullFracture
-> Performs 
+> Performs an analysis of a fracture callus according to the protocol used by the lab of Matt Silva for full fractures caused by 3-point bending. It expects that you have drawn a mask that represents the full callus, picked a lower threshold representing callus bone, and an upper threshold representing cortical bone.
+
+> Inputs - cropped image stack, mask representing the callus, lower threshold representing callus bone, upper threshold representing cortical bone.
+
+> Outputs - text file containing parameters relating to callus bone formation and the cortical bone contained therein.
