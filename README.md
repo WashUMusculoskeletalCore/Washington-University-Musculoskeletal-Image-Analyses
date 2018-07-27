@@ -92,3 +92,11 @@ Common masking tools
 > Inputs - NP and Disc masks (when prompted), PMA contrast enhanced disc scan.
 
 > Outputs - Image of disc parts (if desired), volumes in text file.
+
+-TendonFootprint
+> Analyzes the surface area representing the footprint of where a tendon inserts into a bone, or, more generally,  the surface area of the "bone" mask contained within the "tendon" mask. 
+
+>Inputs - Mask representing the bone (will prompt for name), mask representing the tendon (will prompt for name).
+
+>Outputs - A figure of the 3D surfaces of the two masks used, STL files of surfaces, text file with surface area.
+
