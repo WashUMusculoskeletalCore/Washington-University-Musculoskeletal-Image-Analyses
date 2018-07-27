@@ -1717,8 +1717,8 @@ switch str{val}
         handles.analysis = 'RegisterVolumes';
     case '2D-Analysis'
         handles.analysis = '2D-Analysis';
-    case 'FractureCallus3PtBendBreak'
-        handles.analysis = 'FractureCallus3PtBendBreak';
+    case 'FractureCallusFullFracture'
+        handles.analysis = 'FractureCallusFullFracture';
     %case 'GuilakKneeSurface'
    %     handles.analysis = 'GuilakKneeSurface';
     case 'SkeletonizationAnalysis'
