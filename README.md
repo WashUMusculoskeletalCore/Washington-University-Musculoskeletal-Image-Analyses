@@ -114,3 +114,9 @@ Common masking tools
 
 > Outputs - Plot of object (blue) and voids (red)
 
+- TangIVDPMANotochord
+> This analysis is a refinement of TangIVDPMA, intended to be used on PMA contrast enhanced murine discs that have been scanned at very high resolution, such as at 2um on a ZEISS XRM.
+
+> Inputs - Mask representing the nucleus pulposis (when prompted), mask representing the full disk (when prompted), lower threshold representing cutoff for notochord remnant cells.
+
+> Outputs - Volumes of whole disc, AP, NF, and notochord remnant cells, image of disk if required.
