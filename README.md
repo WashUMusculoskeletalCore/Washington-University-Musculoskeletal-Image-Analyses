@@ -155,3 +155,6 @@ Common masking tools
 > Inputs - cropped image stack, mask representing the callus, lower threshold representing callus bone, upper threshold representing cortical bone.
 
 > Outputs - text file containing parameters relating to callus bone formation and the cortical bone contained therein.
+
+- SkeltonizationAnalysis
+> Not fully tested! This is a start of a method by which to analyze skeletonized structures, as may be used with trabecular networks, contrast enhanced vasculature, etc. The intended input mask should represent the network to be skeletonized and analyzed. That, and the image stack of course, are the only inputs. 
