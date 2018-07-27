@@ -141,3 +141,10 @@ Common masking tools
 > Inputs - Fixed DICOM stack, Moving DICOM stack.
 
 > Outputs - Registered DICOM stack, set of overlayed images for quality check
+
+- 2D-Analysis
+> Performs a 2D analysis on each masked slice in the current image stack. Outcomes include 2D thickness at different positions, tissue mineral density, polar moment of inertia, and others.
+
+> Inputs - masked set of images, typically of cortical bone
+
+> Outputs - text file containing calculated parameters
