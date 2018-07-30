@@ -190,3 +190,11 @@ Common masking tools
 > Inputs - image stack, mask, user selected center and Ymax locations. 
 
 > Outputs - popup box with Ymax distance
+
+- ThicknessVisualization
+> Generates an image of the spheres retained when calculating thickness in the volume of interest
+
+> Inputs - image stack, mask
+
+> Outputs - image of spheres retained in thickness calculations within object defined by mask
+
