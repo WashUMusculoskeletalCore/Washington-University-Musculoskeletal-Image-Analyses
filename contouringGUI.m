@@ -1269,6 +1269,7 @@ elseif strcmpi(handles.primitive,'rectangle') == 1
     if isfield(handles,'bwContour') == 0
         handles.bwContour = false(size(handles.img));
     end
+    handles.abc = size(handles.img);
     hold on;
     [P,R] = DrawRectangle([handles.primitiveCenter(1),handles.primitiveCenter(2),...
         handles.primitiveWidth,handles.primitiveHeight,str2num(get(handles.editRotatePrimitive,'String'))]);
