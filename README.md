@@ -161,4 +161,6 @@ Common masking tools
 
 > Inputs - mask representing network structure, image stack
 
-> Outputs - Figure showing skeletonized structure and thickness along that skeleton, 
+> Outputs - Figure showing skeletonized structure and thickness along that skeleton, text file containing nodes, node locations, link lengths, mean link radius, STD of link radius, and link points
+
+
