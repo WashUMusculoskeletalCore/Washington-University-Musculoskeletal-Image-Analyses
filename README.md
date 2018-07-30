@@ -184,3 +184,9 @@ Common masking tools
 
 > Outputs - new TIFF stack on disk
 
+- YMaxForStrain
+> Serves to identify the user selected Y max values required for strain gauge analysis. It runs on all slices, so crop down your data set first!
+
+> Inputs - image stack, mask, user selected center and Ymax locations. 
+
+> Outputs - popup box with Ymax distance
