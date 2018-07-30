@@ -291,8 +291,8 @@ elseif strcmpi(handles.analysis,'DistanceMap') == 1
 elseif strcmpi(handles.analysis,'WriteToDICOM') == 1
     WriteCurrentImageStackToDICOM(hObject,eventdata,handles);
 	
-elseif strcmpi(handles.analysis,'SaveMasksAsLabelMatrix') == 1
-    SaveMasksAsLabelMatrix(hObject,eventdata,handles);
+%elseif strcmpi(handles.analysis,'SaveMasksAsLabelMatrix') == 1
+%    SaveMasksAsLabelMatrix(hObject,eventdata,handles);
 	
 elseif strcmpi(handles.analysis,'YMaxForStrain') == 1
     YMaxForStrain(hObject,eventdata,handles);
