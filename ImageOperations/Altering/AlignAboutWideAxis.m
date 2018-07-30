@@ -18,8 +18,17 @@ try
     end
     [a b c] = size(handles.img);
     for i = 1:c
-        imgTmp(:,:,i) = imrotate(handles.img(:,:,i),degree);
-        bwContourTmp(:,:,i) = imrotate(handles.bwContour(:,:,i),degree);
+        clc;
+        i/c
+        if i == 1
+            tmp = imrotate(handles.img(:,:,i),degree);
+            imgTmp = zeros([size(tmp) c],'uint16');
+            bwContourTmp = false(size(imgTmp));
+            imgTmp(:,:,i) = tmp;
+        else
+            imgTmp(:,:,i) = imrotate(handles.img(:,:,i),degree);
+            bwContourTmp(:,:,i) = imrotate(handles.bwContour(:,:,i),degree);
+        end
     end
     handles.img = imgTmp;
     handles.bwContour = bwContourTmp;
