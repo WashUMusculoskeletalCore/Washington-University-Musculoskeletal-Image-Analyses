@@ -207,3 +207,10 @@ Common masking tools
 > Inputs - image stack, mask representing cortical bone, lower threshold representing callus calcification
 
 > Outputs - text file with standard callus outcome values, together and separated by surface.
+
+- CTHistomorphometry
+> Calculates differences between bone formation in 2 image stacks. Generally, the workflow is to register two stacks using RegisterVolumes, then load the fixed stack into the main GUI, then run CTHistomorphometry. When prompted, load the moving stack. Both stacks should be trimmed down to only the objects of interest prior to running.
+
+> Inputs - fixed image stack containing only object of interest, lower threshold, upper threshold, moving stack with only object of interest when prompted.
+
+> Text file containing the different volumes that can be calculated, images of overlayed volumes.
