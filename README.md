@@ -183,3 +183,4 @@ Common masking tools
 > Inputs - image stack
 
 > Outputs - new TIFF stack on disk
+
