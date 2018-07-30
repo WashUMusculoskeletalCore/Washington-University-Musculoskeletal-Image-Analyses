@@ -170,4 +170,16 @@ Common masking tools
 
 > Outputs - distance transformation as new image stack
 
--
+- WriteToDICOM
+> Writes the current image stack to a new set of DICOM files in a sub-folder of the current data set's folder, taking its name from the text field below the Execute Analysis button
+
+> Inputs - image stack
+
+> Outputs - new DICOM stack on disk
+
+- WriteToTiff
+> Writes the current image stack to a new set of TIFF files in a sub-folder of the current data set's folder, taking its name from the text field below the Execute Analysis button. Recommended for use with external 3D Visualization programs.
+
+> Inputs - image stack
+
+> Outputs - new TIFF stack on disk
