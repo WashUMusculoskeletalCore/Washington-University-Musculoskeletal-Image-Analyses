@@ -11,7 +11,7 @@ try
         answer = inputdlg("Please enter the last slice to use");
         last = str2num(answer{1});
         img = handles.img(:,:,first:last);
-        degree = RotateWidestHorizontal(img, handles.bwContour);    
+        degree = RotateWidestHorizontal(img, handles.bwContour(:,:,first:last));    
         clear img;
     else
         degree = RotateWidestHorizontal(handles.img, handles.bwContour);    
