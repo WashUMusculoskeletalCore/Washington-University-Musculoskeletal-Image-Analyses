@@ -168,7 +168,11 @@ for i = 1:c
             end
         end
     end
-    noonth(i) = abs(noonlast-noonfirst) * pixelwidth;
+    try
+        noonth(i) = abs(noonlast-noonfirst) * pixelwidth;
+    catch
+        noonth(i) = 0;
+    end
 
     %3:00
     first = 0;
@@ -182,7 +186,11 @@ for i = 1:c
             end
         end
     end
-    threeth(i) = abs(threelast-threefirst) * pixelwidth;
+    try
+        threeth(i) = abs(threelast-threefirst) * pixelwidth;
+    catch
+        threeth(i) = 0;
+    end
 
     %6:00
     first = 0;
@@ -198,7 +206,11 @@ for i = 1:c
             thing = 5;
         end
     end
-    sixth(i) = abs(sixlast-sixfirst) * pixelwidth;
+    try
+        sixth(i) = abs(sixlast-sixfirst) * pixelwidth;
+    catch
+        sixth(i) = 0;
+    end
 
     %9:00
     first = 0;
@@ -212,7 +224,11 @@ for i = 1:c
             end
         end
     end
-    nineth(i) = abs(ninelast-ninefirst) * pixelwidth;
+    try
+        nineth(i) = abs(ninelast-ninefirst) * pixelwidth;
+    catch
+        nineth(i) = 0;
+    end
     avgth(i) = (noonth(i)+threeth(i)+sixth(i)+nineth(i))/4;
 end
 %Output the averages after each bone's data
