@@ -163,4 +163,11 @@ Common masking tools
 
 > Outputs - Figure showing skeletonized structure and thickness along that skeleton, text file containing nodes, node locations, link lengths, mean link radius, STD of link radius, and link points
 
+- DistanceMap
+> Transforms the current image stack with mask into a distance map
 
+> Inputs - image stack, mask
+
+> Outputs - distance transformation as new image stack
+
+-
