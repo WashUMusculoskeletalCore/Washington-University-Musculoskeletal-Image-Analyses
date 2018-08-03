@@ -18,10 +18,10 @@ try
             drawnow;
             eval([fieldNames{i} ' = handles.' fieldNames{i} ';']);
             if ct == 0
-                save(fullfile(handles.pathstr,'Workspace.mat'),fieldNames{i},'-v7.3');
+                save(fullfile(handles.pathstr,'Workspace.mat'),fieldNames{i},'-v7.3','-nocompression');
                 ct=ct+1;
             else
-                save(fullfile(handles.pathstr,'Workspace.mat'),fieldNames{i},'-append');
+                save(fullfile(handles.pathstr,'Workspace.mat'),fieldNames{i},'-append','-nocompression');
                 ct=ct+1;
             end
         end
