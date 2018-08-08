@@ -3,9 +3,24 @@ function [hObject,eventdata,handles] = CorticalAnalysis(hObject,eventdata,handle
 try
 	set(handles.textBusy,'String','Busy');
 	guidata(hObject, handles);
-	drawnow();
-	[handles.outCortical,handles.outHeaderCortical,handles.outCorticalContinuous] = scancoParameterCalculatorCortical(handles.img,handles.bwContour,handles.info,handles.threshold,get(handles.togglebuttonRobustThickness,'Value'));
-	[twoDHeader twoDData] = twoDAnalysisSub(handles.img,handles.info,handles.lowerThreshold,handles.bwContour);
+    drawnow();
+    
+    [x y z] = ind2sub(size(handles.bwContour),find(handles.bwContour));
+    xMin = min(x);
+    xMax = max(x);
+    yMin = min(y);
+    yMax = max(y);
+    zMin = min(z);
+    zMax = max(z);
+
+    handles.img2 = handles.img(xMin:xMax,yMin:yMax,zMin:zMax);
+    handles.bwContour = handles.bwContour(xMin:xMax,yMin:yMax,zMin:zMax);
+
+    handles.slice = 1;
+    handles.abc = size(handles.img2);
+    
+	[handles.outCortical,handles.outHeaderCortical,handles.outCorticalContinuous] = scancoParameterCalculatorCortical(handles.img2,handles.bwContour,handles.info,handles.threshold,get(handles.togglebuttonRobustThickness,'Value'));
+	[twoDHeader twoDData] = twoDAnalysisSub(handles.img2,handles.info,handles.lowerThreshold,handles.bwContour);
 	%print main results
 	if exist(fullfile(handles.pathstr,'CorticalResults.txt'),'file') ~= 2
 		fid = fopen(fullfile(handles.pathstr,'CorticalResults.txt'),'a');
@@ -76,6 +91,7 @@ try
 		end
 	end
 	fclose(fid);
+    clear handles.img2;
 	guidata(hObject, handles);
 	set(handles.textBusy,'String','Not Busy');
 catch
