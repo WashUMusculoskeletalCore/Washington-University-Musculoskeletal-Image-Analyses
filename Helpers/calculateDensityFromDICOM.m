@@ -37,17 +37,17 @@ scale = info.Private_0029_1000;
 water = info.Private_0029_1006;
 
 [a b c] = size(matrix);
-% densityMatrixmgHACCM = zeros(size(matrix),'single');
+densityMatrixmgHACCM = zeros(size(matrix),'uint16');
 for i = 1:c
     clc
     i/c
-    densityMatrixmgHACCM(:,:,i) = single(matrix(:,:,i)) ./ scale .* slope + intercept;
+    densityMatrixmgHACCM(:,:,i) = uint16(single(matrix(:,:,i)) ./ scale .* slope + intercept);
 end
 % densityMatrixmgHACCM(find(densityMatrixmgHACCM < 0)) = 0;
 
-densityMatrixHU=zeros(size(matrix),'single');
+densityMatrixHU=zeros(size(matrix),'uint16');
 for i = 1:c
     clc
     i/c
-    densityMatrixHU(:,:,i) = -1000 + single(matrix(:,:,i)) ./ scale .* 1000 ./ water;
+    densityMatrixHU(:,:,i) = uint16(-1000 + double(matrix(:,:,i)) ./ scale .* 1000 ./ water);
 end
