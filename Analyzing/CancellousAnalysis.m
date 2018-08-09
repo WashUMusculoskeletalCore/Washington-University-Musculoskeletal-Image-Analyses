@@ -13,11 +13,11 @@ try
 		for i = 1:length(handles.outCancellous)
 			if i == length(handles.outCancellous)
 				fprintf(fid,'%s\t',handles.outHeaderCancellous{i});
-
 			else
 				fprintf(fid,'%s\t',handles.outHeaderCancellous{i});
 			end
-		end
+        end
+        fprintf(fid,'%s\t','VoxelSize');
 		fprintf(fid,'%s\n','Threshold');
 		fclose(fid);
 	end
@@ -26,6 +26,9 @@ try
 		if i == length(handles.outCancellous)
 			fprintf(fid,'%s\t',num2str(handles.outCancellous{i}));
 			fprintf(fid,'%s\n',num2str(handles.lowerThreshold));
+        elseif i == 2
+            fprintf(fid,'%s\t',handles.pathstr);    
+            fprintf(fid,'%s\t',num2str(handles.outCancellous{i}));
 		else
 			fprintf(fid,'%s\t',num2str(handles.outCancellous{i}));
 		end
