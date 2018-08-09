@@ -285,8 +285,14 @@ elseif strcmpi(handles.analysis,'FractureCallusFullFracture') == 1
 elseif strcmpi(handles.analysis,'SkeletonizationAnalysis') == 1
 	[hObject,eventdata,handles] = SkeletonizationAnalysis(hObject,eventdata,handles);
 	
-elseif strcmpi(handles.analysis,'DistanceMap') == 1
+elseif strcmpi(handles.analysis,'ConvertTo-DistanceMap') == 1
 	[hObject,eventdata,handles] = DistanceMap(hObject,eventdata,handles);
+    
+elseif strcmpi(handles.analysis,'ConvertTo-Hounsfield') == 1
+	[hObject,eventdata,handles] = ConvertToHounsfield(hObject,eventdata,handles);
+    
+elseif strcmpi(handles.analysis,'ConvertTo-mgHAperCCM') == 1
+	[hObject,eventdata,handles] = ConvertToDensity(hObject,eventdata,handles);
 	
 elseif strcmpi(handles.analysis,'WriteToDICOM') == 1
     WriteCurrentImageStackToDICOM(hObject,eventdata,handles);
@@ -1724,8 +1730,12 @@ switch str{val}
    %     handles.analysis = 'GuilakKneeSurface';
     case 'SkeletonizationAnalysis'
         handles.analysis = 'SkeletonizationAnalysis';
-    case 'DistanceMap'
-        handles.analysis = 'DistanceMap';
+    case 'ConvertTo-DistanceMap'
+        handles.analysis = 'ConvertTo-DistanceMap';
+    case 'ConvertTo-Hounsfield'
+        handles.analysis = 'ConvertTo-Hounsfield';
+    case 'ConvertTo-mgHAperCCM'
+        handles.analysis = 'ConvertTo-mgHAperCCM';
     case 'WriteToTiff'
         handles.analysis = 'WriteToTiff';
     case 'WriteToDICOM'
