@@ -5,6 +5,7 @@ try
 	guidata(hObject, handles);
 	drawnow();
 	bw = false(size(handles.img));
+	handles.img(~handles.bwContour) = 0;
 	bw(find(handles.img > handles.lowerThreshold)) = 1;
 	bw(find(handles.img > handles.upperThreshold)) = 0;
 	[handles.outCancellous,handles.outHeaderCancellous] = scancoParameterCalculatorCancellous(bw,handles.bwContour,handles.img,handles.info,get(handles.togglebuttonRobustThickness,'Value'));
