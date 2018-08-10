@@ -18,7 +18,6 @@ try
 				fprintf(fid,'%s\t',handles.outHeaderCancellous{i});
 			end
         end
-        fprintf(fid,'%s\t','VoxelSize');
 		fprintf(fid,'%s\n','Threshold');
 		fclose(fid);
 	end
