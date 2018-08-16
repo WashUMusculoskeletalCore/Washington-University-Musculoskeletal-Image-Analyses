@@ -54,7 +54,7 @@ if strcmpi(answer{1},'y') == 1
     set(handles.textBusy,'String','Finding Mask Differences');
     drawnow();
     bwFixedVolume = length(find(bwFixed)) * handles.info.SliceThickness^3;
-    bwRegisteredVolume = length(find(bwFixed)) * handles.info.SliceThickness^3;
+    bwRegisteredVolume = length(find(bwRegistered)) * handles.info.SliceThickness^3;
     bwDifferenceVolume = bwFixedVolume - bwRegisteredVolume;
     newVolume = length(find(bwRegistered(~bwFixed))) * handles.info.SliceThickness^3;
     oldVolume = length(find(bwFixed(~bwRegistered))) * handles.info.SliceThickness^3;
