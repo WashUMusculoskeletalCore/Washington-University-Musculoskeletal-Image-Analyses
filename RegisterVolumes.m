@@ -135,6 +135,7 @@ end
 
 switch plAx
     case 'planar'
+        % Rotate the image around the center point
         handles.imgMoving = imrotate(handles.imgMoving,deg);
     case 'axial'
         str = get(handles.popupmenuAxialAxis,'String');
@@ -142,10 +143,13 @@ switch plAx
         ax = str2num(str{val});
         switch ax
             case 1
+                % 3D Rotate around x axis
                 handles.imgMoving = imrotate3(handles.imgMoving,deg,[1,0,0]);
             case 2
+                % 3D Rotate around y axis
                 handles.imgMoving = imrotate3(handles.imgMoving,deg,[0,1,0]);
             case 3
+                % 3D Rotate around z axis
                 handles.imgMoving = imrotate3(handles.imgMoving,deg,[0,0,1]);
         end
 end
@@ -236,7 +240,12 @@ function pushbuttonRegisterVolumes_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonRegisterVolumes (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Configure image registration for images with similar brightness and
+% contrast (monomodal)
 [optimizer, metric] = imregconfig('monomodal');
+% Set the Mattes Mutual Information algorithm as the metric to use during
+% registration
 metric = registration.metric.MattesMutualInformation;
 optimizer.MaximumIterations = round(str2num(cell2mat(get(handles.editIterations,'String'))));
 % optimizer.MinimumStepLength = 1.00e-8;
@@ -250,27 +259,32 @@ optimizer.MaximumIterations = round(str2num(cell2mat(get(handles.editIterations,
 % catch
 %     handles.imgRegistered = imregister(handles.imgMoving,handles.imgReference,'rigid',optimizer,metric,...
 %         'DisplayOptimization',1,'PyramidLevels',4);
+    % Identify a rigid transformation that will make the moving image matcg
+    % the reference image
     handles.imgRegTform = imregtform(handles.imgMoving,handles.imgReference,'rigid',optimizer,metric,...
         'DisplayOptimization',1,'PyramidLevels',4);
+    % Transform and display the moving image at the same size as the
+    % reference image
     handles.imgRegistered = imwarp(handles.imgMoving,handles.imgRegTform,'OutputView',imref3d(size(handles.imgReference)));
    
     
 % end
 
 [a b c] = size(handles.imgRegistered);
+% Create a composite of the reference and registered images slice by slice
 clear fused;
 for i = 1:c
     fused(:,:,i) = imfuse(handles.imgReference(:,:,i),handles.imgRegistered(:,:,i),'blend');
 end
 
 handles.fused = fused;
-
+% Update sliders to size of fused image
 [a b c] = size(handles.fused);
 set(handles.sliderFused,'Value',1);
 set(handles.sliderFused,'min',1);
 set(handles.sliderFused,'max',c);
 set(handles.sliderFused,'SliderStep',[1,1]/(c-1));
-
+% Display the fused image
 imshow(handles.fused(:,:,1),'Parent',handles.axesFused);
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
@@ -308,14 +322,18 @@ function pushbuttonLoadMovingVolume_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonLoadMovingVolume (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Select directory containing DICOM Stack in UI
 if strcmpi(handles.movingFileType,'dcm')
     handles.pathstrMoving = uigetdir(pwd,'Please select the folder of the volume to be registered');
     [handles.imgMoving handles.infoMoving] = readDICOMStack(handles.pathstrMoving);
     
+% Select txm file in UI
 elseif strcmpi(handles.movingFileType,'txm')
     [handles.movingFileName handles.movingPathName] = uigetfile([pwd '\*.txm'],'Please select your TXM file');
     [handles.header handles.headerShort] = txmheader_read8(fullfile(handles.movingPathName,handles.movingFileName));
-    
+    % Fills infoMoving with preset value
+    % TODO- Move presets to configuraion file
     handles.infoMoving = handles.headerShort;
     handles.infoMoving.SliceThickness = handles.infoMoving.PixelSize;
     handles.infoMoving.SliceThickness = handles.infoMoving.SliceThickness / 1000;
@@ -340,7 +358,7 @@ elseif strcmpi(handles.movingFileType,'txm')
     handles.infoMoving.PixelSpacing = [handles.infoMoving.SliceThickness;handles.infoMoving.SliceThickness];
 
     handles.img = zeros([handles.headerShort.ImageWidth handles.headerShort.ImageHeight handles.headerShort.NoOfImages],'uint16');
-
+    % Load txm file one slice at a time into moving image
     ct=0;
     for i = 1:handles.headerShort.NoOfImages
         ct=ct+1;
@@ -350,7 +368,7 @@ elseif strcmpi(handles.movingFileType,'txm')
 end
 
 % handles.imgMoving = padarray(handles.imgMoving,[50 50 50]);
-
+% Adjust slider to new size
 handles.abc = size(handles.imgMoving);
 set(handles.sliderMoving,'Value',1);
 set(handles.sliderMoving,'min',1);
@@ -367,13 +385,17 @@ function pushbuttonLoadReferenceVolume_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonLoadReferenceVolume (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% Select directory containing DICOM stack in UI
 if strcmpi(handles.referenceFileType,'dcm')
     handles.pathstrReference = uigetdir(pwd,'Please select the folder of the volume to be registered');
     [handles.imgReference handles.infoReference] = readDICOMStack(handles.pathstrReference);
+% Select txm file in UI
 elseif strcmpi(handles.referenceFileType,'txm')
     [handles.referenceFileName handles.referencePathName] = uigetfile([pwd '\*.txm'],'Please select your TXM file');
     [handles.header handles.headerShort] = txmheader_read8(fullfile(handles.referencePathName,handles.referenceFileName));
-    
+    % Fills infoReference with preset value
+    % TODO- Move presets to configuraion file
     handles.infoReference = handles.headerShort;
     handles.infoReference.SliceThickness = handles.infoReference.PixelSize;
     handles.infoReference.SliceThickness = handles.infoReference.SliceThickness / 1000;
@@ -398,7 +420,7 @@ elseif strcmpi(handles.referenceFileType,'txm')
     handles.infoReference.PixelSpacing = [handles.infoReference.SliceThickness;handles.infoReference.SliceThickness];
 
     handles.img = zeros([handles.headerShort.ImageWidth handles.headerShort.ImageHeight handles.headerShort.NoOfImages],'uint16');
-
+    % Adjust slider to new size
     ct=0;
     for i = 1:handles.headerShort.NoOfImages
         ct=ct+1;
@@ -482,10 +504,11 @@ end
 
 
 function updateImage(hObject,eventdata,handles)
-
+% If there is a moving and refence image show both side by side
 if isfield(handles,'imgMoving') && isfield(handles,'imgReference')
     imshow(imadjust(handles.imgMoving(:,:,handles.sliceMoving)),'Parent',handles.axesMovingXY);
     imshow(imadjust(handles.imgReference(:,:,handles.sliceReference)),'Parent',handles.axesReferenceXY);
+% If there is only one, show it alone
 elseif isfield(handles,'imgMoving') && ~isfield(handles,'imgReference')
     imshow(imadjust(handles.imgMoving(:,:,handles.sliceMoving)),'Parent',handles.axesMovingXY);
 elseif ~isfield(handles,'imgMoving') && isfield(handles,'imgReference')
@@ -500,6 +523,9 @@ function pushbuttonCenterMovingToReference_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonCenterMovingToReference (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+% For each dimension, if either image is larger than the other, pad the
+% start of the array by half the difference
 [a b c] = size(handles.imgReference);
 
 [a1 b1 c1] = size(handles.imgMoving);
@@ -692,6 +718,9 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
+% Resize sliders based on resized image
+% TODO- Make this more generic so it can be used more
+% Function slider = updateSlider(slider, image) or (slider, sliderLength)
 function handles = updateSliders(hObject,eventdata,handles)
 [a b c] = size(handles.imgReference);
 set(handles.sliderReference,'Value',1);
@@ -719,13 +748,17 @@ function pushbuttonCropReference_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonCropReference (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+% Create an interactive croping tool
 [~,rect] = imcrop(handles.axesReferenceXY);
 [a b c] = size(handles.imgReference);
+% Crop every slice of reference image using rect
 for i = 1:c
     tmp{i} = imcrop(handles.imgReference(:,:,i),rect);
 end
+% Clear reference image and relace with cropped version
 clear handles.imgReference;
 for i = 1:c
+    % TODO- can we skip using tmp2 and insert directly into imgReference
    tmp2(:,:,i) = tmp{i};
 end
 handles.imgReference = tmp2;
@@ -735,17 +768,20 @@ guidata(hObject, handles);
 updateSliders(hObject, eventdata, handles);
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
-
+%TODO- combine both of these
 % --- Executes on button press in pushbuttonCropMoving.
 function pushbuttonCropMoving_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonCropMoving (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+% Create an interactive croping tool
 [~,rect] = imcrop(handles.axesMovingXY);
 [a b c] = size(handles.imgMoving);
+% Crop every slice of moving image using rect
 for i = 1:c
     tmp{i} = imcrop(handles.imgMoving(:,:,i),rect);
 end
+% Clear moving image and relace with cropped version
 clear handles.imgMoving;
 rmfield(handles,'imgMoving');
 guidata(hObject, handles);
@@ -766,20 +802,25 @@ function pushbuttonWrite_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonWrite (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+% Save files from registered image
 writeCurrentImageStackToDICOM(handles.imgRegistered,handles.infoMoving,handles.pathstrMoving);
 tform = handles.imgRegTform;
 save([handles.pathstrMoving '\Registered\Tform.mat'],'tform');
-
+% Creates directory for fused images
 mkdir(fullfile(handles.pathstrMoving,'Fused'));
 
 zers = '00000';
 [a b c] = size(handles.fused);
 for i = 1:c
+    % Give every filename a unique 5 digit number with leading zeroes
     fName = ['Fused -' zers(1:end-length(num2str(i))) num2str(i) '.tif'];
+    % TODO- Move myDir declaration outside loop
     myDir = fullfile(handles.pathstrMoving,'Fused');
+    % Save the file
     imwrite(handles.fused(:,:,i),fullfile(myDir,fName));
 end
 
+%TODO-Major rework, get configuration files set up first
 function writeCurrentImageStackToDICOM(img,info,pathstr)
 
 DICOMPrefix = 'Registered';

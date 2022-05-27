@@ -8,7 +8,7 @@ try
     handles.bwBone = eval(['handles.' answer{1}]);
     answer = inputdlg('Please type in the name of the mask representing the tendon');
     handles.bwTendon = eval(['handles.' answer{1}]);
-    
+    % Plot tendon and bone shape
     handles.shpBone = shpFromBW(handles.bwBone,3);
     figure
     plot(handles.shpBone);
@@ -42,7 +42,7 @@ try
     fv.vertices = fv.vertices .* handles.info.SliceThickness;
     
     area = 0;
-    
+    % TODO-look at output
     for i = 1:length(objFV.faces)
         nodesMakeFace = objFV.faces(i,1:3);
         areIn = in(nodesMakeFace);

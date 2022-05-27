@@ -1,5 +1,5 @@
 function [hObject,eventdata,handles] = SetLastSlice(hObject,eventdata,handles)
-
+% Crop all slices after the current slice
 handles.img = handles.img(:,:,1:handles.slice);
 
 if isfield(handles,'bwContour') == 1

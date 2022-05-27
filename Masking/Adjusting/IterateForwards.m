@@ -1,3 +1,6 @@
+% Generates 3d mask matching image object boundary by iteratively using
+% existing mask as guide for mask in next slice
+% TODO- merge with IterateBackwards 
 function [hObject, eventdata, handles] = IterateForwards(hObject, eventdata, handles)
 
 if length(find(handles.bwContour(:,:,handles.slice))) ~= 0

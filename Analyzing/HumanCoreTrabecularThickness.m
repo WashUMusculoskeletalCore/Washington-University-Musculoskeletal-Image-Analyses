@@ -4,10 +4,11 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
+    % Identify area inside thresholds
     bw = false(size(handles.img));
     bw(find(handles.img > handles.lowerThreshold)) = 1;
     bw(find(handles.img > handles.upperThreshold)) = 0;
-    bw = bwareaopen(bw,150);
+    bw = bwareaopen(bw,150); % Remove small objects from image
 
     [handles.outCancellous,handles.outHeaderCancellous] = scancoParameterCalculatorCancellous(bw,handles.bwContour,handles.img,handles.info,get(handles.togglebuttonRobustThickness,'Value'));
     if exist(fullfile(handles.pathstr,'CancellousResults.txt'),'file') ~= 2

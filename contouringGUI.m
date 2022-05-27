@@ -45,7 +45,7 @@ end
 
 
 % --- Executes just before contouringGUI is made visible.
-function contouringGUI_OpeningFcn(hObject, eventdata, handles, varargin)
+function contouringGUI_OpeningFcn(hObject, eventdata, handles, varargin) %#ok<*INUSL>
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 
@@ -130,38 +130,62 @@ guidata(hObject, handles);
 % UIWAIT makes contouringGUI wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
-function pushbuttonLoadTifStack_Callback(hObject, eventdata, handles)
-    [hObject, eventdata, handles] = LoadTiffStack(hObject,eventdata,handles);
-
+% DESC-Executes on button press, loads an image from a tif stack
+function pushbuttonLoadTifStack_Callback(hObject, eventdata, handles)  %#ok<*DEFNU>
+    [hObject, eventdata, handles] = LoadTiffStack(hObject,eventdata,handles); %#ok<*ASGLU>
+    
 function varargout = contouringGUI_OutputFcn(hObject, eventdata, handles)
     varargout{1} = handles.output;
 
-function sliderIMG_Callback(hObject, eventdata, handles)
+% DESC-Executes when image slider is used, updates the current slice
+% IN-handles.sliderIMG: The value selected/displayed with the slider
+% OUT-handles.slice: The number of the current active slice
+%     handles.editSliceNumber: The slice number selected/displayed with a
+%     textbox
+function sliderIMG_Callback(hObject, eventdata, handles) 
+    % Sets the active slice to the value chosen with the slider
     handles.slice = round(get(handles.sliderIMG,'Value'));
+    % And sets the slice number to the same value
     set(handles.editSliceNumber,'String',num2str(handles.slice));
     UpdateImage(hObject, eventdata, handles);
     guidata(hObject, handles);
 
-function sliderIMG_CreateFcn(hObject, eventdata, handles)
+% DESC-Executes when the image slider is created, sets the background color
+% to gray
+% OUT-hobject.BackgroundColor: the background color of the sider
+function sliderIMG_CreateFcn(hObject, eventdata, handles)  %#ok<*INUSD>
     if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor',[.9 .9 .9]);
     end
 
-function pushbuttonLoadIMG_Callback(hObject, eventdata, handles)
+% DESC-Executes on button press, loads an image from DICOM stack    
+function pushbuttonLoadIMG_Callback(hObject, eventdata, handles) 
     [hObject, eventdata, handles] = LoadDICOMStack(hObject,eventdata,handles);
-
-function pushbuttonDrawContour_Callback(hObject, eventdata, handles)%%encapsulated
+% DESC-Executes on button press, allows the user to draw a black and white
+% mask
+% IN-Freehand 2d image draw by user
+%    handles.slice: the current active slice
+% OUT handles.bwContour: the 3d image mask
+function pushbuttonDrawContour_Callback(hObject, eventdata, handles)% %%encapsulated
     [hObject, eventdata, handles] = DrawContour(hObject, eventdata, handles);
-
+% DESC-Executes on button press, allows the user to draw a black and white
+% mask to be removed from the current mask
+% IN-Freehand 2d image draw by user
+%    handles.slice: the current active slice
+% OUT handles.bwContour: the 3d image mask
 function pushbuttonSubtractContour_Callback(hObject, eventdata, handles)
     [hObject, eventdata, handles] = SubtractContour(hObject, eventdata, handles);
-
+% DESC-Executes on button press, allows the user to draw a black and white
+% mask to be added to the current mask
+% IN-Freehand 2d image draw by user
+%    handles.slice: the current active slice
+% OUT handles.bwContour: the 3d image mask
 function pushbuttonAddContour_Callback(hObject, eventdata, handles)
     [hObject, eventdata, handles] = AddContour(hObject, eventdata, handles);
-
+% DESC-Executes on button press, 
 function pushbuttonMorphRange_Callback(hObject, eventdata, handles)
     [hObject, eventdata, handles] = MorphRange(hObject, eventdata, handles);
-
+% DESC-Executes on button press,
 function pushbuttonAdjustCurrentSlice_Callback(hObject, eventdata, handles)
     [hObject, eventdata, handles] = AdjustCurrentSlice(hObject, eventdata, handles);
 
@@ -178,6 +202,7 @@ function popupmenuContourMethod_Callback(hObject, eventdata, handles)
     guidata(hObject, handles);
 
 function popupmenuContourMethod_CreateFcn(hObject, eventdata, handles)
+    % TODO- This is reused a lot. Make it into a function.
     if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
         set(hObject,'BackgroundColor','white');
     end
@@ -211,7 +236,7 @@ function editIterations_CreateFcn(hObject, eventdata, handles)
     end
 
 function pushbuttonExecuteAnalysis_Callback(hObject, eventdata, handles)
-
+%TODO- Change to switch case.
 if strcmpi(handles.analysis,'Cortical') == 1
     [hObject,eventdata,handles] = CorticalAnalysis(hObject,eventdata,handles);
     
@@ -259,7 +284,7 @@ elseif strcmpi(handles.analysis,'ObjectAndVoids') == 1
     
 elseif strcmpi(handles.analysis,'VolumeRender') == 1
 %     handles = volumeRender(handles,hObject);
-    'Volume rendering currently broken by Mathworks'
+    'Volume rendering currently broken by Mathworks' 
     
 elseif strcmpi(handles.analysis,'TangIVDPMANotochord') == 1
     [hObject,eventdata,handles] = TangIVDPMANotocordMorphology(hObject,eventdata,handles);
@@ -338,21 +363,27 @@ function editRadius_CreateFcn(hObject, eventdata, handles)
     end
 
 function sliderThreshold_Callback(hObject, eventdata, handles)
+    %Get new threshold from sliders and adjust all values based on it
     handles.threshold = get(handles.sliderThreshold,'Value');
     lowThreshTmp = handles.threshold;
     highThreshTmp = handles.upperThreshold;
     set(handles.text9,'String',num2str(handles.threshold));
     set(handles.editThreshold,'String',num2str(handles.threshold));
     % handles.bwContour(:,:,handles.slice) = handles.img(:,:,handles.slice) > handles.lowerThreshold;
+    % Create binary image tpm showing everything in current slice between the
+    % thresholds as 1 and everything else as 0
     tmp = false(size(handles.img(:,:,handles.slice)));
     tmp(find(handles.img(:,:,handles.slice) > lowThreshTmp)) = 1;
     tmp(find(handles.img(:,:,handles.slice) > highThreshTmp)) = 0;
+    % Show a blend of the current slice and the threshold area with axes.
     imshowpair(imadjust(handles.img(:,:,handles.slice),[double(handles.lOut);double(handles.hOut)],[double(0);double(1)]),tmp,'blend','Parent',handles.axesIMG);
+    % Display Pixel Information tool
     impixelinfo(handles.axesIMG);
     guidata(hObject, handles);
 
 function sliderThreshold_CreateFcn(hObject, eventdata, handles)
     if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+        % NOTE-Uses a different color from the others
         set(hObject,'BackgroundColor',[.9 .9 .9]);
     end
 
@@ -363,7 +394,8 @@ function togglebuttonIterateBackwards_Callback(hObject, eventdata, handles)
 % --- Executes on button press in togglebuttonIterateForwards.
 function togglebuttonIterateForwards_Callback(hObject, eventdata, handles)
     [hObject, eventdata, handles] = IterateForwards(hObject, eventdata, handles);
-
+    
+% Removes all masks between the startMorph and endMorph slices   
 function pushbuttonClearMaskRange_Callback(hObject, eventdata, handles)
 
 handles.bwContour(:,:,handles.startMorph:handles.endMorph) = false(size(handles.bwContour(:,:,handles.startMorph:handles.endMorph)));
@@ -372,6 +404,7 @@ UpdateImage(hObject, eventdata, handles);
 
 
 % --- Executes on button press in pushbuttonClearAllMasks.
+% Removes bwContour field if it exists, deleting all masks
 function pushbuttonClearAllMasks_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonClearAllMasks (see GCBO)
 
@@ -484,11 +517,13 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
+    %Resets emptyRanges
     clear handles.empty handles.emptyRanges;
     handles.emptyRanges = cell(0);
     guidata(hObject, handles);
     
     [a b c] = size(handles.img);
+    %Create an array showing 1 for every slice without a mask
     empties = zeros([1,c]);
     for i = 1:c
         if length(find(handles.bwContour(:,:,i))) == 0
@@ -496,11 +531,13 @@ try
         end
     end
     
+    % Find where the empties array changes and mark as starts or stops
     diffs = diff(empties);
     starts = find(diffs == -1);
     starts = starts + 1;
     stops = find(diffs == 1);
     
+    % Also mark start and end as start or stop if not empty
     if empties(1) ~= 1
         starts = [1,starts];
     end
@@ -509,7 +546,7 @@ try
         stops = [stops,c];
     end
     
-    
+    % Pair every start with its respective stop
     for i = 1:length(starts)
         el{i} = [num2str(starts(i)) ' , ' num2str(stops(i))];
     end
@@ -560,7 +597,9 @@ function pushbuttonCreate3DObject_Callback(hObject, eventdata, handles)
 
 set(handles.textBusy,'String','Busy');
 drawnow();
+% Generate 3d shape from masks 
 handles.shp = shpFromBW(handles.bwContour,handles.sphereSize);
+% Create new window and display the shape in it
 figure();
 plot(handles.shp,'FaceColor',handles.STLColor ./ 255,'LineStyle','none');
 camlight();
@@ -580,10 +619,15 @@ try
     guidata(hObject, handles);
     drawnow();
     if strcmpi(handles.stlWriteMethod,'ascii') == 1
+        % Generate a filename
         fName = ['scaled-' num2str(handles.imgScale) '-' handles.DICOMPrefix '-stl-ascii.stl'];
+        % Write boundaryFacets and Points to that filename with mode:ASCII
         stlwrite(fullfile(handles.pathstr,fName),handles.shp.boundaryFacets,handles.shp.Points,'mode','ascii');
     else
+        % Generate a filename
         fName = ['scaled-' num2str(handles.imgScale) '-' handles.DICOMPrefix '-stl.stl'];
+        % Write boundaryFacets and Points to that filename with specified
+        % FaceColor
         stlwrite(fullfile(handles.pathstr,fName),handles.shp.boundaryFacets,handles.shp.Points,'FaceColor',handles.STLColor);
     end
     set(handles.textBusy,'String','Not Busy');
@@ -596,6 +640,7 @@ catch
 end
 
 % --- Executes on button press in pushbuttonSetMaskThreshold.
+% Sets mask to 1 in all parts of img between thresholds and 0 elsewhere
 function pushbuttonSetMaskThreshold_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonSetMaskThreshold (see GCBO)
 
@@ -615,9 +660,14 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
+    % Remove all areas smaller than speckleSize from BWContour
     handles.bwContour = bwareaopen(handles.bwContour,handles.speckleSize);
+    %TODO- I'm not sure this is needed. Check if it does anything
     handles.bwContour(:,:,handles.slice) = handles.bwContour(:,:,handles.slice);
+    % Show current slice of img, with contrast adjusted to display values
+    % between lOut and hOut, blended with BWContour mask and axes
     imshowpair(imadjust(handles.img(:,:,handles.slice),[double(handles.lOut);double(handles.hOut)],[double(0);double(1)]),handles.bwContour(:,:,handles.slice),'blend','Parent',handles.axesIMG);
+    % Display Pixel Information tool
     impixelinfo(handles.axesIMG);
     
     guidata(hObject, handles);
@@ -686,17 +736,22 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
+    % Resize img in 3 dimensions by imgScale
     handles.img = imresize3(handles.img,handles.imgScale);
+    % TODO- Can this be deleted? Use handles.abc instead
     [a b c] = size(handles.img);
+    % If bwContour exists, resize it too
     if isfield(handles,'bwContour')
         handles.bwContour = resize3DMatrixBW(handles.bwContour,handles.imgScale);
     end
+    % Set abc to new size
     handles.abc = size(handles.img);
+    % Reset slider to new size
     set(handles.sliderIMG,'Value',1);
     set(handles.sliderIMG,'min',1);
     set(handles.sliderIMG,'max',handles.abc(3));
     set(handles.sliderIMG,'SliderStep',[1,1]/(handles.abc(3)-1));
-    
+    %Rescale the text voxels so they still only fill one slice
     set(handles.textVoxelSize,'String',num2str(handles.info.SliceThickness / handles.imgScale));
     guidata(hObject, handles);
     UpdateImage(hObject, eventdata, handles);
@@ -791,7 +846,7 @@ end
 function pushbuttonIsolateObjectOfInterest_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonIsolateObjectOfInterest (see GCBO)
 
-
+% Remove everything not in mask from image
 handles.img(~handles.bwContour) = 0;
 % end
 guidata(hObject, handles);
@@ -802,7 +857,7 @@ function pushbuttonCropImageToMask_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonCropImageToMask (see GCBO)
 
 
-
+%Find the minimum and maximum x, y, and z containing a nonzero in bwContour
 [x y z] = ind2sub(size(handles.bwContour),find(handles.bwContour));
 xMin = min(x);
 xMax = max(x);
@@ -811,11 +866,16 @@ yMax = max(y);
 zMin = min(z);
 zMax = max(z);
 
+
+% Crop out everything outside of that range 
 handles.img = handles.img(xMin:xMax,yMin:yMax,zMin:zMax);
 handles.bwContour = handles.bwContour(xMin:xMax,yMin:yMax,zMin:zMax);
 
+% Reset slice to 1
 handles.slice = 1;
+% Set abc to new size 
 handles.abc = size(handles.img);
+% Reset slider to match new size
 set(handles.sliderIMG,'Value',1);
 set(handles.sliderIMG,'min',1);
 set(handles.sliderIMG,'max',handles.abc(3));
@@ -863,6 +923,8 @@ try
     val = get(handles.popupmenuMaskComponents,'Value');
     str = str{val};
     
+    %TODO- Can't find documentation for bwIndex, it seems like this sets
+    %the mask based on the selected value
     handles.bwContour = bwIndex(handles.bwContour, str2num(str));
     guidata(hObject, handles);
     UpdateImage(hObject, eventdata, handles);
@@ -899,21 +961,30 @@ function popupmenuSTLColor_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from popupmenuSTLColor
 str = get(handles.popupmenuSTLColor,'String');
 val = get(handles.popupmenuSTLColor,'Value');
+
 if strcmpi(str{val},'r') == 1
+    %Red
     handles.STLColor = [255 0 0];
 elseif strcmpi(str{val},'g') == 1
+    %Green
     handles.STLColor = [0 255 0];
 elseif strcmpi(str{val},'b') == 1
+    %Blue
     handles.STLColor = [0 0 255];
 elseif strcmpi(str{val},'y') == 1
+    %Yellow
     handles.STLColor = [255 255 0];
 elseif strcmpi(str{val},'k') == 1
+    %Black
     handles.STLColor = [0 0 0];
 elseif strcmpi(str{val},'c') == 1
+    %Cyan
     handles.STLColor = [0 255 255];
 elseif strcmpi(str{val},'w') == 1
+    %White
     handles.STLColor = [255 255 255];
 end
+%TODO- Magenta? Also change to switch case.
 guidata(hObject, handles);
 
 % --- Executes during object creation, after setting all properties.
@@ -946,12 +1017,17 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
+    %TODO-Use handlse.abc instead
     [a b c] = size(handles.img);
     
+    %TODO- Is this needed? Slider doesn't change. 
     handles.slice = round(get(handles.sliderIMG,'Value'));
     
+    %Create temp storage with the same depth as the image
     tmp = cell([1 c]);
     tmp2 = cell([1 c]);
+    % For each slice, rotate the image and mask and store the new
+    % image/mask slice in tmp and tmp2
     for i = 1:c
         tmp{i} = imrotate(handles.img(:,:,i),handles.rotateDegrees,'crop');
         if isfield(handles,'bwContour') == 1
@@ -959,10 +1035,11 @@ try
         end
     end
     clear handles.img;
+    % Replace the image with the rotated version
     for i = 1:c
         handles.img(:,:,i) = tmp{i};
     end
-    
+    % Replace the mask with the rotated version
     if isfield(handles,'bwContour') == 1
         clear handles.bwContour;
         for i = 1:c
@@ -972,6 +1049,7 @@ try
     %set to update graphics stuff
     handles.abc = size(handles.img);
     
+    %TODO- Might not be needed, c doesn't change
     set(handles.sliderIMG,'Value',handles.slice);
     set(handles.sliderIMG,'min',1);
     set(handles.sliderIMG,'max',handles.abc(3));
@@ -1017,7 +1095,7 @@ function pushbuttonFlipImage_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonFlipImage (see GCBO)
 
 
-
+% Flip the image and mask around the axis
 handles.img = flip(handles.img,handles.rotateAxis);
 if isfield(handles,'bwContour') == 1
     handles.bwContour = flip(handles.bwContour,handles.rotateAxis);
@@ -1026,6 +1104,7 @@ end
 handles.abc = size(handles.img);
 % handles.bwContour = false(size(handles.img));
 
+%TODO- Might not be needed, Check how flip affects c
 set(handles.sliderIMG,'Value',1);
 set(handles.sliderIMG,'min',1);
 set(handles.sliderIMG,'max',handles.abc(3));
@@ -1047,6 +1126,7 @@ function popupmenuRotationAxis_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from popupmenuRotationAxis
 str = get(handles.popupmenuRotationAxis,'String');
 val = get(handles.popupmenuRotationAxis,'Value');
+% TODO- Check why 1 and 2 are switched
 switch str{val}
     case '1'
         handles.rotateAxis = 2;
@@ -1085,9 +1165,12 @@ function pushbuttonPopulateMaskComponents_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 try
     set(handles.textBusy,'String','Busy');
+    %Identifies all connected components of mask
     handles.cc = bwconncomp(handles.bwContour);
+    %Create a list of all components in string format
     for i = 1:length(handles.cc.PixelIdxList)
         connCompInd{i} = num2str(i);
+        %TODO- is this slow enough to need a loading indicator?
         set(handles.textPercentLoaded,'String',num2str(i/length(handles.cc.PixelIdxList)));
         drawnow();
     end
@@ -1107,23 +1190,34 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
+    % Interactive point selection
     [x y] = getpts(handles.axesIMG);
     z(1:length(x),1) = handles.slice;
     pt = round([y x z]);%points to use to select mask component
+    % Identifies connected components of mask
     cc = bwconncomp(handles.bwContour);
+    % Create an array matching components and chosen points
     removeFlag = zeros(length(cc.PixelIdxList),length(pt(:,1)));
     for i = 1:length(cc.PixelIdxList)
+        % For each component, get subscripts of pixels in component 
         [idxx idxy idxz] = ind2sub(size(handles.bwContour),cc.PixelIdxList{i});
         idx = [idxx idxy idxz];
         for k = 1:length(pt(:,1))
+            % For each point and component, if point is not in component 
+            % set removeFlag for component/point combo
+            %TODO- once one point in component found, move to next
+            %component? Might be more efficient.
             if length(find(ismember(pt(k,:),idx,'rows'))) == 0
                 removeFlag(i,k) = 1;
             end
         end
+        % Update percentage
         set(handles.textPercentLoaded,'String',num2str(i/length(cc.PixelIdxList)));
         drawnow();
     end
     
+    % If all remove flags for a component are set, remove it from the mask
+    % All flags = None of the selected points were on the component
     for i = 1:length(removeFlag)
         if sum(removeFlag(i,:)) == length(removeFlag(i,:))
             handles.bwContour(cc.PixelIdxList{i}) = 0;
@@ -1157,19 +1251,23 @@ try
     clear handles.maskedRanges;
     guidata(hObject, handles);
     
+    %TODO- Use handles.abc
     [a b c] = size(handles.img);
     empties = zeros([1,c]);
+    % Identify all slices without mask
     for i = 1:c
         if length(find(handles.bwContour(:,:,i))) == 0
             empties(i) = 1;
         end
     end
     
+    % Identify slices where mask starts and stops
     diffs = diff(empties);
     starts = find(diffs == -1);
     starts = starts + 1;
     stops = find(diffs == 1);
     
+    % If first and last slice aren't empty, add to starts and stops 
     if empties(1) ~= 1
         starts = [1,starts];
     end
@@ -1178,14 +1276,17 @@ try
         stops = [stops,c];
     end
     
+    %Match starts and stops as pairs
     for i = 1:length(starts)
         ranges(i,:) = [starts(i),stops(i)];
     end
     
+    % For each pair, identify the section of mask between as a 3d shape and
+    % flip it around the z axis.
     for i = 1:length(ranges)-1
         start = ranges(i,2);
         stop = ranges(i+1,1);
-        
+         
         bwTemp = interp_shape(handles.bwContour(:,:,start),handles.bwContour(:,:,stop),abs(start-stop + 1));
         bwTemp = flip(bwTemp,3);
         handles.bwContour(:,:,start+1:stop-1) = bwTemp;
@@ -1236,7 +1337,9 @@ if strcmpi(handles.primitive,'oval') == 1
     hold off;
     
     
-    ct=0;%make query set representing whole slice
+    ct=0;
+    % Make query set representing the slice in ellipse's rectangle
+    % TODO-prealocate xq and yq
     for i = min(x):max(x)
         for j = floor(min(y)):floor(max(y))
             ct=ct+1;
@@ -1249,20 +1352,26 @@ if strcmpi(handles.primitive,'oval') == 1
     
     xc = x0;
     yc = y0;
+    % Clear the mask for current slice
     if isfield(handles,'bwContour') == 0
         handles.bwContour = false(size(handles.img));
         tmp = false(size(handles.bwContour(:,:,handles.slice)));
     else
         tmp = false(size(handles.bwContour(:,:,handles.slice)));
     end
+    % For each point (xq,yq), if it is inside the ellipse, add it to tmp
     for i = 1:length(xq)
+        % TODO-Simplify, cos(0)=1, sin(0)=0
         if ((xq(i)-xc)*cos(0)-(yq(i)-yc)*sin(0)).^2/a^2 + ((xq(i)-xc)*sin(0)+(yq(i)-yc)*cos(0)).^2/b^2 <= 1
             tmp(round(yq(i)),round(xq(i))) = 1;
         end
     end
+    % Redraw mask for current slice using tmp
     handles.bwContour(:,:,handles.slice) = tmp;
     if handles.primitiveRotationAngle ~= 0
+        % Rotate the mask if rotation angle is not 0
         handles.bwContour(:,:,handles.slice) = imrotate(handles.bwContour(:,:,handles.slice),rad2deg(handles.primitiveRotationAngle),'crop');
+        % Fill in any small gaps created by rotation
         handles.bwContour(:,:,handles.slice) = imclose(handles.bwContour(:,:,handles.slice),strel('disk',4,0));
     end
     
@@ -1272,11 +1381,16 @@ if strcmpi(handles.primitive,'oval') == 1
     
 elseif strcmpi(handles.primitive,'rectangle') == 1
     %     handles.primitiveCenter = [round(handles.abc(1)/2),round(handles.abc(2)/2)];
+    % Clear any existing mask
     if isfield(handles,'bwContour') == 0
         handles.bwContour = false(size(handles.img));
     end
     handles.abc = size(handles.img);
+    % Retain all plots on current axis
     hold on;
+    % TODO-Find DrawRectangle and inpoly source
+    % TODO-This might need rework to be less dependant on those functions,
+    % could reuse ellipse code
     [P,R] = DrawRectangle([handles.primitiveCenter(1),handles.primitiveCenter(2),...
         handles.primitiveWidth,handles.primitiveHeight,str2num(get(handles.editRotatePrimitive,'String'))]);
     ct=0;%make query set representing whole slice
@@ -1290,7 +1404,9 @@ elseif strcmpi(handles.primitive,'rectangle') == 1
     
     %     [P,R] = DrawRectangle([handles.primitiveCenter(1),handles.primitiveCenter(2),...
     %         handles.primitiveWidth,handles.primitiveHeight,0]);
+    % Identify all points inside the rectangle
     [in] = inpoly([xq',yq'],[P(6:10)',P(1:5)']);
+    % Reorient the rectangle
     tmp = reshape(in,[handles.abc(2) handles.abc(1)]);
     tmp = imrotate(tmp,90);
     tmp = flipud(tmp);
@@ -1298,6 +1414,7 @@ elseif strcmpi(handles.primitive,'rectangle') == 1
     %     tmp = false(size(handles.bwContour(:,:,handles.slice)));
     %     tmp(in) = 1;
     %     tmp = imrotate(tmp,rad2deg(str2num(get(handles.editRotatePrimitive,'String'))),'crop');
+    % Set mask to rectangle
     handles.bwContour(:,:,handles.slice) = tmp;
     %     handles.bwContour(:,:,handles.slice) = imclose(handles.bwContour(:,:,handles.slice),true(9,9));
     
@@ -1306,6 +1423,7 @@ elseif strcmpi(handles.primitive,'rectangle') == 1
     guidata(hObject, handles);
 end
 
+% Reset text center to new mask center
 [row col] = find(handles.bwContour(:,:,handles.slice));
 cent = [round(mean(row)) round(mean(col))];
 set(handles.textCenterLocation,'String',[num2str(cent(1)) ' ' num2str(cent(2))]);
@@ -1408,7 +1526,7 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-
+% TODO-Are these unused/unneeded? Either delete or implement them.
 function editTranslateUp_Callback(hObject, eventdata, handles)
 % hObject    handle to editTranslateUp (see GCBO)
 
@@ -1501,11 +1619,15 @@ end
 
 
 % --- Executes on button press in pushbuttonTranslateUp.
+% Get the location of all points in mask, shift them in desired direction, 
+% and replace mask
+% TODO-Combine all 4 directions into 1 function with switch case
 function pushbuttonTranslateUp_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonTranslateUp (see GCBO)
 
 
 % xy = zeros(handles.abc(1),handles.abc(2));
+
 [row col] = find(handles.bwContour(:,:,handles.slice));
 row = row - str2num(get(handles.editTranslateUp,'String'));
 tmp = false(size(handles.bwContour(:,:,handles.slice)));
@@ -1600,10 +1722,14 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
+    % Create an image with the correct intesity and colormap
     im = imadjust(handles.img(:,:,handles.slice),[double(handles.lOut);double(handles.hOut)],[]);
     colormap(handles.axesIMG,handles.colormap);
+    % Open interactive cropping tool and select a rectangle from the
+    % created image
     [~,rect] = imcrop(im);
     
+    % Crop the image and mask to the selected rectangle 
     handles.img = handles.img(round(rect(2)):round(rect(2))+round(rect(4))-1,round(rect(1)):round(rect(1))+round(rect(3))-1,:);
     if isfield(handles,'bwContour')
         handles.bwContour = handles.bwContour(round(rect(2)):round(rect(2))+round(rect(4))-1,round(rect(1)):round(rect(1))+round(rect(3))-1,:);
@@ -1642,7 +1768,8 @@ function pushbuttonDiskMorphological_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonDiskMorphological (see GCBO)
 
 
-
+% Perform the selected morphological operation on the image. Erode expands
+% darker and shrinks/removes lighter features, dilate does the opposite
 if strcmpi(handles.morphological,'Erode') == 1
     handles.img = imerode(handles.img,strel('disk',str2num(get(handles.editDiskSize,'String')),0));
 elseif strcmpi(handles.morphological,'Dilate') == 1
@@ -1683,6 +1810,7 @@ function popupmenuCorticalCancellous_Callback(hObject, eventdata, handles)
 %        contents{get(hObject,'Value')} returns selected item from popupmenuCorticalCancellous
 str = get(handles.popupmenuCorticalCancellous,'String');
 val = get(handles.popupmenuCorticalCancellous,'Value');
+% Set handles.analysis based on option from popup menu.
 switch str{val}
     case 'Cortical'
         handles.analysis = 'Cortical';
@@ -1785,12 +1913,13 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
-    
+    % Rotate image and mask by selected angle
     handles.img = rot90_3D(handles.img,get(handles.popupmenuRotationAxis,'Value'),1);
     if isfield(handles,'bwContour') == 1
         handles.bwContour = rot90_3D(handles.bwContour,get(handles.popupmenuRotationAxis,'Value'),1);
     end
     
+    % Adjust abc and slider based around new size
     handles.abc = size(handles.img);
     handles.primitiveCenter(1) = round(handles.abc(1)/2);
     handles.primitiveCenter(2) = round(handles.abc(2)/2);
@@ -1800,6 +1929,7 @@ try
     set(handles.sliderIMG,'max',handles.abc(3));
     set(handles.sliderIMG,'SliderStep',[1,1]/(handles.abc(3)-1));
     
+    % TODO- check if sliderThreshold and theMax are used elsewhere
     handles.theMax = double(max(max(max(handles.img))));
     set(handles.sliderThreshold,'Value',1);
     set(handles.sliderThreshold,'min',1);
@@ -1844,9 +1974,11 @@ function togglebuttonToggleMask_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of togglebuttonToggleMask
 if get(handles.togglebuttonToggleMask,'Value') == 1
+    % Show the mask and adjusted image blended together
     imshowpair(imadjust(handles.img(:,:,handles.slice),[double(handles.lOut);double(handles.hOut)],[double(0);double(1)]),handles.bwContour(:,:,handles.slice),'blend','Parent',handles.axesIMG);
     impixelinfo(handles.axesIMG);
 else
+    % Or show just he adjusted image
     imshow(imadjust(handles.img(:,:,handles.slice),[double(handles.lOut);double(handles.hOut)],[double(0);double(1)]),'Parent',handles.axesIMG);
     impixelinfo(handles.axesIMG);
 end
@@ -1978,10 +2110,14 @@ function sliderWindowWidth_Callback(hObject, eventdata, handles)
 set(handles.editWindowWidth,'String',num2str(get(handles.sliderWindowWidth,'Value')))
 handles.windowWidth = get(handles.sliderWindowWidth,'Value');
 
+% TODO-Remove unused
 tmp = handles.img(:,:,handles.slice);
+% Set lOut and hOut to the location of left and right side of window
+% divided by dataMax
 handles.lOut = (handles.windowLocation-0.5*handles.windowWidth) / double(handles.dataMax);
 handles.hOut = (handles.windowLocation+0.5*handles.windowWidth)  / double(handles.dataMax);
 
+% Ensure that lOut and hOut do not go past minimum/maximum
 if handles.lOut < 0
     handles.lOut = 0;
 end
@@ -2006,8 +2142,9 @@ function sliderWindowLocation_Callback(hObject, eventdata, handles)
 
 set(handles.editWindowLocation,'String',num2str(get(handles.sliderWindowLocation,'Value')));
 handles.windowLocation = get(handles.sliderWindowLocation,'Value');
-
+% TODO- Combine identical code
 tmp = handles.img(:,:,handles.slice);
+
 handles.lOut = (handles.windowLocation-0.5*handles.windowWidth) / double(handles.dataMax);
 handles.hOut = (handles.windowLocation+0.5*handles.windowWidth)  / double(handles.dataMax);
 
@@ -2130,8 +2267,10 @@ guidata(hObject, handles);
 function pushbuttonPasteMask_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbuttonPasteMask (see GCBO)
 
+% Create temp mask from maskCopy
 tmp = handles.bwContour(:,:,handles.slice);
 tmp(find(handles.maskCopy)) = 1;
+% Replace mask at current slice with temp mask
 handles.bwContour(:,:,handles.slice) = tmp;
 
 guidata(hObject, handles);
@@ -2140,7 +2279,8 @@ UpdateImage(hObject, eventdata, handles);
 
 % --- Executes on button press in pushbuttonStoreMask.
 function pushbuttonStoreMask_Callback(hObject, eventdata, handles)
-
+% Allows saving mask as chosen variable
+% TODO- Potential code injection
 eval(['handles.' get(handles.editMaskName,'String') ' = handles.bwContour;']);
 guidata(hObject, handles);
 

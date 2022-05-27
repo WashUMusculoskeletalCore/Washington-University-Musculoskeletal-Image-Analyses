@@ -4,18 +4,20 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
+    % Find the smallest pixel spacing in any dimension
     handles.minVoxelSpacing = min([handles.info.PixelSpacing(1,:),handles.info.SliceThickness]);
     R = makeresampler({'linear','linear','linear'},'fill');
+    % Create a transformation to make all pixel spacings match the smallest
     a = handles.info.PixelSpacing(1) / handles.minVoxelSpacing;
     b = handles.info.PixelSpacing(2) / handles.minVoxelSpacing;
     c = handles.info.SliceThickness / handles.minVoxelSpacing;
     T = maketform('affine',[a 0 0; 0 b 0; 0 0 c; 0 0 0]);
-    
+    % Set all pixel spacings to the minimum
     handles.info.PixelSpacing(1,1) = handles.minVoxelSpacing;
     handles.info.PixelSpacing(1,2) = handles.minVoxelSpacing;
     handles.info.SliceThickness = handles.minVoxelSpacing;
     [a1 b1 c1] = size(handles.img);
-    
+    % Apply the transformation
     handles.img = tformarray(handles.img,T,R,[1 2 3],[1 2 3], [round(a1*a) round(b1*b) round(c1*c)],[],0);
     
     handles.dataMax = max(max(max(handles.img)));

@@ -1,3 +1,5 @@
+% DESC-For each slice, allows the user to select 2 points on the mask, then
+% displays the y-distance between those points and the center.
 function YMaxForStrain(hObject,eventdata,handles)
 
 [a b c] = size(handles.bwContour);    
@@ -7,14 +9,14 @@ for i = 1:c
     % I = I .* pixelwidth; %mm (pixels * mm/pixels)
     % J = J .* pixelwidth; %mm
     ycent = mean(I(:));
-    xcent = mean(J(:));
-
+    xcent = mean(J(:)); % TODO-xcent is unused
+    % Display a colormap showing the mask
     tmp = zeros(size(handles.bwContour(:,:,i)));
     tmp(handles.bwContour(:,:,i)) = 2;
     tmp(~handles.bwContour(:,:,i)) = 1;
     h = figure; imagesc(tmp);
-    [x,y] = ginput(2);
-
+    [x,y] = ginput(2); % Let the user select 2 points
+    % Get y-distance for each point and display it
     d1 = abs(y(1)-ycent);
     d2 = abs(y(2)-ycent);
 

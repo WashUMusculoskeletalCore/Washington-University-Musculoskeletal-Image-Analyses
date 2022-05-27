@@ -12,10 +12,10 @@ try
 	if exist(fullfile(handles.pathstr,'CancellousResults.txt'),'file') ~= 2
 		fid = fopen(fullfile(handles.pathstr,'CancellousResults.txt'),'w');
 		for i = 1:length(handles.outCancellous)
-			if i == length(handles.outCancellous)
-				fprintf(fid,'%s\t',handles.outHeaderCancellous{i});
+			if i == length(handles.outCancellous) % Determine if this is the final value
+				fprintf(fid,'%s\t',handles.outHeaderCancellous{i}); % Write to the file
 			else
-				fprintf(fid,'%s\t',handles.outHeaderCancellous{i});
+				fprintf(fid,'%s\t',handles.outHeaderCancellous{i}); % TODO-Can these be combined
 			end
         end
         fprintf(fid,'%s\t','Voxel Size');
@@ -23,12 +23,13 @@ try
 		fclose(fid);
 	end
 	for i = 1:length(handles.outCancellous)
+        % TODO-Use 1 open and close
 		fid = fopen(fullfile(handles.pathstr,'CancellousResults.txt'),'a');
 		if i == length(handles.outCancellous)
 			fprintf(fid,'%s\t',num2str(handles.outCancellous{i}));
-			fprintf(fid,'%s\n',num2str(handles.lowerThreshold));
+			fprintf(fid,'%s\n',num2str(handles.lowerThreshold)); % For the final value print the lower threshold
         elseif i == 2
-            fprintf(fid,'%s\t',handles.pathstr);    
+            fprintf(fid,'%s\t',handles.pathstr); % For the second value add the pahstring   
             fprintf(fid,'%s\t',num2str(handles.outCancellous{i}));
 		else
 			fprintf(fid,'%s\t',num2str(handles.outCancellous{i}));

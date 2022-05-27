@@ -10,21 +10,21 @@ try
     %     bw = imclose(bw,true(4,4,4));
     
     %now set up to input two masks, af and total
-    
+    % TODO-replace eval
     answer = inputdlg('Please type in the name of the mask representing the NP');
     handles.bwNP = eval(['handles.' answer{1}]);
     answer = inputdlg('Please type in the name of the mask representing the complete disc');
     handles.bwTotal = eval(['handles.' answer{1}]);
     handles.bwAF = handles.bwTotal(~handles.bwNP);
-    
+    % Find averages
     meanTotal = mean(handles.img(handles.bwTotal));
     meanAF = mean(handles.img(handles.bwAF));
     meanNP = mean(handles.img(handles.bwNP));
-    
+    % Calculate volume
     afVolume = length(find(handles.bwAF)) * handles.info.SliceThickness^3;
     totalVolume = length(find(handles.bwTotal)) * handles.info.SliceThickness^3;
     npVolume = totalVolume - afVolume;
-    
+    % Generate a graphic
     answer = inputdlg('Do you want to generate a picture? y or n');
     if strcmpi(answer{1},'y')
         shp = shpFromBW(handles.bwTotal,3);
@@ -36,7 +36,7 @@ try
         camlight();
         saveas(gcf,fullfile(handles.pathstr,'Disc.fig'));
     end
-    
+    % Output to file
     fid = fopen(fullfile(handles.pathstr,'TangIVDPMAResults.txt'),'a');
     fprintf(fid,'%s\t','Date Analysis Performed');
     fprintf(fid,'%s\t','DICOM Path');

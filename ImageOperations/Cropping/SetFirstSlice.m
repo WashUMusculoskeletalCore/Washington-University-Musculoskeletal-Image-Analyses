@@ -1,5 +1,5 @@
 function [hObject,eventdata,handles] = SetFirstSlice(hObject,eventdata,handles)
-
+% Crop all slices before the current slice
 handles.img = handles.img(:,:,handles.slice:end);
 
 handles.windowWidth = max(max(max(handles.img))) - min(min(min(handles.img)));

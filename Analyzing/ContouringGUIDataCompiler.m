@@ -43,6 +43,7 @@ try
     line = fgetl(fid);
     fprintf(out,'%s\n',line);
 catch
+    % TODO-More general error
     'Cannot create result file, see Dan'
 end
 

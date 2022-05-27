@@ -1,3 +1,4 @@
+% DESC-Calculate density and area statistics for shape and output to file
 function    [hObject,eventdata,handles] = TwoDAnalysis(hObject,eventdata,handles)
 
 try
@@ -48,7 +49,7 @@ try
     maxIntensity = max(double(handles.imgDensity(handles.bwContour)));
     
     for i = 1:c
-        if i == 1
+        if i == 1 % For the first slice, also output the density are area for the whole shape
             fprintf(fid,'%s\t',num2str(area(i)));
             fprintf(fid,'%s\t',num2str(meanIntens(i)));
             fprintf(fid,'%s\t',num2str(stdIntens(i)));

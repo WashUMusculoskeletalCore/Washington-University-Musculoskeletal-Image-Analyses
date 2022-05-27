@@ -11,6 +11,8 @@ try
         answer = inputdlg("Please enter the last slice to use");
         last = str2num(answer{1});
         img = handles.img(:,:,first:last);
+        % Identify the degree that gives the widest horizontal axis for any
+        % slice in the range
         degree = RotateWidestHorizontal(img, handles.bwContour(:,:,first:last));    
         clear img;
     else
@@ -18,12 +20,15 @@ try
     end
     [a b c] = size(handles.img);
     for i = 1:c
+        % TODO- Remove unneeded console output
         clc;
         i/c
         if i == 1
+            % For the first slice, create the new array first
             tmp = imrotate(handles.img(:,:,i),degree);
             imgTmp = zeros([size(tmp) c],'uint16');
             bwContourTmp = false(size(imgTmp));
+            % TODO- apply first slice of mask
             imgTmp(:,:,i) = tmp;
         else
             imgTmp(:,:,i) = imrotate(handles.img(:,:,i),degree);

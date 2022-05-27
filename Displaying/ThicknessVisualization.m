@@ -5,27 +5,38 @@ try
 	guidata(hObject, handles);
     drawnow();
     bw = handles.bwContour;
+    % Create distance map
     D1 = bwdist(~bw);%does what I want for thickness of spacing
+    % Find local maximums
     bwUlt = bwulterode(bw);
+    % Limit distance map to local maximums
     D1(~bwUlt) = 0;
-
+    % Find maximum radius in distance map 
     maxRad = ceil(max(max(max(double(D1)))));
+    % Pad the array so all dimensions are at least maxRad
+    %                                               
     D1 = padarray(D1,[ceil(maxRad)+1 ceil(maxRad)+1 ceil(maxRad)+1]);
 
     [aa bb cc] = size(D1);
     [a b c] = size(bw);
-
+    % Get the number of lm
     initLen = length(find(D1));
+    % Get the location of each lm
     [x y z] = ind2sub(size(D1),find(D1));
+    % Reshape D1 into a 1d array
     D1Reshaped = reshape(D1,[aa*bb*cc,1]);
+    % Sort the reshaped array
     [D1Sorted I]= sort(D1Reshaped,'descend');
+    % Remove all zeros
     [D1Sorted] = find(D1Sorted);
+    % Get the location of each lm in sorted order
     [x2 y2 z2] = ind2sub(size(D1),I(1:length(D1Sorted)));
 
     tic
     for i = 1:length(x2)
         if mod(i,500) == 0
     %         clc
+            % Update loading percentage
             set(handles.textPercentLoaded,'String',num2str(i/initLen));
             drawnow()
         end

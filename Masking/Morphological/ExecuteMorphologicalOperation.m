@@ -4,7 +4,8 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
-    
+    % TODO-- Find a way to do this with fewer nested ifs
+    % Perform the chosen operation on the mask or image in 2d or 3d
     if strcmp(handles.morphologicalOperation,'Close') == 1
         if strcmp(handles.morphological2D3D,'2D') == 1
             if strcmp(handles.morphologicalImageMask,'Mask') == 1

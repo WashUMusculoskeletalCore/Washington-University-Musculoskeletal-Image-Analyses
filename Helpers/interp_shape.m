@@ -24,5 +24,7 @@ t = num+2;
 out = interpn(x,y,z,cat(3,bottom,top),xi,yi,zi);
 out = out(:,:,2:end-1)>=0;
 
+%Gets the distance from the edge for every point, outside points are
+%negative
 function im = signed_bwdist(im)
 im = -bwdist(bwmorph(im,'remove')).*~im + bwdist(bwmorph(im,'remove')).*im;

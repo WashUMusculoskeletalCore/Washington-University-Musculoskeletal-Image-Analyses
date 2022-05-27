@@ -16,3 +16,4 @@ for i = 1:length(files)
     i/length(files)
     img(:,:,i) = dicomread([pathstr '\' files(i).name]);
 end
+%TODO- This seems to be obsoleted by LoadDICOMStack

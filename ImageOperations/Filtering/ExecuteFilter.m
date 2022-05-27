@@ -6,9 +6,10 @@ try
     drawnow();
     rad = str2num(get(handles.editRadius,'String'));
     weight = str2num(get(handles.editSigma,'String'));
-    
+    % Get the filter from the popup menu
     str = get(handles.popupmenuFilter,'String');
     val = get(handles.popupmenuFilter,'Value');
+    % Apply the filter to the image
     switch str{val}
         case '3D Median'
             handles.img = uint16(smooth3(handles.img,'box',[rad rad rad]));

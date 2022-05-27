@@ -4,6 +4,7 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
+    % Create an interactive distance line tool
     imDist = imdistline(handles.axesIMG);
     setLabelVisible(imDist,0);
     h1 = msgbox('Close this box to complete linear measurement');
@@ -11,7 +12,7 @@ try
         pos = getPosition(imDist);
         pause(0.1);
     end
-    
+    % Display information about distance
     pix = pdist(pos,'euclidean');
     pixPhys = pix * handles.info.SliceThickness;
     h1 = msgbox(['Number of pixels = ' num2str(pix) ', physical distance is ' num2str(pixPhys)]);

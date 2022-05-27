@@ -44,21 +44,24 @@ if strcmpi(answer{1},'y') == 1
 
     set(handles.textBusy,'String','Masking Images');
     drawnow();
+    % Remove area outside thresholds from image
     bwFixed = handles.img > handles.lowerThreshold;
     bwFixedHigh = handles.img > handles.upperThreshold;
     bwFixed(bwFixedHigh) = 0;
+    % Remove area outside thresholds from registered image
     bwRegistered = registeredIMG > handles.lowerThreshold;
     bwRegisteredHigh = registeredIMG > handles.upperThreshold;
     bwRegistered(bwFixedHigh) = 0;
 
     set(handles.textBusy,'String','Finding Mask Differences');
     drawnow();
+    % Calculate difference in volume between image and registered image
     bwFixedVolume = length(find(bwFixed)) * handles.info.SliceThickness^3;
     bwRegisteredVolume = length(find(bwRegistered)) * handles.info.SliceThickness^3;
     bwDifferenceVolume = bwFixedVolume - bwRegisteredVolume;
     newVolume = length(find(bwRegistered(~bwFixed))) * handles.info.SliceThickness^3;
     oldVolume = length(find(bwFixed(~bwRegistered))) * handles.info.SliceThickness^3;
-    
+    % Output results to file
     header = {'Rat ID','Date Performed','Threshold','BV Fixed (pre-scan)','BV Registered (post-scan)','BV Difference','Fixed-Only Volume',...
         'Moving-Only Volume'};
     
@@ -81,7 +84,7 @@ if strcmpi(answer{1},'y') == 1
     fclose(fid);
     
     [a b c] = size(bwFixed);
-    
+    % Display data as a graphic
     shpFixed = shpFromBW(bwFixed,2);
     shpRegistered = shpFromBW(bwRegistered,2);
     tmp = bwFixed;

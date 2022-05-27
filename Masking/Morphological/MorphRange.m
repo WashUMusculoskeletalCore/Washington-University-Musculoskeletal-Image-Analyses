@@ -2,6 +2,7 @@ function [hObject, eventdata, handles] = MorphRange(hObject, eventdata, handles)
 
 try
     set(handles.textBusy,'String','Busy');
+    % TODO- Experiment with this and get a better feel for interp_shape
     bwTemp = interp_shape(handles.bwContour(:,:,handles.startMorph),handles.bwContour(:,:,handles.endMorph),abs(handles.startMorph - handles.endMorph)+1);
     bwTemp = flip(bwTemp,3);
     handles.bwContour(:,:,handles.startMorph:handles.endMorph) = bwTemp;

@@ -10,17 +10,19 @@ try
     if isfield(handles,'bwContour') == 1
         clear handles.bwContour;handles=rmfield(handles,'bwContour');
     end
-    
+    % Open UI prompt to get directory
     handles.pathstr = uigetdir(pwd,'Please select the folder containing your DICOM files');
-    
+    % Get all files in directory containing .dcm
     handles.files = dir(fullfile(handles.pathstr, '*.dcm*'));
     %     mrFlag = 0;
+    % If there are no dcm files found, get all files starting with IM
     if isempty(handles.files)
         handles.files = dir(fullfile(handles.pathstr, 'IM*'));
         %         mrFlag = 1;
     end
     handles.info = dicominfo(fullfile(handles.pathstr,handles.files(1).name));
-    
+    % Autofill missing info
+    % TODO- Use configuration files
     if ~isfield(handles.info,'Manufacturer')
         handles.info.Manufacturer = 'ZEISS';
     end
@@ -38,10 +40,12 @@ try
     
     handles.img = zeros(handles.info.Height,handles.info.Width,length(handles.files),'uint16');
     
+    % Convert each file to an image slice
     for i = 1:length(handles.files)
         set(handles.textPercentLoaded,'String',num2str(i/length(handles.files)));
         drawnow();
         %         if mrFlag == 1
+        % TODO- Identify ImagePositionPatient
         infotmp(i) = dicominfo(fullfile(handles.pathstr,handles.files(i).name));
         locTmp1(i) = infotmp(i).ImagePositionPatient(1);
         locTmp2(i) = infotmp(i).ImagePositionPatient(2);
@@ -49,6 +53,8 @@ try
         %         end
         handles.img(:,:,i) = dicomread(fullfile(handles.pathstr,handles.files(i).name));
     end
+    % Measure which locTmp has the most difference and reorganize the stack
+    % based on that value
     dif1 = diff(locTmp1);
     dif2 = diff(locTmp2);
     dif3 = diff(locTmp3);
@@ -66,7 +72,8 @@ try
         [order I] = sort(locTmp3);
         handles.img = handles.img(:,:,I);
     end
-    
+    % Convert pixels from bit depth of 8 to 16
+    % TODO- Match with other versions in loading
     if isfield(handles.info,'LargestImagePixelValue') == 1
         if handles.info.LargestImagePixelValue == 255
             handles.img = uint16((double(handles.img) ./ 255) .* 2^16);

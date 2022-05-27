@@ -4,8 +4,10 @@ try
     set(handles.textBusy,'String','Busy');
     guidata(hObject, handles);
     drawnow();
+    % Save orginal image
     handles.imgOrig = handles.img;
-    
+    % Set width to the difference between the maximum and minimum value in
+    % the image. Max and min are used once per dimension
     handles.windowWidth = max(max(max(handles.img))) - min(min(min(handles.img)));
     set(handles.editWindowWidth,'String',num2str(handles.windowWidth));
     

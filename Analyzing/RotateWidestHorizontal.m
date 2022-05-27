@@ -6,13 +6,13 @@ degree = 0;
 for i = 1:c
     img2 = img(:,:,i);
     bw = bwIn(:,:,i);
-    bw = bwBiggest(bw);
+    bw = bwBiggest(bw); % Get the biggest object
     % Find position of Centroid
     [I J] = find(bw > 0);
     ycent = mean(I(:));
     xcent = mean(J(:));
 
-    % Find MOIs
+    % Find moments of inertia
     for j=1:length(I)
         Iyy_rt(j) = double((J(j) - xcent)^2);
         Ixx_rt(j) = double((I(j) - ycent)^2);

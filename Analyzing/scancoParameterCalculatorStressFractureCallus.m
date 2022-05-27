@@ -16,7 +16,7 @@ function [out,outHeader] = scancoParameterCalculatorStressFractureCallus(bw,lowe
 % img = permute(img,[2,3,1]);
 
 %Find cortical bone volume
-bw = imdilate(bw,strel('disk',3));
+bw = imdilate(bw,strel('disk',3)); % Dilates the mask
 
 corticalBV = length(find(bw)) * info.SliceThickness^3;
 %find cortical medullary volume
@@ -25,41 +25,42 @@ bwFilled = false(size(bw));
 for i = 1:c
     bwFilled(:,:,i) = imfill(bw(:,:,i),'holes');
 end
-bwMedullaryArea = bwFilled - bw;
-corticalMedullaryVolume = length(find(bwMedullaryArea)) * info.SliceThickness^3;
+bwMedullaryArea = bwFilled - bw; % Identify holes in the dilated mask
+corticalMedullaryVolume = length(find(bwMedullaryArea)) * info.SliceThickness^3; % Calculate volume of holes
 
 %Find estimated endosteal bone formation
 img3 = img;
-img3(~(bwFilled-bw)) = 0;
-bwInterior = img3 > lowerThreshold;
-callusInteriorBV = (length(find(bwInterior))) * info.SliceThickness^3;
-callusInteriorTV = length(find(imclose(bwInterior,strel('Disk',5,0)))) * info.SliceThickness^3;
-callusInteriorBVTV = callusInteriorBV / corticalMedullaryVolume;
+img3(~(bwFilled-bw)) = 0; % Isolates the parts of the image with holes
+bwInterior = img3 > lowerThreshold; % Removes area below threshold, leaving edge of hole
+callusInteriorBV = (length(find(bwInterior))) * info.SliceThickness^3; % Calculate volume
+callusInteriorTV = length(find(imclose(bwInterior,strel('Disk',5,0)))) * info.SliceThickness^3; % Calculate volume after applying close
+callusInteriorBVTV = callusInteriorBV / corticalMedullaryVolume; % Calculate volume ration
 img2 = img;
-img2(~imclose(bwInterior,strel('Disk',5,0))) = 0;
+img2(~imclose(bwInterior,strel('Disk',5,0))) = 0; % Leaves only the interior after close
 callusInteriorDensity = calculateDensityFromDICOM(info,img2);
-callusInteriorvBMD = mean(callusInteriorDensity(imclose(bwInterior,strel('Disk',5,0))));
+callusInteriorvBMD = mean(callusInteriorDensity(imclose(bwInterior,strel('Disk',5,0)))); % Gets average desnsity of interior
 
 img2 = img;
-img2(~bw) = 0;
+img2(~bw) = 0; % Leaves only area inside mask
 corticalDensity = calculateDensityFromDICOM(info,img2);
 corticalTMD = mean(corticalDensity(bw));
 
 img2 = img;
-img2(bwFilled) = 0;
-bw2 = img2 > lowerThreshold;
-callusBV = length(find(bw2)) * info.SliceThickness^3;
-bw2Whole = imopen(imclose(imclose(bw2,strel('disk',15,0)),true(5,5,5)),true(3,3,3));
-bw2Whole(bwFilled) = 0;
-callusTV = length(find(bw2Whole)) * info.SliceThickness^3;
-callusBVTV = callusBV/callusTV;
-img2(~bw2Whole) = 0;
-callusDensity = calculateDensityFromDICOM(info,img2);
-callusvBMD = mean(callusDensity(bw2Whole));
-
+img2(bwFilled) = 0; % Leaves only area outside mask/holes
+bw2 = img2 > lowerThreshold; % Identify area above threshold
+callusBV = length(find(bw2)) * info.SliceThickness^3; % Calculates volume
+bw2Whole = imopen(imclose(imclose(bw2,strel('disk',15,0)),true(5,5,5)),true(3,3,3)); % TODO-test this 
+bw2Whole(bwFilled) = 0; % Leaves area outside mask/holes
+callusTV = length(find(bw2Whole)) * info.SliceThickness^3; % Calculates volume
+callusBVTV = callusBV/callusTV; % Calculates volume ratio
+img2(~bw2Whole) = 0; % Removes image outside area
+callusDensity = calculateDensityFromDICOM(info,img2); % Get image density
+callusvBMD = mean(callusDensity(bw2Whole)); % Calculates average density
+% Reorder dimensions for viewing
 bw = permute(bw,[3,2,1]);
 bw2Whole = permute(bw2Whole,[3,2,1]);
 
+% Plot shapes of bw and bwWhole
 shp = shpFromBW(bw,3);
 h = figure;plot(shp,'LineStyle','none','FaceColor','w');hold on;
 shp = shpFromBW(bw2Whole,3);
