@@ -1,9 +1,7 @@
-function [hObject,eventdata,handles] = NeedlePinctureImage(hObject,eventdata,handles)
+function [hObject,eventdata,handles] = NeedlePunctureImage(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     answer(1) = inputdlg('Please indicate the name of the mask representing the full bone');
     answer(2) = inputdlg('Please indicate the name of the mask representing the needle hole');
     
@@ -22,7 +20,8 @@ try
     plot(shp2,'FaceColor','r','LineStyle','none','FaceAlpha',0.8);
     camlight();
     title(['Bone and puncture for ' handles.pathstr]);
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

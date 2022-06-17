@@ -45,7 +45,7 @@ end
 
 
 % --- Executes just before RegisterVolumes is made visible.
-function RegisterVolumes_OpeningFcn(hObject, eventdata, handles, varargin)
+function RegisterVolumes_OpeningFcn(hObject, eventdata, handles, varargin) %#ok<*INUSL>
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -82,7 +82,7 @@ varargout{1} = handles.output;
 
 
 % --- Executes on button press in pushbuttonFlipAxis.
-function pushbuttonFlipAxis_Callback(hObject, eventdata, handles)
+function pushbuttonFlipAxis_Callback(hObject, eventdata, handles) %#ok<*DEFNU>
 % hObject    handle to pushbuttonFlipAxis (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -97,7 +97,7 @@ updateBothImages(hObject, eventdata, handles);
 
 
 % --- Executes on selection change in popupmenuAxis.
-function popupmenuAxis_Callback(hObject, eventdata, handles)
+function popupmenuAxis_Callback(hObject, eventdata, handles) %#ok<*INUSD>
 % hObject    handle to popupmenuAxis (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
@@ -270,7 +270,7 @@ optimizer.MaximumIterations = round(str2num(cell2mat(get(handles.editIterations,
     
 % end
 
-[a b c] = size(handles.imgRegistered);
+[~, ~, c] = size(handles.imgRegistered);
 % Create a composite of the reference and registered images slice by slice
 clear fused;
 for i = 1:c
@@ -279,7 +279,7 @@ end
 
 handles.fused = fused;
 % Update sliders to size of fused image
-[a b c] = size(handles.fused);
+[~, ~, c] = size(handles.fused);
 set(handles.sliderFused,'Value',1);
 set(handles.sliderFused,'min',1);
 set(handles.sliderFused,'max',c);
@@ -326,12 +326,12 @@ function pushbuttonLoadMovingVolume_Callback(hObject, eventdata, handles)
 % Select directory containing DICOM Stack in UI
 if strcmpi(handles.movingFileType,'dcm')
     handles.pathstrMoving = uigetdir(pwd,'Please select the folder of the volume to be registered');
-    [handles.imgMoving handles.infoMoving] = readDICOMStack(handles.pathstrMoving);
+    [handles.imgMoving, handles.infoMoving] = readDICOMStack(handles.pathstrMoving);
     
 % Select txm file in UI
 elseif strcmpi(handles.movingFileType,'txm')
-    [handles.movingFileName handles.movingPathName] = uigetfile([pwd '\*.txm'],'Please select your TXM file');
-    [handles.header handles.headerShort] = txmheader_read8(fullfile(handles.movingPathName,handles.movingFileName));
+    [handles.movingFileName, handles.movingPathName] = uigetfile([pwd '\*.txm'],'Please select your TXM file');
+    [handles.header, handles.headerShort] = txmheader_read8(fullfile(handles.movingPathName,handles.movingFileName));
     % Fills infoMoving with preset value
     % TODO- Move presets to configuraion file
     handles.infoMoving = handles.headerShort;
@@ -389,11 +389,11 @@ function pushbuttonLoadReferenceVolume_Callback(hObject, eventdata, handles)
 % Select directory containing DICOM stack in UI
 if strcmpi(handles.referenceFileType,'dcm')
     handles.pathstrReference = uigetdir(pwd,'Please select the folder of the volume to be registered');
-    [handles.imgReference handles.infoReference] = readDICOMStack(handles.pathstrReference);
+    [handles.imgReference, handles.infoReference] = readDICOMStack(handles.pathstrReference);
 % Select txm file in UI
 elseif strcmpi(handles.referenceFileType,'txm')
-    [handles.referenceFileName handles.referencePathName] = uigetfile([pwd '\*.txm'],'Please select your TXM file');
-    [handles.header handles.headerShort] = txmheader_read8(fullfile(handles.referencePathName,handles.referenceFileName));
+    [handles.referenceFileName, handles.referencePathName] = uigetfile([pwd '\*.txm'],'Please select your TXM file');
+    [handles.header, handles.headerShort] = txmheader_read8(fullfile(handles.referencePathName,handles.referenceFileName));
     % Fills infoReference with preset value
     % TODO- Move presets to configuraion file
     handles.infoReference = handles.headerShort;
@@ -526,9 +526,9 @@ function pushbuttonCenterMovingToReference_Callback(hObject, eventdata, handles)
 
 % For each dimension, if either image is larger than the other, pad the
 % start of the array by half the difference
-[a b c] = size(handles.imgReference);
+[a, b, c] = size(handles.imgReference);
 
-[a1 b1 c1] = size(handles.imgMoving);
+[a1, b1, c1] = size(handles.imgMoving);
 
 if a >= a1
     aDiff = a - a1;
@@ -569,7 +569,7 @@ str = get(handles.popupmenuUDLR,'String');
 val = get(handles.popupmenuUDLR,'Value');
 direction = str{val};
 numVox = str2num(cell2mat(get(handles.editMoveVoxels,'String')));
-[a b c] = size(handles.imgMoving);
+[a, b, c] = size(handles.imgMoving);
 
 switch direction
     case 'L'
@@ -722,7 +722,7 @@ end
 % TODO- Make this more generic so it can be used more
 % Function slider = updateSlider(slider, image) or (slider, sliderLength)
 function handles = updateSliders(hObject,eventdata,handles)
-[a b c] = size(handles.imgReference);
+[~, ~, c] = size(handles.imgReference);
 set(handles.sliderReference,'Value',1);
 set(handles.sliderReference,'min',1);
 set(handles.sliderReference,'max',c);
@@ -732,7 +732,7 @@ guidata(hObject, handles);
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
 
-[a b c] = size(handles.imgMoving);
+[~, ~, c] = size(handles.imgMoving);
 set(handles.sliderMoving,'Value',1);
 set(handles.sliderMoving,'min',1);
 set(handles.sliderMoving,'max',c);

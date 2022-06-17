@@ -1,13 +1,11 @@
 function [hObject,eventdata,handles] = HumanCoreTrabecularThickness(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     % Identify area inside thresholds
     bw = false(size(handles.img));
-    bw(find(handles.img > handles.lowerThreshold)) = 1;
-    bw(find(handles.img > handles.upperThreshold)) = 0;
+    bw(handles.img > handles.lowerThreshold) = 1;
+    bw(handles.img > handles.upperThreshold) = 0;
     bw = bwareaopen(bw,150); % Remove small objects from image
 
     [handles.outCancellous,handles.outHeaderCancellous] = scancoParameterCalculatorCancellous(bw,handles.bwContour,handles.img,handles.info,get(handles.togglebuttonRobustThickness,'Value'));
@@ -35,7 +33,8 @@ try
     end
     fclose(fid);
     guidata(hObject, handles);
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

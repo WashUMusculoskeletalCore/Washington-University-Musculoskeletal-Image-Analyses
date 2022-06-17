@@ -9,9 +9,9 @@ D2 = padarray(D2,[ceil(maxRad)+1 ceil(maxRad)+1 ceil(maxRad)+1]);
 bw = false(size(D2));
 bw(D2 > 0) = 1;
 
-[aa bb cc] = size(D2);
+[aa, bb, cc] = size(D2);
 
-[a b c] = size(bw);
+[a, b, c] = size(bw);
 % bw2 = Skeleton3D(bw);
 % for i = 1:c
 %     bw2(:,:,i) = bwmorph(bw(:,:,i),'skel',100);
@@ -20,14 +20,14 @@ bw(D2 > 0) = 1;
 % D2(~bw2) = 0;
 
 %sort radii by size to avoid accidental voids
-[aa bb cc] = size(D2);
+[aa, bb, cc] = size(D2);
 
 initLen = length(find(D2));
-[x y z] = ind2sub(size(D2),find(D2));
+[x, y, z] = ind2sub(size(D2),find(D2));
 D2Reshaped = reshape(D2,[aa*bb*cc,1]);
-[D2Sorted I]= sort(D2Reshaped,'descend');
+[D2Sorted, I]= sort(D2Reshaped,'descend');
 [D2Sorted] = find(D2Sorted);
-[x2 y2 z2] = ind2sub(size(D2),I(1:length(D2Sorted)));
+[x2, y2, z2] = ind2sub(size(D2),I(1:length(D2Sorted)));
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%for testing
@@ -60,7 +60,7 @@ for i = 1:length(x2)
         rirj = radToTest + radsTesting;
 
         inds = rirj >= ds;% find spheres that intersect
-        [thisMax I] = max(radsTesting(inds));
+        [thisMax, I] = max(radsTesting(inds));
         inds = [a1(inds),b1(inds),c1(inds)];
         if radToTest >= thisMax
             inds2 = inds == [x2(i),y2(i),z2(i)];
@@ -81,7 +81,7 @@ for i = 1:length(x2)
 end
 % toc;
 
-endLen = length(find(D2));
+%endLen = length(find(D2));
 % StackSlider(D2)
 rads = D2(find(D2));%find the radii of the spheres at the local maxima
 % % rads(rads < (2)) = 0;

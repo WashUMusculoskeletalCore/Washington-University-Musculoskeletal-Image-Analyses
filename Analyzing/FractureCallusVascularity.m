@@ -1,9 +1,7 @@
 function [hObject,eventdata,handles] = FractureCallusVascularity(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     [handles.outCallus,handles.outHeaderCallus] = scancoParameterCalculatorCancellousCallus(handles.img > handles.threshold,handles.bwContour,handles.img,handles.info);
     
     handles.outHeaderCallus{14} = 'Slices';
@@ -11,7 +9,7 @@ try
     handles.outHeaderCallus{16} = 'Median Filter Radius';
     
     nums1 = 1;%handles.emptyRanges{1};
-    [a b c] = size(handles.img);
+    [~, ~, c] = size(handles.img);
     nums2 = c;%handles.emptyRanges{end};
     handles.outCallus{14} = [nums1,nums2];
     handles.outCallus{15} = handles.threshold;
@@ -36,7 +34,8 @@ try
     end
     fclose(fid);
     guidata(hObject, handles);
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

@@ -1,25 +1,22 @@
+% NAME-UseForContouring
+% DESC-Saves the current image as the original if none exists, and adjusts
+% the image's thresholds
+% TODO-not sure how this uses the image for contouring
 function [hObject,eventdata,handles] = UseForContouring(hObject,eventdata,handles)
-
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     % Save original image
     if isfield(handles,'imgOrig') == 0
         handles.imgOrig = handles.img;
     end
-    [a b c] = size(handles.img);
     % Adjust image threshold
-    for i = 1:c
+    for i = 1:handles.abc(3)
         handles.img(:,:,i) = imadjust(handles.img(:,:,i),[double(handles.lOut);double(handles.hOut)],[]);
     end
     guidata(hObject, handles);
     UpdateImage(hObject, eventdata, handles);
-    set(handles.textBusy,'String','Not Busy');
-    guidata(hObject, handles);
-    drawnow();
-catch
-    set(handles.textBusy,'String','Failed');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

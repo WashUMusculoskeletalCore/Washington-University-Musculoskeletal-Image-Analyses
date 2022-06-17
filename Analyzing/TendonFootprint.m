@@ -1,9 +1,7 @@
 function [hObject,eventdata,handles] = TendonFootprint(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     answer = inputdlg('Please type in the name of the mask representing the bone');
     handles.bwBone = eval(['handles.' answer{1}]);
     answer = inputdlg('Please type in the name of the mask representing the tendon');
@@ -43,20 +41,21 @@ try
     
     area = 0;
     % TODO-look at output
+    faceColor = zeros(length(objFv.faces), 3);
     for i = 1:length(objFV.faces)
         nodesMakeFace = objFV.faces(i,1:3);
         areIn = in(nodesMakeFace);
         if length(find(areIn)) == 3
             area = area + triangleArea3d(objFV.vertices(nodesMakeFace(1),:),objFV.vertices(nodesMakeFace(2),:),objFV.vertices(nodesMakeFace(3),:));
-            faceColor(i,:) = [255 0 0];
+            faceColor(i,:) = [255 0 0];% Red
         elseif length(find(areIn)) == 2
             area = area + (2/3) * triangleArea3d(objFV.vertices(nodesMakeFace(1),:),objFV.vertices(nodesMakeFace(2),:),objFV.vertices(nodesMakeFace(3),:));
-            faceColor(i,:) = [0 255 0];
+            faceColor(i,:) = [0 255 0];% Blue
         elseif length(find(areIn)) == 1
             area = area + (1/3) * triangleArea3d(objFV.vertices(nodesMakeFace(1),:),objFV.vertices(nodesMakeFace(2),:),objFV.vertices(nodesMakeFace(3),:));
-            faceColor(i,:) = [0 0 255];
+            faceColor(i,:) = [0 0 255];% Green
         else
-            faceColor(i,:) = [255 0 255];
+            faceColor(i,:) = [255 0 255];% Yellow
         end
     end
     
@@ -74,7 +73,8 @@ try
     fclose(fid);
     
     guidata(hObject, handles);
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err)
 end

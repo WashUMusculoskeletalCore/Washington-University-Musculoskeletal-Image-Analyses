@@ -1,9 +1,7 @@
 function [hObject,eventdata,handles] = TangIVDPMAMorphology(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     %     bw = handles.img > handles.lowerThreshold;
     %     bw(find(handles.img > handles.upperThreshold)) = 0;
     %     bw = imopen(bw,true(3,3,3));
@@ -60,7 +58,8 @@ try
     fprintf(fid,'%s\t',num2str(meanAF));
     fprintf(fid,'%s\n',num2str(meanNP));
     fclose(fid);
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

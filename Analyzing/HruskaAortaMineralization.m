@@ -1,11 +1,9 @@
-function [hObject,eventdata,handles] = HruskaAortaMinerization(hObject,eventdata,handles)
+function [hObject,eventdata,handles] = HruskaAortaMineralization(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
-    startSlice = handles.slice;
-    endSlice = startSlice + 1049;
+    setStatus(hObject, handles, 'Busy');
+    %startSlice = handles.slice;
+    %endSlice = startSlice + 1049;
     
     calcificationThresh =  800 * (2^15 / 1000);
     %     img = uint16(smooth3(handles.img(:,:,startSlice:endSlice)));
@@ -46,7 +44,8 @@ try
     fprintf(fid,'%s\n',num2str(calcificationThresh));
     fclose(fid);
     %     close all;
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

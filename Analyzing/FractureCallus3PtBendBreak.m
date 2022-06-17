@@ -1,18 +1,15 @@
 function [hObject,eventdata,handles] = FractureCallus3PtBendBreak(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    drawnow()
-    
-    
-    
+    setStatus(hObject, handles, 'Busy');
+
     handles.img(~handles.bwContour) = 0;
     
     %convert pixels to physical units when writing out
     %do callus math
     handles.bwTmp = false(size(handles.img));
     handles.bwTmp(handles.img > handles.lowerThreshold) = 1;
-    [handles.imgDensity ~] = calculateDensityFromDICOM(handles.info,handles.img);
+    [handles.imgDensity, ~] = calculateDensityFromDICOM(handles.info,handles.img);
     handles.imgDensity(~handles.bwTmp) = 0;
     handles.callusMeanVolumetricDensity = mean(handles.imgDensity(handles.bwTmp));
     handles.callusBoneVolume = length(find(handles.bwTmp));
@@ -21,7 +18,8 @@ try
     
     %get areas
     handles.bwTmp = imclose(handles.bwTmp,true(15,15,15));
-    [a b c] = size(handles.bwTmp);
+    [~, ~, c] = size(handles.bwTmp);
+    bwArea = zeros(c);
     for i = 1:c
         handles.bwTmp(:,:,i) = imfill(handles.bwTmp(:,:,i),'holes');
         bwArea(i) = length(find(handles.bwTmp(:,:,i)));
@@ -72,7 +70,7 @@ try
     
     fprintf(fid,'%s\t',datestr(now));
     fprintf(fid,'%s\t',handles.pathstr);
-    [a b c] = size(handles.img);
+    [~, ~, c] = size(handles.img);
     fprintf(fid,'%s\t',num2str((c)));
     
     fprintf(fid,'%s\t',num2str(handles.info.SliceThickness));
@@ -96,7 +94,8 @@ try
     
     fclose(fid);
     
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

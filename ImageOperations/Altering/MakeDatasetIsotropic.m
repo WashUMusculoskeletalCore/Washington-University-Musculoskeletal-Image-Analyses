@@ -1,9 +1,7 @@
 function [hObject,eventdata,handles] = MakeDatasetIsotropic(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     % Find the smallest pixel spacing in any dimension
     handles.minVoxelSpacing = min([handles.info.PixelSpacing(1,:),handles.info.SliceThickness]);
     R = makeresampler({'linear','linear','linear'},'fill');
@@ -89,11 +87,8 @@ try
     % %
     % % end
     % %
-    set(handles.textBusy,'String','Not Busy');
-    guidata(hObject, handles);
-    drawnow();
-catch
-    set(handles.textBusy,'String','Failed');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

@@ -1,9 +1,7 @@
 function [hObject,eventdata,handles] = ExecuteMorphologicalOperation(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     % TODO-- Find a way to do this with fewer nested ifs
     % Perform the chosen operation on the mask or image in 2d or 3d
     if strcmp(handles.morphologicalOperation,'Close') == 1
@@ -110,11 +108,8 @@ try
     
     guidata(hObject, handles);
     UpdateImage(hObject, eventdata, handles);
-    set(handles.textBusy,'String','Not Busy');
-    guidata(hObject, handles);
-    drawnow();
-catch
-    set(handles.textBusy,'String','Failed');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

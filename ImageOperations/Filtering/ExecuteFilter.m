@@ -1,46 +1,44 @@
+% NAME-ExecuteFilter
+% DESC-Applies the chosen filter to the image
+% IN-handles.popupmenuFilter: the popup menu for choosing the filter
+% handles.sigma: the wieght to use for the filters
+% handles,radius: the radius to use for the filters
+% OUT-handles.img: the filtered image
 function [hObject,eventdata,handles] = ExecuteFilter(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
-    rad = str2num(get(handles.editRadius,'String'));
-    weight = str2num(get(handles.editSigma,'String'));
+    setStatus(hObject, handles, 'Busy');
     % Get the filter from the popup menu
     str = get(handles.popupmenuFilter,'String');
     val = get(handles.popupmenuFilter,'Value');
     % Apply the filter to the image
     switch str{val}
         case '3D Median'
-            handles.img = uint16(smooth3(handles.img,'box',[rad rad rad]));
+            handles.img = uint16(smooth3(handles.img, 'box', [handles.radius handles.radius handles.radius]));
         case '3D Gaussian'
-            handles.img = imgaussfilt3(handles.img,weight,'FilterSize',rad);
+            handles.img = imgaussfilt3(handles.img, handles.sigma, 'FilterSize', handles.radius);
         case '2D Median'
-            [a b c] = size(handles.img);
-            for i = 1:c
-                handles.img(:,:,i) = medfilt2(handles.img(:,:,i),[rad rad]);
+            for i = 1:handles.abc(3)
+                handles.img(:,:,i) = medfilt2(handles.img(:,:,i),[handles.radius handles.radius]);
             end
         case '2D Gaussian'
-            handles.img = imgaussfilt(handles.img,weight,'FilterSize',rad);
+            handles.img = imgaussfilt(handles.img, handles.sigma, 'FilterSize', handles.radius);
         case '2D Mean'
-            h = fspecial('average',rad);
+            h = fspecial('average', handles.radius);
             handles.img = imfilter(handles.img,h);
         case 'Local Standard Deviation'
-            handles.img = stdfilt(handles.img,true([rad rad rad]));
+            handles.img = stdfilt(handles.img,true([handles.radius handles.radius handles.radius]));
         case 'Range'
-            handles.img = rangefilt(handles.img,true([rad rad rad]));
+            handles.img = rangefilt(handles.img,true([handles.radius handles.radius handles.radius]));
         case 'Entropy'
-            handles.img = entropyfilt(handles.img,true([rad rad rad]));
+            handles.img = entropyfilt(handles.img,true([handles.radius handles.radius handles.radius]));
             
             
     end
     guidata(hObject, handles);
     UpdateImage(hObject, eventdata, handles);
-    set(handles.textBusy,'String','Not Busy');
-    guidata(hObject, handles);
-    drawnow();
-catch
-    set(handles.textBusy,'String','Failed');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

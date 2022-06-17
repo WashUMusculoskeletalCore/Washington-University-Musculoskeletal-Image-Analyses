@@ -1,10 +1,8 @@
 function [hObject,eventdata,handles] = LoadTXM(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
-    
+    setStatus(hObject, handles, 'Busy');
+
     if isfield(handles,'img') == 1
         clear handles.img;
     end
@@ -53,8 +51,7 @@ try
     ct=0;
     for i = 1:handles.headerShort.NoOfImages
         ct=ct+1;
-        set(handles.textPercentLoaded,'String',num2str(ct/double(handles.headerShort.NoOfImages)));
-        drawnow();
+        displayPercentLoaded(hObject, handles, ct/double(handles.headerShort.NoOfImages));
         handles.img(:,:,i) = txmimage_read8(handles.header,ct,0,0);
     end
     
@@ -111,11 +108,8 @@ try
     set(gcf,'toolbar','figure');
     
     UpdateImage(hObject, eventdata, handles);
-    set(handles.textBusy,'String','Not Busy');
-    guidata(hObject, handles);
-    drawnow();
-catch
-    set(handles.textBusy,'String','Failed');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

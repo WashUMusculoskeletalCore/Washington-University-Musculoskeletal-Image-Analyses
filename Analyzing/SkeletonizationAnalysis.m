@@ -1,13 +1,12 @@
 function [hObject,eventdata,handles] = SkeletonizationAnalysis(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    drawnow();
-    
+    setStatus(hObject, handles, 'Busy');
+
     %generates uncorrected skeleton
     handles.bwSkeleton = Skeleton3D(handles.bwContour);
-    [handles.A handles.node handles.link] = Skel2Graph3D(handles.bwSkeleton,str2num(get(handles.editRadius,'String')));
-    [w l h] = size(handles.bwSkeleton);
+    [handles.A, handles.node, handles.link] = Skel2Graph3D(handles.bwSkeleton,str2num(get(handles.editRadius,'String')));
+    [w, l, h] = size(handles.bwSkeleton);
     handles.bwSkeleton = Graph2Skel3D(handles.node,handles.link,w,l,h);
     % Display shape of mask
     hfig = figure;
@@ -19,19 +18,18 @@ try
     handles.bwDist = bwdist(~handles.bwContour); % Gets distance map to edge for area in mask
     handles.bwDist(~handles.bwSkeleton) = 0; % Limit distance map to skeleton
     handles = ReduceDistanceMap(handles,hObject);
-    [r c v] = ind2sub(size(handles.bwDist),find(handles.bwDist));
+    [r, c, v] = ind2sub(size(handles.bwDist),find(handles.bwDist));
     xyzUlt = [r c v];
     for i = 1:length(xyzUlt)
         rads(i) = handles.bwDist(xyzUlt(i,1),xyzUlt(i,2),xyzUlt(i,3));%find xyz coords of the local maxima
     end
-    [rads I] = sort(rads,'ascend');
+    [rads, I] = sort(rads,'ascend');
     xyzUlt = xyzUlt(I,:);
-    [x y z] = sphere();
+    [x, y, z] = sphere();
     Y = discretize(rads,64); % Sort rads into 64 bins
     cmap = jet(64); % Creates a colormap coresponding to each bucket
     for i = 1:length(rads)
-        set(handles.textPercentLoaded,'String',num2str(i/length(rads)));
-        drawnow();
+        displayPercentLoaded(hObject, handles, i/length(rads));
         % Creates a colored surface map
         surf((x*rads(i)+xyzUlt(i,1)),(y*rads(i)+xyzUlt(i,2)),(z*rads(i)+xyzUlt(i,3)),'LineStyle','none','FaceColor',cmap(Y(i),:));
         axis tight;
@@ -47,7 +45,7 @@ try
         out(i).nodeLocs(1,:) = [handles.node(handles.link(i).n1).comx,handles.node(handles.link(i).n1).comy,handles.node(handles.link(i).n1).comz];
         out(i).nodeLocs(2,:) = [handles.node(handles.link(i).n2).comx,handles.node(handles.link(i).n2).comy,handles.node(handles.link(i).n2).comz];
         for k = 1:length(handles.link(i).point)
-            [px(k) py(k) pz(k)] = ind2sub(size(handles.bwSkeleton),handles.link(i).point(k)); % Get the coordinates of each point
+            [px(k), py(k), pz(k)] = ind2sub(size(handles.bwSkeleton),handles.link(i).point(k)); % Get the coordinates of each point
         end
         out(i).points = [px' py' pz'];
         for k = 1:length(out(i).points(:,1))
@@ -118,7 +116,8 @@ try
     %         handles.bwDist(handles.bwContour) = max(max(max(handles.bwDist)));
     
     
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

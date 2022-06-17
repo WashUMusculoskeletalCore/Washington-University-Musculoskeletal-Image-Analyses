@@ -30,11 +30,7 @@ D1(~bwFilled) = 0;
 D2(~bwUlt) = 0;
 D1(~bwBackUlt) = 0;
 if robust == 1
-%     try
-%         [meanRad,stdRad] = calculateThicknessGPU(D2,10);
-%     catch
-        [meanRad,stdRad,D2] = calculateThickness(D2,10);
-%     end
+    [meanRad,stdRad,~] = calculateThickness(D2,10);
     [meanRadSpace,stdRadSpace] = calculateThickness(D1,10);
     TbTh = meanRad * 2 * info.SliceThickness;
     TbThSTD = stdRad * 2 * info.SliceThickness;
@@ -43,7 +39,7 @@ if robust == 1
 else
     %do foreground structure
     rads = D2(find(D2));%(find(bwUlt));%find the radii of the spheres at the local maxima
-    [r c v] = ind2sub(size(bwUlt),find(bwUlt));
+    [r, c, v] = ind2sub(size(bwUlt),find(bwUlt));
     xyzUlt = [r c v];%find xyz coords of the local maxima
     xyzUlt = xyzUlt .* info.SliceThickness;%convert to physical units
     diams = 2 * rads .* info.SliceThickness;%convert to diameters and in physical units
@@ -55,8 +51,8 @@ else
     bwNotFilled = bwFilled;
     bwNotFilled(bw) = 0;
     bwUlt = bwulterode(bwNotFilled);
-    rads = D1(find(bwUlt));%find the radii of the spheres at the local maxima
-    [r c v] = ind2sub(size(bwUlt),find(bwUlt));
+    rads = D1(bwUlt);%find the radii of the spheres at the local maxima
+    [r, c, v] = ind2sub(size(bwUlt),find(bwUlt));
     % xyzUlt = [r c v];%find xyz coords of the local maxima
     % xyzUlt = xyzUlt .* info.SliceThickness;%convert to physical units
     diams = 2 * rads .* info.SliceThickness;%convert to diameters and in physical units
@@ -69,10 +65,9 @@ TN = 1/TbSp;
 
 %find TMD and vBMD
 try
-    [densityMatrix junk] = calculateDensityFromDICOM(info,img);
-    clear junk;
-    TMD = mean(densityMatrix(find(bw)));
-    vBMD = mean(densityMatrix(find(bwFilled)));
+    [densityMatrix , ~] = calculateDensityFromDICOM(info,img);
+    TMD = mean(densityMatrix(bw));
+    vBMD = mean(densityMatrix(bwFilled));
 catch
     TMD = 0;
     vBMD = 0;
@@ -100,11 +95,11 @@ SMI = (6 * BV * (dS/dr)) / BS^2;
 
 cc = bwconncomp(bw);
 numPixels = cellfun(@numel,cc.PixelIdxList);
-[biggest,idx] = max(numPixels);
+[~,idx] = max(numPixels);
 bw = false(size(bw));
 bw(cc.PixelIdxList{idx}) = true;
                     
-[connectivity label] = imEuler3d(bw,26);%calculate Euler characteristic of foreground structure
+[connectivity , ~] = imEuler3d(bw,26);%calculate Euler characteristic of foreground structure
 ConnD = (1-connectivity) / TV;
 
 out = {datestr(now),TV,BV,BVTV,ConnD,SMI,TbTh,TbThSTD,TbSp,TbSpSTD,TN,vBMD,TMD,info.SliceThickness};

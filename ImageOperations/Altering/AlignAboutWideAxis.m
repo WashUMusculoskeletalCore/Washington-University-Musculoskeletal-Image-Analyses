@@ -1,9 +1,7 @@
 function [hObject,eventdata,handles] = AlignAboutWideAxis(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy')
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy')
     answer = inputdlg("Would you like to use only a portion of the images for determining the rotation? y/n");
     if strcmpi(answer{1},'y') == 1
         answer = inputdlg("Please enter the first slice to use");
@@ -18,11 +16,9 @@ try
     else
         degree = RotateWidestHorizontal(handles.img, handles.bwContour);    
     end
-    [a b c] = size(handles.img);
+    [a, b, c] = size(handles.img);
     for i = 1:c
-        % TODO- Remove unneeded console output
-        clc;
-        i/c
+        displayPercentLoaded(i/c);
         if i == 1
             % For the first slice, create the new array first
             tmp = imrotate(handles.img(:,:,i),degree);
@@ -39,7 +35,8 @@ try
     handles.bwContour = bwContourTmp;
     guidata(hObject, handles);
     UpdateImage(hObject,eventdata,handles);
-    set(handles.textBusy,'String','Not Busy')
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy')
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

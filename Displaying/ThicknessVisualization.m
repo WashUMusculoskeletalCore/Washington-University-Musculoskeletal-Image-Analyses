@@ -1,9 +1,7 @@
 function ThicknessVisualization(hObject,eventdata,handles)
 
 try
-	set(handles.textBusy,'String','Busy');
-	guidata(hObject, handles);
-    drawnow();
+	setStatus(hObject, handles, 'Busy');
     bw = handles.bwContour;
     % Create distance map
     D1 = bwdist(~bw);%does what I want for thickness of spacing
@@ -37,8 +35,7 @@ try
         if mod(i,500) == 0
     %         clc
             % Update loading percentage
-            set(handles.textPercentLoaded,'String',num2str(i/initLen));
-            drawnow()
+            displayPercentLoaded(hObject, handles, i/initLen);
         end
         if D1(x2(i),y2(i),z2(i)) > 0
 
@@ -112,7 +109,8 @@ try
     end
     saveas(gcf,fullfile(handles.pathstr,[get(handles.editDICOMPrefix,'String') '.fig']));
     guidata(hObject, handles);
-    set(handles.textBusy,'String','Not Busy');
-catch
-    	set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    	setStatus(hObject, handles, 'Failed');
+        reportError(err);
 end

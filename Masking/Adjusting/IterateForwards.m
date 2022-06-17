@@ -1,5 +1,17 @@
-% Generates 3d mask matching image object boundary by iteratively using
+% NAME-IterateForwards
+% DESC- Generates 3d mask matching image object boundary by iteratively using
 % existing mask as guide for mask in next slice
+% IN-handles.bwContour: The 3d mask, must have a value for the current slice
+% handles.slice: the current slice to start at
+% handles.img: the 3d image to be matched, should be continuous
+% handles.startStop: a toggle button to start and stop the process
+% handles.contourMethod: the contouring method to be used by the algorithm
+% handles.smoothFactor: the smooth factor to be used by the algorithm
+% handles.contractionBias: the contraction bias to be used by the algorithm
+% handles.iterations: The number of iterations to be used by the algorithm
+% OUT-handles.bwContour: will be matched
+% handles.slice: will move down
+% UI: display the new masks
 % TODO- merge with IterateBackwards 
 function [hObject, eventdata, handles] = IterateForwards(hObject, eventdata, handles)
 

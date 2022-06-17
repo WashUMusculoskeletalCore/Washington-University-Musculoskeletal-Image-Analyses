@@ -3,8 +3,7 @@ function [handles,events,hObject] = CTHistomorphometry(hObject,events,handles)
 movingPathstr = uigetdir(handles.pathstr,'Please select the folder containing your registered DICOM files');
 [tformPathstr,tformPathDir] = uigetfile(handles.pathstr,'Please select the transformation object to use');
 
-set(handles.textBusy,'String','Loading DICOM Files');
-drawnow();
+setStatus(hObject, handles, 'Loading DICOM Files');
 [registeredIMG,registeredInfo] = readDICOMStack(movingPathstr);
 
 if tformPathstr ~= 0
@@ -30,8 +29,7 @@ end
 answer{1} = 'y';
 if strcmpi(answer{1},'y') == 1
 
-    set(handles.textBusy,'String','Cropping Images');
-    drawnow();
+    setStatus(hObject, handles, 'Cropping Images');
 %     [x y z] = ind2sub(size(handles.bwContour),find(handles.bwContour));
 %     xMin = min(x);
 %     xMax = max(x);
@@ -42,8 +40,7 @@ if strcmpi(answer{1},'y') == 1
 %     handles.img = handles.img(xMin:xMax,yMin:yMax,zMin:zMax);
 %     registeredIMG = registeredIMG(xMin:xMax,yMin:yMax,zMin:zMax);
 
-    set(handles.textBusy,'String','Masking Images');
-    drawnow();
+    setStatus(hObject, handles, 'Masking Images');
     % Remove area outside thresholds from image
     bwFixed = handles.img > handles.lowerThreshold;
     bwFixedHigh = handles.img > handles.upperThreshold;
@@ -53,8 +50,7 @@ if strcmpi(answer{1},'y') == 1
     bwRegisteredHigh = registeredIMG > handles.upperThreshold;
     bwRegistered(bwFixedHigh) = 0;
 
-    set(handles.textBusy,'String','Finding Mask Differences');
-    drawnow();
+    setStatus(hObject, handles, 'Finding Mask Differences');
     % Calculate difference in volume between image and registered image
     bwFixedVolume = length(find(bwFixed)) * handles.info.SliceThickness^3;
     bwRegisteredVolume = length(find(bwRegistered)) * handles.info.SliceThickness^3;

@@ -1,7 +1,7 @@
 function [hObject, eventdata, handles] = LoadDICOMStack(hObject, eventdata, handles)
 
 try
-    set(handles.textBusy,'String','Busy');
+    setStatus(hObject, handles, 'Busy');
     if isfield(handles,'img') == 1
         handles.img = [];
         guidata(hObject, handles);
@@ -42,8 +42,7 @@ try
     
     % Convert each file to an image slice
     for i = 1:length(handles.files)
-        set(handles.textPercentLoaded,'String',num2str(i/length(handles.files)));
-        drawnow();
+        displayPercentLoaded(hObject, handles, i/length(handles.files));
         %         if mrFlag == 1
         % TODO- Identify ImagePositionPatient
         infotmp(i) = dicominfo(fullfile(handles.pathstr,handles.files(i).name));
@@ -78,7 +77,7 @@ try
         if handles.info.LargestImagePixelValue == 255
             handles.img = uint16((double(handles.img) ./ 255) .* 2^16);
             handles.info.LargestImagePixelValue = 2^16;
-            handles.info.BitDepth = 15;
+            handles.info.BitDepth = 16;
         end
     end
     
@@ -90,7 +89,7 @@ try
     
     
     
-    handles.abc = size(handles.img);
+    handles.abc = size(handles.img, [1 2 3]);
     
     handles.windowLocation = round(handles.windowWidth / 2);
     set(handles.editWindowLocation,'String',num2str(handles.windowLocation));
@@ -136,9 +135,8 @@ try
     
     set(gcf,'menubar','figure');
     set(gcf,'toolbar','figure');
-    set(handles.textBusy,'String','Not Busy');
-    
-    guidata(hObject, handles);
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    disp(err.message);
 end

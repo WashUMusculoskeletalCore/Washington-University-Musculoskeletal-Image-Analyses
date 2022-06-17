@@ -1,9 +1,7 @@
 function [hObject,eventdata,handles] = LinearMeasure(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     % Create an interactive distance line tool
     imDist = imdistline(handles.axesIMG);
     setLabelVisible(imDist,0);
@@ -20,7 +18,8 @@ try
         pause(0.01);
     end
     delete(imDist);
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

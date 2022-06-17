@@ -21,8 +21,8 @@ t = num+2;
 [x y z] = ndgrid(1:r,1:c,[1 t]); % existing data
 [xi yi zi] = ndgrid(1:r,1:c,1:t); % including new slice
 
-out = interpn(x,y,z,cat(3,bottom,top),xi,yi,zi);
-out = out(:,:,2:end-1)>=0;
+out = interpn(x,y,z,cat(3,bottom,top),xi,yi,zi); % Get values of middle based off of top and bottom
+out = out(:,:,2:end-1)>=0; % Cut off top and bottom
 
 %Gets the distance from the edge for every point, outside points are
 %negative
