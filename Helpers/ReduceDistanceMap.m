@@ -1,8 +1,7 @@
 function [handles] = ReduceDistanceMap(handles,hObject)
 
 try
-    set(handles.textBusy,'String','Busy');
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     maxRad = max(max(max(handles.bwDist)));
     
     %pad array to account for radius
@@ -26,7 +25,7 @@ try
     for i = 1:length(x2)
         if mod(i,50) == 0 || i == length(x2)
             % Update percentage complete
-            set(handles.textPercentLoaded,'String',num2str(i/length(x2)));
+            displayPercentLoaded(hObject, handles, i/length(x2));
             drawnow();
         end
         if handles.bwDist(x2(i),y2(i),z2(i)) > 0
@@ -78,7 +77,8 @@ try
         (2*ceil(maxRad)+2):end-(2*ceil(maxRad)+2),...
         (2*ceil(maxRad)+2):end-(2*ceil(maxRad)+2));
     
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

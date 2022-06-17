@@ -1,9 +1,7 @@
 function [hObject,eventdata,handles] = SaveWorkspace(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     fieldNames = fieldnames(handles);
     fieldNum = numel(fieldnames(handles));
     matPath = fullfile(handles.pathstr,'Workspace.mat');
@@ -16,8 +14,7 @@ try
         elseif strcmpi(fieldNames{i},'axesIMG') == 1
         elseif strcmpi(fieldNames{i},'output') == 1
         else
-            set(handles.textPercentLoaded,'String',num2str(ct/(fieldNum-135)));
-            drawnow;
+            displayPercentLoaded(hObject, handles, ct/(fieldNum-135));
             % Get value from handles
             eval([fieldNames{i} ' = handles.' fieldNames{i} ';']);
             % Save first field as a new file, append all other fields to
@@ -31,13 +28,9 @@ try
             end
         end
     end
-    
-    set(handles.textBusy,'String','Not Busy');
-    set(handles.textPercentLoaded,'String',num2str(1));
-    guidata(hObject, handles);
-    drawnow();
-catch
-    set(handles.textBusy,'String','Failed');
-    guidata(hObject, handles);
-    drawnow();
+    displayPercentLoaded(hObject, handles, 1);
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

@@ -1,22 +1,20 @@
 function [hObject,eventdata,handles] = CancellousAnalysis(hObject,eventdata,handles)
 
 try
-	set(handles.textBusy,'String','Busy');
-	guidata(hObject, handles);
-	drawnow();
+	setStatus(hObject, handles, 'Busy');
 	bw = false(size(handles.img));
 	handles.img(~handles.bwContour) = 0;
-	bw(find(handles.img > handles.lowerThreshold)) = 1;
-	bw(find(handles.img > handles.upperThreshold)) = 0;
+	bw(handles.img > handles.lowerThreshold) = 1;
+	bw(handles.img > handles.upperThreshold) = 0;
 	[handles.outCancellous,handles.outHeaderCancellous] = scancoParameterCalculatorCancellous(bw,handles.bwContour,handles.img,handles.info,get(handles.togglebuttonRobustThickness,'Value'));
 	if exist(fullfile(handles.pathstr,'CancellousResults.txt'),'file') ~= 2
 		fid = fopen(fullfile(handles.pathstr,'CancellousResults.txt'),'w');
-		for i = 1:length(handles.outCancellous)
-			if i == length(handles.outCancellous) % Determine if this is the final value
+        for i = 1:length(handles.outCancellous)
+            if i == length(handles.outCancellous) % Determine if this is the final value
 				fprintf(fid,'%s\t',handles.outHeaderCancellous{i}); % Write to the file
 			else
 				fprintf(fid,'%s\t',handles.outHeaderCancellous{i}); % TODO-Can these be combined
-			end
+            end
         end
         fprintf(fid,'%s\t','Voxel Size');
 		fprintf(fid,'%s\n','Threshold');
@@ -37,7 +35,8 @@ try
 	end
 	fclose(fid);
 	guidata(hObject, handles);
-	set(handles.textBusy,'String','Not Busy');
-catch
-	set(handles.textBusy,'String','Failed');
+	setStatus(hObject, handles, 'Not Busy');
+catch err
+	setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

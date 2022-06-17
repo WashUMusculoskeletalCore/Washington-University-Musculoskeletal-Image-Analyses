@@ -1,9 +1,7 @@
 function WriteCurrentImageStackToDICOM(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     [a b c] = size(handles.img);
     
     zers = '00000';
@@ -42,8 +40,7 @@ try
             tmp2.SOPInstanceUID = tmp2.MediaStorageSOPInstanceUID;
             tmp2.PatientName.FamilyName = handles.DICOMPrefix;
             tmp2.ImagePositionPatient(3) = tmp2.ImagePositionPatient(3) + tmp2.SliceThickness;
-            set(handles.textPercentLoaded,'String',num2str(i/c));
-            drawnow();
+            displayPercentLoaded(hObject, handles, i/c);
             fName = [handles.DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i)  '.dcm'];
             dicomwrite(handles.img(:,:,i),fullfile(tmpDir,fName),tmp2);
         end
@@ -70,8 +67,7 @@ try
                 %         info.SOPInstanceUID = num2str(str2num(info.SOPInstanceUID) + 1);
                 
             end
-            set(handles.textPercentLoaded,'String',num2str(i/c));
-            drawnow();
+            displayPercentLoaded(hObject, handles, i/c);
             fName = [handles.DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i)  '.dcm'];
             dicomwrite(handles.img(:,:,i),fullfile(tmpDir,fName),info);
         end
@@ -93,18 +89,14 @@ try
                 %         info.SOPInstanceUID = num2str(str2num(info.SOPInstanceUID) + 1);
                 
             end
-            set(handles.textPercentLoaded,'String',num2str(i/c));
-            drawnow();
+            displayPercentLoaded(hObject, handles, i/c);
             fName = [handles.DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i)  '.dcm'];
             dicomwrite(handles.img(:,:,i),fullfile(tmpDir,fName),info);
         end
         
     end
-    set(handles.textBusy,'String','Not Busy');
-    guidata(hObject, handles);
-    drawnow();
-catch
-    set(handles.textBusy,'String','Failed');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

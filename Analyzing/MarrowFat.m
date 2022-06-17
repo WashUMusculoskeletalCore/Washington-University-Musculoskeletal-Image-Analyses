@@ -1,22 +1,20 @@
 function [hObject,eventdata,handles] = MarrowFat(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     handles.img(~handles.bwContour) = 0;
     handles.bwGlobules = handles.img > handles.lowerThreshold;
     handles.bwGlobules(handles.img > handles.upperThreshold) = 0;
     bw = handles.bwGlobules;
     bw = bwareaopen(bw,20);
-    fatVol = length(find(bw)) * handles.info.SliceThickness^3;
-    totVol = length(find(handles.bwContour)) * handles.info.SliceThickness^3;
+    %fatVol = length(find(bw)) * handles.info.SliceThickness^3;
+    %totVol = length(find(handles.bwContour)) * handles.info.SliceThickness^3;
     bw = imerode(bw,true(3,3,3));
     %     StackSlider(bw);
     bw = ~bw;
     D = bwdist(bw);
     D = 1-D;
-    Ld = watershed(D);
+    %Ld = watershed(D);
     %     imshow(label2rgb(Ld))
     mask = imextendedmin(D,1);
     D2 = imimposemin(D,mask);
@@ -54,7 +52,7 @@ try
         vols(i) = shp.volume;
         %         vols(i) = vols(i) * handles.info.SliceThickness^3;
         %         vols(i) = length(find(bwTmp)) * handles.info.SliceThickness^3;
-        surfArea(i) = shp.surfaceArea;
+        %surfArea(i) = shp.surfaceArea;
         %         surfArea(i) = surfArea(i) * handles.info.SliceThickness^3;
         topTerm = pi * (6 * shp.volume / pi)^(2/3);
         sphericity(i) = topTerm / shp.surfaceArea;
@@ -103,14 +101,15 @@ try
     
     mkdir(fullfile(handles.pathstr,'overlay images'));
     
-    [a b c] = size(handles.blended);
+    [~, ~, c] = size(handles.blended);
     for i = 1:c
         pathTemp = fullfile(handles.pathstr,'overlay images');
         fName = ['Image' num2str(i) '.tif'];
         imwrite(handles.blended(:,:,i),fullfile(pathTemp,fName));
     end
     
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

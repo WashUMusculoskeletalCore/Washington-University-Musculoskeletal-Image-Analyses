@@ -1,9 +1,7 @@
 function [hObject,eventdata,handles] = RevertImage(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     handles.img = handles.imgOrig;
     
     handles.windowWidth = max(max(max(handles.img))) - min(min(min(handles.img)));
@@ -52,11 +50,8 @@ try
     
     guidata(hObject, handles);
     UpdateImage(hObject, eventdata, handles);
-    set(handles.textBusy,'String','Not Busy');
-    guidata(hObject, handles);
-    drawnow();
-catch
-    set(handles.textBusy,'String','Failed');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

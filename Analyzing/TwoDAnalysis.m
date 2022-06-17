@@ -2,7 +2,7 @@
 function    [hObject,eventdata,handles] = TwoDAnalysis(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
+    setStatus(hObject, handles, 'Busy');
     fid = fopen(fullfile(handles.pathstr,'2DResults.txt'),'a');
     fprintf(fid,'%s\t','Date Analyzed');
     fprintf(fid,'%s\t','Measurement');
@@ -29,8 +29,7 @@ try
     
     [a b c] = size(handles.bwContour);
     for i = 1:c
-        set(handles.textPercentLoaded,'String',num2str(i/c));
-        drawnow();
+        displayPercentLoaded(hObject, handles, i/c);
         area(i) = bwarea(handles.bwContour(:,:,i)) * handles.info.SliceThickness^2;
         tmp = handles.imgDensity(:,:,i);
         meanIntens(i) = mean(reshape(tmp(handles.bwContour(:,:,i)),[length(find(handles.bwContour(:,:,i))) 1]));
@@ -76,7 +75,8 @@ try
     
     fclose(fid);
     
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

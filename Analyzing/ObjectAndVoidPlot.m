@@ -1,10 +1,7 @@
 function [hObject,eventdata,handles] = ObjectAndVoidPlot(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
-    bw = false(size(handles.img));
+    setStatus(hObject, handles, 'Busy');
     bw = handles.img > handles.lowerThreshold;
     bw(handles.img > handles.upperThreshold) = 0;
     %     tmp = imerode(handles.bwContour,true(7,7,7));
@@ -22,7 +19,8 @@ try
     plot(shp2,'LineStyle','none','FaceColor','r');
     camlight();
 %     axes tight;
-    set(handles.textBusy,'String','Not Busy');
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

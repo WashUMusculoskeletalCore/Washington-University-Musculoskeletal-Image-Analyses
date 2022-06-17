@@ -14,7 +14,7 @@ dirs = dir(pathstrParent);
 for i = 3:length(dirs)
     if dirs(i).isdir == 1
         files = dir(fullfile(pathstrParent,dirs(i).name,'*cortical*.txt'));
-        if length(files) > 0 && isempty(whos('out'))
+        if ~isempty(files) && isempty(whos('out'))
             [out] = CreateCorticalResultFile(pathstrParent,dirs(i),files(1));
         end
         for j = 1:length(files)
@@ -42,9 +42,10 @@ try
     fid = fopen(f);
     line = fgetl(fid);
     fprintf(out,'%s\n',line);
-catch
+catch err
     % TODO-More general error
-    'Cannot create result file, see Dan'
+    disp('Cannot create result file, see Dan');
+    reportError(err);
 end
 
 function CollectCancellousData(pathstrParent)
@@ -53,7 +54,7 @@ dirs = dir(pathstrParent);
 for i = 3:length(dirs)
     if dirs(i).isdir == 1
         files = dir(fullfile(pathstrParent,dirs(i).name,'*cancellous*.txt'));
-        if length(files) > 0 && isempty(whos('out'))
+        if ~isempty(files) && isempty(whos('out'))
             [out] = CreateCancellousResultFile(pathstrParent,dirs(i),files(1));
         end
         for j = 1:length(files)
@@ -83,6 +84,7 @@ try
     line = fgetl(fid);
     fprintf(out,'%s\t','File Location');
     fprintf(out,'%s\n',line);
-catch
-    'Cannot create result file, see Dan'
+catch err
+    disp('Cannot create result file, see Dan');
+    reportError(err);
 end

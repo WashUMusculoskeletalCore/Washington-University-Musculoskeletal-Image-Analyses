@@ -1,11 +1,10 @@
-function [hObject,eventdata,handles] = LoadTifStack(hObject,eventdata,handles)
+function [hObject,eventdata,handles] = LoadTiffStack(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     pathstr = uigetdir(pwd,'Please select the folder containing your stack of TIF (or TIFF) images');
     files = dir(fullfile(pathstr,'*.tif*'));
-    [file pth] = uigetfile('*.*', 'Select a DICOM file to use as a template or cancel to continue with dummy metadata');
+    [file, pth] = uigetfile('*.*', 'Select a DICOM file to use as a template or cancel to continue with dummy metadata');
     if file ~= 0
         info = dicominfo(fullfile(pth,file));
     else
@@ -18,16 +17,14 @@ try
         iminfo = imfinfo(fullfile(pathstr,files(1).name));
         for i = 1:length(files)
             handles.img(:,:,i) = imread(fullfile(pathstr,files(i).name));
-            set(handles.textPercentLoaded,'String',num2str(i/length(files)));
-            drawnow();
+            displayPercentLoaded(hObject, handles, i/length(files));
         end
     elseif length(files) == 1
         iminfo = imfinfo(fullfile(pathstr,files(1).name));
         numImages = numel(iminfo);
         for i = 1:numImages
             handles.img(:,:,i) = imread(fullfile(pathstr,files(1).name),i);
-            set(handles.textPercentLoaded,'String',num2str(i/numImages));
-            drawnow();
+            displayPercentLoaded(hObject, handles, i/numImages);
         end
     end
     handles.img = uint16(handles.img);
@@ -88,10 +85,8 @@ try
     set(gcf,'menubar','figure');
     set(gcf,'toolbar','figure');
     
-    set(handles.textBusy,'String','Not Busy');
-    
-    guidata(hObject, handles);
-    
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy');
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

@@ -1,9 +1,7 @@
 function [hObject,eventdata,handles] = ScancoParameterStressFractureCallus(hObject,eventdata,handles)
 
 try
-    set(handles.textBusy,'String','Busy');
-    guidata(hObject, handles);
-    drawnow();
+    setStatus(hObject, handles, 'Busy');
     [out, outHeader] = scancoParameterCalculatorStressFractureCallus(handles.bwContour,handles.lowerThreshold,handles.img,handles.info);
     if exist(fullfile(handles.pathstr,'StressFractureCallusResults.txt'),'file') ~= 2 % If this does not exist as a file
         fid = fopen(fullfile(handles.pathstr,'StressFractureCallusResults.txt'),'a'); % Create the file
@@ -33,11 +31,13 @@ try
     for i = 1:5
         try
             fclose(fid);
-        catch
+        catch err
+            reportError(err);
         end
     end
     guidata(hObject, handles);
-    set(handles.textBusy,'String','Not Busy')
-catch
-    set(handles.textBusy,'String','Failed');
+    setStatus(hObject, handles, 'Not Busy')
+catch err
+    setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end

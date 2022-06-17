@@ -1,11 +1,9 @@
 function [hObject,eventdata,handles] = CorticalAnalysis(hObject,eventdata,handles)
 
 try
-	set(handles.textBusy,'String','Busy');
-	guidata(hObject, handles);
-    drawnow();
+	setStatus(hObject, handles, 'Busy');
     
-    [x y z] = ind2sub(size(handles.bwContour),find(handles.bwContour));
+    [x, y, z] = ind2sub(size(handles.bwContour),find(handles.bwContour));
     xMin = min(x);
     xMax = max(x);
     yMin = min(y);
@@ -20,7 +18,7 @@ try
     handles.abc = size(handles.img2);
     
 	[handles.outCortical,handles.outHeaderCortical,handles.outCorticalContinuous] = scancoParameterCalculatorCortical(handles.img2,handles.bwContour,handles.info,handles.threshold,get(handles.togglebuttonRobustThickness,'Value'));
-	[twoDHeader twoDData] = twoDAnalysisSub(handles.img2,handles.info,handles.lowerThreshold,handles.bwContour);
+	[~, twoDData] = twoDAnalysisSub(handles.img2,handles.info,handles.lowerThreshold,handles.bwContour);
 	%print main results
 	if exist(fullfile(handles.pathstr,'CorticalResults.txt'),'file') ~= 2
 		fid = fopen(fullfile(handles.pathstr,'CorticalResults.txt'),'a');
@@ -78,7 +76,7 @@ try
 			outVarContinuous(j,i) = var(j);
 		end
 	end
-	[a b] = size(outVarContinuous);
+	[a, b] = size(outVarContinuous);
 	for i = 1:a
 		fprintf(fid,'%s\t',handles.pathstr);
 		fprintf(fid,'%s\t',datestr(now));
@@ -93,7 +91,8 @@ try
 	fclose(fid);
     clear handles.img2;
 	guidata(hObject, handles);
-	set(handles.textBusy,'String','Not Busy');
-catch
-	set(handles.textBusy,'String','Failed');
+	setStatus(hObject, handles, 'Not Busy');
+catch err
+	setStatus(hObject, handles, 'Failed');
+    reportError(err);
 end
