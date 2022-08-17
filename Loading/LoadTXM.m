@@ -12,14 +12,14 @@ try
     
     set(handles.editScaleImageSize,'String',num2str(handles.imgScale));
     
-    [fName pName] = uigetfile(fullfile(pwd,'*.txm'),'Please select your TXM file');
+    [fName, pName] = uigetfile(fullfile(pwd,'*.txm'),'Please select your TXM file');
     handles.pathstr = [pName fName];
     
     set(handles.textCurrentDirectory,'String',[pName fName]);
     % handles.files = dir([handles.pathstr '\*.txm*']);
     % handles.info = dicominfo([handles.pathstr '\' handles.files(1).name]);
     
-    [handles.header handles.headerShort] = txmheader_read8([handles.pathstr]);
+    [handles.header, handles.headerShort] = txmheader_read8([handles.pathstr]);
     handles.pathstr = pName;
     handles.info = handles.headerShort;
     handles.info.SliceThickness = handles.info.PixelSize;
@@ -61,42 +61,10 @@ try
     handles.info.LargestImagePixelValue = max(max(max(handles.img)));
     handles.info.SmallestImagePixelValue = min(min(min(handles.img)));
     
-    handles.windowWidth = max(max(max(handles.img))) - min(min(min(handles.img)));
-    set(handles.editWindowWidth,'String',num2str(handles.windowWidth));
-    
-    handles.abc = size(handles.img);
-    
-    handles.windowLocation = round(handles.windowWidth / 2);
-    set(handles.editWindowLocation,'String',num2str(handles.windowLocation));
-    
-    handles.primitiveCenter(1) = round(handles.abc(1)/2);
-    handles.primitiveCenter(2) = round(handles.abc(2)/2);
-    % handles.bwContour = false(size(handles.img));
-    
-    handles.upperThreshold = max(max(max(handles.img)));
-    
-    set(handles.sliderIMG,'Value',1);
-    set(handles.sliderIMG,'min',1);
-    set(handles.sliderIMG,'max',handles.abc(3));
-    set(handles.sliderIMG,'SliderStep',[1,1]/(handles.abc(3)-1));
-    
-    handles.theMax = double(max(max(max(handles.img))));
-    handles.hOut = 1;%handles.theMax / 2^16;
-    handles.lOut = 0;
-    set(handles.sliderThreshold,'Value',1);
-    set(handles.sliderThreshold,'min',1);
-    set(handles.sliderThreshold,'max',handles.theMax);
-    set(handles.sliderThreshold,'SliderStep',[1,round(handles.theMax/1000)] / (handles.theMax));
-    
-    set(handles.sliderWindowWidth,'Value',1);
-    set(handles.sliderWindowWidth,'min',1);
-    set(handles.sliderWindowWidth,'max',handles.theMax);
-    set(handles.sliderWindowWidth,'SliderStep',[1,round(handles.theMax/1000)] / (handles.theMax));
-    
-    set(handles.sliderWindowLocation,'Value',1);
-    set(handles.sliderWindowLocation,'min',1);
-    set(handles.sliderWindowLocation,'max',handles.theMax);
-    set(handles.sliderWindowLocation,'SliderStep',[1,round(handles.theMax/1000)] / (handles.theMax));
+    handles.startMorph = 1;
+    set(handles.editStartMorph, 'String', num2str(handles.startMorph));
+    [hObject, handles] = abcResize(hObject, handles);
+    handles = windowResize(handles);
     
     handles.colormap = 'gray';
     
@@ -104,10 +72,10 @@ try
     
     guidata(hObject, handles);
     
-    set(gcf,'menubar','figure');
-    set(gcf,'toolbar','figure');
+    set(gcf,'menubar','none');
+    set(gcf,'toolbar','none');
     
-    UpdateImage(hObject, eventdata, handles);
+    updateImage(hObject, eventdata, handles);
     setStatus(hObject, handles, 'Not Busy');
 catch err
     setStatus(hObject, handles, 'Failed');

@@ -1,31 +1,31 @@
-% DESC-For each slice, allows the user to select 2 points on the mask, then
-% displays the y-distance between those points and the center.
-function YMaxForStrain(hObject,eventdata,handles)
-
-[a b c] = size(handles.bwContour);    
-for i = 1:c
-    % Find position of Centroid
-    [I J] = find(handles.bwContour(:,:,i) > 0);
-    % I = I .* pixelwidth; %mm (pixels * mm/pixels)
-    % J = J .* pixelwidth; %mm
-    ycent = mean(I(:));
-    xcent = mean(J(:)); % TODO-xcent is unused
-    % Display a colormap showing the mask
-    tmp = zeros(size(handles.bwContour(:,:,i)));
-    tmp(handles.bwContour(:,:,i)) = 2;
-    tmp(~handles.bwContour(:,:,i)) = 1;
-    h = figure; imagesc(tmp);
-    [x,y] = ginput(2); % Let the user select 2 points
-    % Get y-distance for each point and display it
-    d1 = abs(y(1)-ycent);
-    d2 = abs(y(2)-ycent);
-
-    d1 = d1 * handles.info.SliceThickness;
-    d2 = d2 * handles.info.SliceThickness;
-
-    msgbox(['D1 for slice ' num2str(i) ' is ' num2str(d1)]);
-    msgbox(['D2 for slice ' num2str(i) ' is ' num2str(d2)]);
-    
-    close(h);
-    
-end
+% NAME-YMaxForStrain
+% DESC-Allows the user to select a point, then displays the y-distance 
+% between those points and the center of mass of the mask.
+% IN-handles.bwContour: The 3D mask
+% IO: Point selected by user
+% OUT-dPix: The distance in pixels, displayed in a message box
+% dPhys: The distance in milimeters, displayed in a message box
+function YMaxForStrain(hObject, eventdata, handles)
+    if isfield(handles, 'bwContour')
+        % Find position of Centroid
+        [I , ~] = find(handles.bwContour(:,:,handles.slice) > 0);
+        if size(I) > 0
+            ycent = mean(I(:));
+            % Display the center line
+            line=yline(handles.axesIMG, ycent, 'Color', 'r');
+            % Let the user select a point
+            pt = drawpoint(handles.axesIMG);
+            % Get y-distance for the point
+            dPix = abs(pt.Position(2)-ycent);
+            % Convert pixels to physical units
+            dPhys = dPix * handles.info.SliceThickness;
+            % Open a message and wait for the user to close it
+            waitfor(msgbox(['Vertical distance is ' num2str(dPix) ' pixels and ' num2str(dPhys) 'mm']));
+            delete(pt);
+            delete(line);
+        else
+            errorMsg();
+        end
+    else
+        noMaskError();
+    end

@@ -41,25 +41,20 @@ try
     handles.windowWidth = max(max(max(handles.img))) - min(min(min(handles.img)));
     set(handles.editWindowWidth,'String',num2str(handles.windowWidth));
     
-    handles.abc = size(handles.img);
+    handles.startMorph = 1;
+    set(handles.editStartMorph, 'String', num2str(handles.startMorph));
+    [hObject, handles] = abcResize(hObject, handles);
     
     handles.windowLocation = round(handles.windowWidth / 2);
     set(handles.editWindowLocation,'String',num2str(handles.windowLocation));
     
     set(handles.editScaleImageSize,'String',num2str(handles.imgScale));
     
-    handles.primitiveCenter(1) = round(handles.abc(2)/2);
-    handles.primitiveCenter(2) = round(handles.abc(1)/2);
     
     set(handles.textCurrentDirectory,'String',handles.pathstr);
     
     handles.upperThreshold = max(max(max(handles.img)));
-    set(handles.textUpperThreshold,'String',num2str(handles.upperThreshold));
-    
-    set(handles.sliderIMG,'Value',1);
-    set(handles.sliderIMG,'min',1);
-    set(handles.sliderIMG,'max',handles.abc(3));
-    set(handles.sliderIMG,'SliderStep',[1,1]/(handles.abc(3)-1));
+    set(handles.textUpperThreshold,'String',num2str(handles.upperThreshold));    
     
     handles.theMax = double(max(max(max(handles.img))));
     handles.hOut = 1;%handles.theMax / 2^15;
@@ -82,8 +77,8 @@ try
     % imshowpair(imadjust(handles.img(:,:,handles.slice),[double(handles.lOut);double(handles.hOut)],[double(0);double(1)]),handles.bwContour(:,:,handles.slice),'blend','Parent',handles.axesIMG);
     set(handles.textVoxelSize,'String',num2str(handles.info.SliceThickness));
     
-    set(gcf,'menubar','figure');
-    set(gcf,'toolbar','figure');
+    set(gcf,'menubar','none');
+    set(gcf,'toolbar','none');
     
     setStatus(hObject, handles, 'Not Busy');
 catch err

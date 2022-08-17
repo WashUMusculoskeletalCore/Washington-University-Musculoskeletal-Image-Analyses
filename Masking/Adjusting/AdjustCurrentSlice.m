@@ -1,3 +1,4 @@
+% NAME-AdjustCurrentSlice
 % DESC-Adjusts the mask on the current slice to match the image
 % IN-handles.img: The 3d image to be matched
 % handles.bwContour: The 3d mask, should have a value on the current slice
@@ -12,17 +13,19 @@ function [hObject, eventdata, handles] = AdjustCurrentSlice(hObject, eventdata, 
 
 try
     setStatus(hObject, handles, 'Busy');
-    % Get image and mask for current slice
-    img = handles.img(:,:,handles.slice);
-    bw = handles.bwContour(:,:,handles.slice);
-    % Apply active contour algorithm to match mask to nearby object
-    % boundaries in image
-    bw = activecontour(img,bw,...
-        handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
-    % Set mask to new mask
-    handles.bwContour(:,:,handles.slice) = bw;
-    guidata(hObject, handles);
-    UpdateImage(hObject,eventdata,handles);
+    if isfield(handles, 'img') && isfield(handles, 'bwContour')
+        % Get image and mask for current slice
+        img = handles.img(:,:,handles.slice);
+        bw = handles.bwContour(:,:,handles.slice);
+        % Apply active contour algorithm to match mask to nearby object
+        % boundaries in image
+        bw = activecontour(img,bw,...
+            handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
+        % Set mask to new mask
+        handles.bwContour(:,:,handles.slice) = bw;
+        guidata(hObject, handles);
+        updateImage(hObject,eventdata,handles);
+    end
     setStatus(hObject, handles, 'Not Busy');
 catch err
     setStatus(hObject, handles, 'Failed');

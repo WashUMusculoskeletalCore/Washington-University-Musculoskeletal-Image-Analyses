@@ -5,8 +5,8 @@ try
     answer(1) = inputdlg('Please indicate the name of the mask representing the full bone');
     answer(2) = inputdlg('Please indicate the name of the mask representing the needle hole');
     
-    handles.bwBone = eval(['handles.' answer{1}]);
-    handles.bwNeedleHole = eval(['handles.' answer{2}]);
+    handles.bwBone = selectMask(handles, 'Please indicate the name of the mask representing the full bone');
+    handles.bwNeedleHole = selectMask(handles, 'Please indicate the name of the mask representing the needle hole');
     
     handles.bwBone = smooth3(handles.bwBone);
     handles.bwNeedleHole = smooth3(handles.bwNeedleHole);

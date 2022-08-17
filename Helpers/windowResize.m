@@ -1,18 +1,31 @@
-function [handles, hObject] = windowResize(handles, hObject)
-
-    handles.windowWidth = max(max(max(handles.img))) - min(min(min(handles.img)));
-    set(handles.editWindowWidth,'String',num2str(handles.windowWidth));
-    
-    handles.windowLocation = round(handles.windowWidth / 2);
-    set(handles.editWindowLocation,'String',num2str(handles.windowLocation));
-   
-    handles.upperThreshold = max(max(max(handles.img)));
-    set(handles.textUpperThreshold,'String',num2str(handles.upperThreshold));
-    
+% NAME-windowResize
+% DESC-Resizes the brightness window sliders and performs other adjustments. 
+% Call this whenever the brightness range of the image changes
+% IN-handles.img: the 3D image
+% OUT-handles.windowWidth: the width of the brightness window
+% handles.windowLocation: the center of the brightness window
+% handles.editWindowWidth: the window width text box
+% handles.editWindowLocation: the window location text box
+% handles.theMax: the maximum brightness of the image
+% handles.SliderThreshold: the threshold sliders
+function [handles] = windowResize(handles)
+    % Resize all window sliders. This will reset their values to 1, 
     handles.theMax = double(max(max(max(handles.img))));
     handles.SliderThreshold = resizeSlider(handles.sliderThreshold, 1, handles.theMax, 1, handles.theMax/1000); 
     handles.SliderWindowWidth = resizeSlider(handles.sliderWindowWidth, 1, handles.theMax, 1, handles.theMax/1000); 
     handles.SliderWindowLocation = resizeSlider(handles.sliderWindowLocation, 1, handles.theMax, 1, handles.theMax/1000);
+    % Set width to the maximum value in the image.
+    handles.windowWidth = handles.theMax;
+    set(handles.editWindowWidth,'String',num2str(handles.windowWidth));
+    set(handles.sliderWindowWidth,'Value',handles.windowWidth);
+    % Set the location to the center of the width
+    handles.windowLocation = round(handles.windowWidth / 2);
+    set(handles.editWindowLocation,'String',num2str(handles.windowLocation));
+    set(handles.sliderWindowLocation,'Value',handles.windowLocation);
+   % Set the thresholds
+    handles.upperThreshold = max(max(max(handles.img)));
+    set(handles.textUpperThreshold,'String',num2str(handles.upperThreshold));
     
-    guidata(hObject, handles);
+    handles.threshold = round(get(handles.sliderThreshold,'Value'));
+    set(handles.editThreshold,'String',num2str(handles.threshold))
 end

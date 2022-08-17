@@ -1,115 +1,73 @@
+% NAME-ExecuteMorphologicalOperation
+% DESC-Executes a morphological operation with the chosen options
+% IN-handles.morphologicalImageMask: determines whether to perform the
+% operation on the image or mask
+% handles.morphological2D3D: determines whether to perform the operation on
+% the entire 3d shape or slice by slice
+% handles.morphologicalOperation: which operation to perform, options are
+% close, open, erode, dilate, and fill
+% handles.morphologicalRadius: the radius of the structuring element usesd
+% by the operation
+% OUT-handles.img: the 3D image
+% handles.bwContour: the 3D mask
 function [hObject,eventdata,handles] = ExecuteMorphologicalOperation(hObject,eventdata,handles)
+    try
+        setStatus(hObject, handles, 'Busy');
+        switch handles.morphologicalImageMask
+            case 'Mask'
+                field = 'bwContour';
+            case 'Image'
+                field = 'img';
+        end
+        if isfield(handles, field)
+            % Determine which structuring element to use
+            switch handles.morphological2D3D
+                case '2D'
+                    se = strel('disk',handles.morphologicalRadius,0);
+                case '3D'
+                    se = true(handles.morphologicalRadius);
+            end
 
-try
-    setStatus(hObject, handles, 'Busy');
-    % TODO-- Find a way to do this with fewer nested ifs
-    % Perform the chosen operation on the mask or image in 2d or 3d
-    if strcmp(handles.morphologicalOperation,'Close') == 1
-        if strcmp(handles.morphological2D3D,'2D') == 1
-            if strcmp(handles.morphologicalImageMask,'Mask') == 1
-                [a b c] = size(handles.bwContour);
-                for i = 1:c
-                    handles.bwContour(:,:,i) = imclose(handles.bwContour(:,:,i),strel('disk',handles.morphologicalRadius,0));
-                end
-            elseif strcmp(handles.morphologicalImageMask,'Image') == 1
-                [a b c] = size(handles.img);
-                for i = 1:c
-                    handles.img(:,:,i) = imclose(handles.img(:,:,i),strel('disk',handles.morphologicalRadius,0));
-                end
+            % Determine which operation to use
+            switch handles.morphologicalOperation
+                case 'Close'
+                    fh = @imclose;
+                case 'Open'
+                    fh = @imopen;
+                case 'Erode'
+                    fh = @imerode;
+                case 'Dilate'
+                    fh = @imdilate;
+                case 'Fill'
+                    fh = @imfill;
+                    se = 'holes';
             end
-        elseif strcmp(handles.morphological2D3D,'3D') == 1
-            if strcmp(handles.morphologicalImageMask,'Mask') == 1
-                handles.bwContour = imclose(handles.bwContour,true(handles.morphologicalRadius));
-            elseif strcmp(handles.morphologicalImageMask,'Image') == 1
-                handles.img = imclose(handles.img,true(handles.morphologicalRadius));
+
+            % Perform the operation in either 3D or 2D slice by slice
+            switch handles.morphological2D3D
+                case '2D'
+                    [~, ~, c] = size(handles.(field));
+                    for i = 1:c
+                        handles.(field)(:,:,i) = fh(handles.(field)(:,:,i), se);
+                    end
+                case '3D'
+                    handles.(field) = fh(handles.(field), se);
             end
-        end
-    elseif strcmp(handles.morphologicalOperation,'Open') == 1
-        if strcmp(handles.morphological2D3D,'2D') == 1
-            if strcmp(handles.morphologicalImageMask,'Mask') == 1
-                [a b c] = size(handles.bwContour);
-                for i = 1:c
-                    handles.bwContour(:,:,i) = imopen(handles.bwContour(:,:,i),strel('disk',handles.morphologicalRadius,0));
-                end
-            elseif strcmp(handles.morphologicalImageMask,'Image') == 1
-                [a b c] = size(handles.img);
-                for i = 1:c
-                    handles.img(:,:,i) = imopen(handles.img(:,:,i),strel('disk',handles.morphologicalRadius,0));
-                end
-            end
-        elseif strcmp(handles.morphological2D3D,'3D') == 1
-            if strcmp(handles.morphologicalImageMask,'Mask') == 1
-                handles.bwContour = imopen(handles.bwContour,true(handles.morphologicalRadius));
-            elseif strcmp(handles.morphologicalImageMask,'Image') == 1
-                handles.img = imopen(handles.img,true(handles.morphologicalRadius));
+
+            guidata(hObject, handles);
+            %handles = updateContour(handles);
+            updateImage(hObject, eventdata, handles);
+        else
+            % If the field does not exist, give an error message
+            switch handles.morphologicalImageMask
+            case 'Mask'
+                noMaskError();
+            case 'Image'
+                noImgError();
             end
         end
-    elseif strcmp(handles.morphologicalOperation,'Erode') == 1
-        if strcmp(handles.morphological2D3D,'2D') == 1
-            if strcmp(handles.morphologicalImageMask,'Mask') == 1
-                [a b c] = size(handles.bwContour);
-                for i = 1:c
-                    handles.bwContour(:,:,i) = imerode(handles.bwContour(:,:,i),strel('disk',handles.morphologicalRadius,0));
-                end
-            elseif strcmp(handles.morphologicalImageMask,'Image') == 1
-                [a b c] = size(handles.img);
-                for i = 1:c
-                    handles.img(:,:,i) = imerode(handles.img(:,:,i),strel('disk',handles.morphologicalRadius,0));
-                end
-            end
-        elseif strcmp(handles.morphological2D3D,'3D') == 1
-            if strcmp(handles.morphologicalImageMask,'Mask') == 1
-                handles.bwContour = imerode(handles.bwContour,true(handles.morphologicalRadius));
-            elseif strcmp(handles.morphologicalImageMask,'Image') == 1
-                handles.img = imerode(handles.img,true(handles.morphologicalRadius));
-            end
-        end
-    elseif strcmp(handles.morphologicalOperation,'Dilate') == 1
-        if strcmp(handles.morphological2D3D,'2D') == 1
-            if strcmp(handles.morphologicalImageMask,'Mask') == 1
-                [a b c] = size(handles.bwContour);
-                for i = 1:c
-                    handles.bwContour(:,:,i) = imdilate(handles.bwContour(:,:,i),strel('disk',handles.morphologicalRadius,0));
-                end
-            elseif strcmp(handles.morphologicalImageMask,'Image') == 1
-                [a b c] = size(handles.img);
-                for i = 1:c
-                    handles.img(:,:,i) = imdilate(handles.img(:,:,i),strel('disk',handles.morphologicalRadius,0));
-                end
-            end
-        elseif strcmp(handles.morphological2D3D,'3D') == 1
-            if strcmp(handles.morphologicalImageMask,'Mask') == 1
-                handles.bwContour = imdilate(handles.bwContour,true(handles.morphologicalRadius));
-            elseif strcmp(handles.morphologicalImageMask,'Image') == 1
-                handles.img = imdilate(handles.img,true(handles.morphologicalRadius));
-            end
-        end
-    elseif strcmp(handles.morphologicalOperation,'Fill') == 1
-        if strcmp(handles.morphological2D3D,'2D') == 1
-            if strcmp(handles.morphologicalImageMask,'Mask') == 1
-                [a b c] = size(handles.bwContour);
-                for i = 1:c
-                    handles.bwContour(:,:,i) = imfill(handles.bwContour(:,:,i),'holes');
-                end
-            elseif strcmp(handles.morphologicalImageMask,'Image') == 1
-                [a b c] = size(handles.img);
-                for i = 1:c
-                    handles.img(:,:,i) = imfill(handles.img(:,:,i),'holes');
-                end
-            end
-        elseif strcmp(handles.morphological2D3D,'3D') == 1
-            if strcmp(handles.morphologicalImageMask,'Mask') == 1
-                handles.bwContour = imfill(handles.bwContour,'holes');
-            elseif strcmp(handles.morphologicalImageMask,'Image') == 1
-                handles.img = imfill(handles.img,'holes');
-            end
-        end
+        setStatus(hObject, handles, 'Not Busy');
+    catch err
+        setStatus(hObject, handles, 'Failed');
+        reportError(err);
     end
-    
-    guidata(hObject, handles);
-    UpdateImage(hObject, eventdata, handles);
-    setStatus(hObject, handles, 'Not Busy');
-catch err
-    setStatus(hObject, handles, 'Failed');
-    reportError(err);
-end

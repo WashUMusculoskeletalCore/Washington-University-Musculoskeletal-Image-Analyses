@@ -1,36 +1,25 @@
+% NAME-SaveWorkspace
+% DESC-Saves all nongraphics handles fields to a file
+% IN-handles.pathstr: the filepath to save to
+% handles: all nongraphics fields will be saved
+% OUT-Workspace.mat: a file containing all saved fields 
 function [hObject,eventdata,handles] = SaveWorkspace(hObject,eventdata,handles)
-
-try
-    setStatus(hObject, handles, 'Busy');
-    fieldNames = fieldnames(handles);
-    fieldNum = numel(fieldnames(handles));
-    matPath = fullfile(handles.pathstr,'Workspace.mat');
-    delete(matPath);
-    ct=0;
-    % TODO-Make 134 a constant
-    for i = 134:fieldNum
-        % Skip these 3 fields
-        if strcmpi(fieldNames{i},'sliderIMG') == 1
-        elseif strcmpi(fieldNames{i},'axesIMG') == 1
-        elseif strcmpi(fieldNames{i},'output') == 1
-        else
-            displayPercentLoaded(hObject, handles, ct/(fieldNum-135));
-            % Get value from handles
-            eval([fieldNames{i} ' = handles.' fieldNames{i} ';']);
-            % Save first field as a new file, append all other fields to
-            % the file
-            if ct == 0
-                save(fullfile(handles.pathstr,'Workspace.mat'),fieldNames{i},'-v7.3','-nocompression');
-                ct=ct+1;
-            else
-                save(fullfile(handles.pathstr,'Workspace.mat'),fieldNames{i},'-append','-nocompression');
-                ct=ct+1;
+    try
+        setStatus(hObject, handles, 'Busy');
+        fieldNames = fieldnames(handles);
+        fieldNum = numel(fieldnames(handles));
+        % Add all non-graphic fields to savedHandles
+        for i = 1:fieldNum
+            if ~any(isgraphics(handles.(fieldNames{i}))) | any(handles.(fieldNames{i}) == 0) %#ok<OR2> % 0 is considered a graphics object by isgraphics
+                savedHandles.(fieldNames{i}) = handles.(fieldNames{i});
             end
+            displayPercentLoaded(hObject, handles, i/fieldNum);
         end
+        % Save all fields in savedHandles to Workspace.mat
+        save(fullfile(handles.pathstr,'Workspace.mat'), '-struct', 'savedHandles', '-v7.3','-nocompression');
+        displayPercentLoaded(hObject, handles, 1);
+        setStatus(hObject, handles, 'Not Busy');
+    catch err
+        setStatus(hObject, handles, 'Failed');
+        reportError(err);
     end
-    displayPercentLoaded(hObject, handles, 1);
-    setStatus(hObject, handles, 'Not Busy');
-catch err
-    setStatus(hObject, handles, 'Failed');
-    reportError(err);
-end

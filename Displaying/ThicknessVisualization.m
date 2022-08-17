@@ -1,116 +1,67 @@
-function ThicknessVisualization(hObject,eventdata,handles)
-
-try
-	setStatus(hObject, handles, 'Busy');
-    bw = handles.bwContour;
-    % Create distance map
-    D1 = bwdist(~bw);%does what I want for thickness of spacing
-    % Find local maximums
-    bwUlt = bwulterode(bw);
-    % Limit distance map to local maximums
-    D1(~bwUlt) = 0;
-    % Find maximum radius in distance map 
-    maxRad = ceil(max(max(max(double(D1)))));
-    % Pad the array so all dimensions are at least maxRad
-    %                                               
-    D1 = padarray(D1,[ceil(maxRad)+1 ceil(maxRad)+1 ceil(maxRad)+1]);
-
-    [aa bb cc] = size(D1);
-    [a b c] = size(bw);
-    % Get the number of lm
-    initLen = length(find(D1));
-    % Get the location of each lm
-    [x y z] = ind2sub(size(D1),find(D1));
-    % Reshape D1 into a 1d array
-    D1Reshaped = reshape(D1,[aa*bb*cc,1]);
-    % Sort the reshaped array
-    [D1Sorted I]= sort(D1Reshaped,'descend');
-    % Remove all zeros
-    [D1Sorted] = find(D1Sorted);
-    % Get the location of each lm in sorted order
-    [x2 y2 z2] = ind2sub(size(D1),I(1:length(D1Sorted)));
-
-    tic
-    for i = 1:length(x2)
-        if mod(i,500) == 0
-    %         clc
-            % Update loading percentage
-            displayPercentLoaded(hObject, handles, i/initLen);
+% NAME-ThicknessVisualization
+% DESC-Creates a 3D visualization showing the thickness of different parts
+% of the mask
+% IN-handles.bwContour: the 3D mask
+% OUT-Creates a 3D image showing the relative thickness of each section
+% of the mask
+% TODO-look into this deeper for potential optimization
+function ThicknessVisualization(hObject, handles)
+    try
+        setStatus(hObject, handles, 'Busy');
+        bw = handles.bwContour;
+        % Create distance map
+        D1 = bwdist(~bw);% does what I want for thickness of spacing
+        % Find local maximums
+        bwUlt = bwulterode(bw);
+        % Limit distance map to local maximums
+        D1(~bwUlt) = 0;
+        D1 = findSpheres(hObject, handles, D1);
+        % Get a 21x21x3 set of points that form the surface of a sphere with radius 1
+        [x, y, z] = sphere;
+        [x2, y2, z2] = ind2sub(size(D1),find(D1));
+        % Get the all nonzero values in D1 
+        rads = nonzeros(D1);
+        shp = shpFromBW(bw,3);
+        % Create the visualization
+        figure;
+        plot(shp,'FaceColor','w','LineStyle','none');
+        alpha(gca,0.4);
+        camlight;
+        hold on;
+        % Find the range of all radii and convert it to a scale of 256
+        % values
+        rangeRads = max(rads) - min(rads);
+        binRads = rangeRads / 256;
+        if rangeRads == 0
+            bin(1) = 0;
+            bin(2) = max(rads);
+            trans = [1 1];
+        else
+            bin=zeros(1, 255);
+            trans=zeros(1, 255);
+            for i = 1:255
+                bin(i) = binRads * i;
+                trans(i) = i/255;
+            end
         end
-        if D1(x2(i),y2(i),z2(i)) > 0
-
-            radToTest = D1(x2(i),y2(i),z2(i));
-
-            bw3 = false(size(D1));
-            bw3(x2(i),y2(i),z2(i)) = 1;
-            bw3 = imdilate(bw3,true([2*ceil(maxRad)+1,2*ceil(maxRad)+1,2*ceil(maxRad)+1]));
-            [a1 b1 c1] = ind2sub(size(bw3),find(bw3));
-
-            radsTesting = D1(bw3);
-
-            ds = sqrt((a1-x2(i)).^2 + (b1-y2(i)).^2 + (c1-z2(i)).^2);%location of cube - location of radius
-            rirj = radToTest + radsTesting;
-
-            inds = rirj >= ds;% find spheres that intersect
-            [thisMax I] = max(radsTesting(inds));
-            inds = [a1(inds),b1(inds),c1(inds)];
-            if radToTest >= thisMax
-                inds2 = inds == [x2(i),y2(i),z2(i)];
-                for j = 1:length(inds2)
-                    if inds2(j,1) == 1 && inds2(j,2) == 1 && inds2(j,3) == 1
-                        inds(j,:) = [];
-                    end
+        if length(bin) > 256
+            map = colormap(jet(256));
+        else
+            map = colormap(jet(length(bin)));
+        end
+        for i = 1:length(find(D1))
+            for j = 2:length(bin)
+                if rads(i)-min(rads) > bin(j-1) && rads(i)-min(rads) <= bin(j)
+                    surf(x*rads(i)+x2(i), y*rads(i)+y2(i), z*rads(i)+z2(i),'FaceColor',map(j-1,:),'FaceAlpha',trans(j),'LineStyle','none');
+                    axis tight;
+                    drawnow();
                 end
-            else
-                inds(I,:) = [];
-            end
-            for j = 1:length(inds)
-                D1(inds(j,1),inds(j,2),inds(j,3)) = 0;
             end
         end
-
+        saveas(gcf,fullfile(handles.pathstr,[get(handles.editDICOMPrefix,'String') '.fig']));
+        guidata(hObject, handles);
+        setStatus(hObject, handles, 'Not Busy');
+    catch err
+            setStatus(hObject, handles, 'Failed');
+            reportError(err);
     end
-    toc 
-
-    shp = shpFromBW(bw,3);
-    figure;
-    plot(shp,'FaceColor','w','LineStyle','none');
-    alpha(gca,0.4);
-    camlight;
-    hold on;
-    [x y z] = sphere;
-    [x2 y2 z2] = ind2sub(size(D1),find(D1));
-    rads = D1(find(D1));
-    rangeRads = max(rads) - min(rads);
-    binRads = rangeRads / 256;
-    if rangeRads == 0
-        bin(1) = 0;
-        bin(2) = max(rads);
-        trans = [1 1];
-    else
-        for i = 1:255
-            bin(i) = binRads * i;
-            trans(i) = i/255;
-        end
-    end
-    if length(bin) > 256
-        map = colormap(jet(256));
-    else
-        map = colormap(jet(length(bin)));
-    end
-    for i = 1:length(find(D1))
-        for j = 2:length(bin)
-            if rads(i) > bin(j-1) && rads(i) <= bin(j)
-                surf(x*rads(i)+x2(i)-maxRad,y*rads(i)+y2(i)-maxRad,z*rads(i)+z2(i)-maxRad,'FaceColor',map(j-1,:),'FaceAlpha',trans(j),'LineStyle','none');
-                axis tight;
-                drawnow();
-            end
-        end
-    end
-    saveas(gcf,fullfile(handles.pathstr,[get(handles.editDICOMPrefix,'String') '.fig']));
-    guidata(hObject, handles);
-    setStatus(hObject, handles, 'Not Busy');
-catch err
-    	setStatus(hObject, handles, 'Failed');
-        reportError(err);
-end

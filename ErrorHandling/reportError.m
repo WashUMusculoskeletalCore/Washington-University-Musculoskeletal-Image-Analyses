@@ -5,6 +5,8 @@
 % OUT-IO:Writes to console
 function reportError(err)
     disp(err.message);
-    disp(err.stack(1));
+    for i = 1:length(err.stack)
+        disp(err.stack(i));
+    end
 end
 

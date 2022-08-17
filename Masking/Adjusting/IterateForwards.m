@@ -15,7 +15,7 @@
 % TODO- merge with IterateBackwards 
 function [hObject, eventdata, handles] = IterateForwards(hObject, eventdata, handles)
 
-if length(find(handles.bwContour(:,:,handles.slice))) ~= 0
+if ~isempty(find(handles.bwContour(:,:,handles.slice), 1))
     handles.startStop = get(handles.togglebuttonIterateForwards,'Value');
     while handles.startStop == 1 && handles.slice < handles.abc(3)
         drawnow();
@@ -29,7 +29,7 @@ if length(find(handles.bwContour(:,:,handles.slice))) ~= 0
             handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
         handles.slice = handles.slice+1;
         guidata(hObject,handles);
-        UpdateImage(hObject, eventdata, handles);
+        updateImage(hObject, eventdata, handles);
         set(handles.sliderIMG,'Value',handles.slice);
         set(handles.editSliceNumber,'String',num2str(handles.slice));
         drawnow();
@@ -39,7 +39,7 @@ if length(find(handles.bwContour(:,:,handles.slice))) ~= 0
         handles.bwContour(:,:,end) = activecontour(handles.img(:,:,handles.slice),handles.bwContour(:,:,handles.slice-1),...
             handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
         guidata(hObject,handles);
-        UpdateImage(hObject, eventdata, handles);
+        updateImage(hObject, eventdata, handles);
         set(handles.sliderIMG,'Value',handles.slice);
         set(handles.editSliceNumber,'String',num2str(handles.slice));
         drawnow();

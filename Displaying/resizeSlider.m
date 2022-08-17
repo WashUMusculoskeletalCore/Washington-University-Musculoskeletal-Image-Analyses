@@ -28,8 +28,15 @@ function slider = resizeSlider(varargin)
     else
          error('Incorrect number of arguments for resizeSlider')
     end
-    set(slider,'Value', min);
+    if max < min
+        max = min;
+    end
     set(slider,'min', min);
     set(slider,'max', max);
-    set(slider,'SliderStep',[button_step, trough_step]/(max-min));
+    if(max == min) % Check to prevent division by 0
+        set(slider,'SliderStep', [0, 0]);
+    else
+        set(slider,'SliderStep',[button_step, trough_step]/(max-min));
+    end
+    set(slider,'Value', min);
 end

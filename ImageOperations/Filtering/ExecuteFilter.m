@@ -5,40 +5,36 @@
 % handles,radius: the radius to use for the filters
 % OUT-handles.img: the filtered image
 function [hObject,eventdata,handles] = ExecuteFilter(hObject,eventdata,handles)
-
-try
-    setStatus(hObject, handles, 'Busy');
-    % Get the filter from the popup menu
-    str = get(handles.popupmenuFilter,'String');
-    val = get(handles.popupmenuFilter,'Value');
-    % Apply the filter to the image
-    switch str{val}
-        case '3D Median'
-            handles.img = uint16(smooth3(handles.img, 'box', [handles.radius handles.radius handles.radius]));
-        case '3D Gaussian'
-            handles.img = imgaussfilt3(handles.img, handles.sigma, 'FilterSize', handles.radius);
-        case '2D Median'
-            for i = 1:handles.abc(3)
-                handles.img(:,:,i) = medfilt2(handles.img(:,:,i),[handles.radius handles.radius]);
+    try
+        setStatus(hObject, handles, 'Busy');
+        if isfield(handles, 'img')
+            % Apply the filter to the image
+            switch handles.filter
+                case '3D Median'
+                    handles.img = uint16(smooth3(handles.img, 'box', [handles.radius handles.radius handles.radius]));
+                case '3D Gaussian'
+                    handles.img = imgaussfilt3(handles.img, handles.sigma, 'FilterSize', handles.radius);
+                case '2D Median'
+                    for i = 1:handles.abc(3)
+                        handles.img(:,:,i) = medfilt2(handles.img(:,:,i),[handles.radius handles.radius]);
+                    end
+                case '2D Gaussian'
+                    handles.img = imgaussfilt(handles.img, handles.sigma, 'FilterSize', handles.radius);
+                case '2D Mean'
+                    h = fspecial('average', handles.radius);
+                    handles.img = imfilter(handles.img,h);
+                case 'Local Standard Deviation'
+                    handles.img = stdfilt(handles.img,true([handles.radius handles.radius handles.radius]));
+                case 'Range'
+                    handles.img = rangefilt(handles.img,true([handles.radius handles.radius handles.radius]));
+                case 'Entropy'
+                    handles.img = entropyfilt(handles.img,true([handles.radius handles.radius handles.radius]));
             end
-        case '2D Gaussian'
-            handles.img = imgaussfilt(handles.img, handles.sigma, 'FilterSize', handles.radius);
-        case '2D Mean'
-            h = fspecial('average', handles.radius);
-            handles.img = imfilter(handles.img,h);
-        case 'Local Standard Deviation'
-            handles.img = stdfilt(handles.img,true([handles.radius handles.radius handles.radius]));
-        case 'Range'
-            handles.img = rangefilt(handles.img,true([handles.radius handles.radius handles.radius]));
-        case 'Entropy'
-            handles.img = entropyfilt(handles.img,true([handles.radius handles.radius handles.radius]));
-            
-            
+            guidata(hObject, handles);
+            updateImage(hObject, eventdata, handles);
+        end
+        setStatus(hObject, handles, 'Not Busy');
+    catch err
+        setStatus(hObject, handles, 'Failed');
+        reportError(err);
     end
-    guidata(hObject, handles);
-    UpdateImage(hObject, eventdata, handles);
-    setStatus(hObject, handles, 'Not Busy');
-catch err
-    setStatus(hObject, handles, 'Failed');
-    reportError(err);
-end
