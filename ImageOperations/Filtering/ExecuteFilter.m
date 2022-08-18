@@ -30,7 +30,6 @@ function [hObject,eventdata,handles] = ExecuteFilter(hObject,eventdata,handles)
                 case 'Entropy'
                     handles.img = entropyfilt(handles.img,true([handles.radius handles.radius handles.radius]));
             end
-            guidata(hObject, handles);
             updateImage(hObject, eventdata, handles);
         end
         setStatus(hObject, handles, 'Not Busy');

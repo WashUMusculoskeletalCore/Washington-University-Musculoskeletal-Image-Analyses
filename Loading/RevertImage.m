@@ -16,12 +16,12 @@ function [hObject,eventdata,handles] = RevertImage(hObject,eventdata,handles)
             if isfield(handles, 'bwContour') == 1
                 handles.bwContour = [];
                 handles = rmfield(handles,'bwContour');
+                handles = updateContour(handles);
             end
         end
         % handles.bwContour = false(size(handles.img));
         % handles.bwContourOrig = handles.bwContour;
 
-        guidata(hObject, handles);
         updateImage(hObject, eventdata, handles);
         setStatus(hObject, handles, 'Not Busy');
     catch err

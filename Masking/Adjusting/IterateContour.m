@@ -63,10 +63,9 @@ function handles = IterateContour(hObject, handles)
                 set(handles.sliderIMG,'Value',handles.slice);
                 set(handles.editSliceNumber,'String',num2str(handles.slice));
                 hObject.Value=0;
-                drawnow();
-
-                guidata(hObject, handles);
             end
+            handles = updateContour(handles);
+            guidata(hObject, handles);
         end
     else
         noMaskError();

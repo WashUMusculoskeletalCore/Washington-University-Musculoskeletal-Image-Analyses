@@ -139,12 +139,10 @@ function [hObject,eventdata,handles] = LoadWorkspace(hObject,eventdata,handles)
         end
         % Clear the image and mask from the axes
         cla(handles.axesIMG);
-        updateImage(hObject,eventdata,handles);
 
         set(gcf,'menubar','none');
         set(gcf,'toolbar','none');
 
-        guidata(hObject, handles);
         updateImage(hObject,eventdata,handles);
         setStatus(hObject, handles, 'Not Busy');
     catch err

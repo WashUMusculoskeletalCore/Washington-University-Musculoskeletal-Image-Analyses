@@ -53,9 +53,9 @@ function [hObject,eventdata,handles] = ExecuteMorphologicalOperation(hObject,eve
                 case '3D'
                     handles.(field) = fh(handles.(field), se);
             end
-
-            guidata(hObject, handles);
-            %handles = updateContour(handles);
+            if strcmp(field, 'bwContour')
+                handles = updateContour(handles);
+            end         
             updateImage(hObject, eventdata, handles);
         else
             % If the field does not exist, give an error message

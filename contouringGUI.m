@@ -257,7 +257,7 @@ function pushbuttonClearMaskRange_Callback(hObject, eventdata, handles)
         startRange=max([handles.startMorph, 1]);
         endRange=min([handles.endMorph, size(handles.bwContour, 3)]);
         handles.bwContour(:,:,startRange:endRange) = false(size(handles.bwContour(:,:,startRange:endRange)));
-        guidata(hObject, handles);
+        handles = updateContour(handles);
         updateImage(hObject, eventdata, handles);
     end
 
@@ -267,7 +267,7 @@ function pushbuttonClearMaskRange_Callback(hObject, eventdata, handles)
 function pushbuttonClearAllMasks_Callback(hObject, eventdata, handles)
     if isfield(handles,'bwContour')
         handles = rmfield(handles,'bwContour');
-        guidata(hObject, handles);
+        handles = updateContour(handles);
         updateImage(hObject, eventdata, handles);
     end
         
@@ -415,12 +415,10 @@ function pushbuttonSetMaskThreshold_Callback(hObject, eventdata, handles)
     if isfield(handles, 'img')
         handles.bwContour = handles.img > handles.lowerThreshold;
         handles.bwContour(handles.img > handles.upperThreshold) = 0;
-        handles.toggleMask = true;
-        set(handles.togglebuttonToggleMask,'Value',1);
+        handles = updateContour(handles);
     else
         noImgError();
     end
-    guidata(hObject, handles);
     updateImage(hObject, eventdata, handles);
 
 % NAME-pushbuttonRemoveSpeckleNoiseFromMask_Callback
@@ -433,7 +431,7 @@ function pushbuttonRemoveSpeckleNoiseFromMask_Callback(hObject, eventdata, handl
         if isfield(handles, 'bwContour')
             % Remove all areas smaller than speckleSize from BWContour
             handles.bwContour = bwareaopen(handles.bwContour,handles.speckleSize);
-            % handles = updateContour(handles);
+            handles = updateContour(handles);
             superimpose(handles, handles.bwContour(:,:,handles.slice));
             guidata(hObject, handles);
         else
@@ -465,7 +463,7 @@ function pushbuttonScaleImageSize_Callback(hObject, eventdata, handles)
             if isfield(handles,'bwContour')
                 % imresize3 doesn't handles logical arrays, so convert to int
                 handles.bwContour = logical(imresize3(int8(handles.bwContour),handles.imgScale));
-                % handles=updateContour(handles);
+                handles=updateContour(handles);
             end
             % Set abc to new size
             [hObject, handles] = abcResize(hObject, handles);
@@ -474,7 +472,6 @@ function pushbuttonScaleImageSize_Callback(hObject, eventdata, handles)
             % Rescale the voxel size
             handles.info.SliceThickness = handles.info.SliceThickness / handles.imgScale;
             set(handles.textVoxelSize,'String',num2str(handles.info.SliceThickness));
-            guidata(hObject, handles);
             updateImage(hObject, eventdata, handles);
         else
             noImgError();
@@ -493,7 +490,6 @@ function pushbuttonIsolateObjectOfInterest_Callback(hObject, eventdata, handles)
     % Remove everything not in mask from image
     if isfield(handles, 'bwContour')
         handles.img(~handles.bwContour) = 0;
-        guidata(hObject, handles);
         updateImage(hObject, eventdata, handles);
     else
         noMaskError();
@@ -519,11 +515,10 @@ function pushbuttonCropImageToMask_Callback(hObject, eventdata, handles)
         % Crop out everything outside of that range 
         handles.img = handles.img(xMin:xMax,yMin:yMax,zMin:zMax);
         handles.bwContour = handles.bwContour(xMin:xMax,yMin:yMax,zMin:zMax);
-        set(handles.pushbuttonSetMaskToComponent, 'Enable', 'off');
+        handles = updateContour(handles);
         % Set abc to new size 
         [hObject, handles] = abcResize(hObject, handles);
 
-        guidata(hObject, handles);
         updateImage(hObject, eventdata, handles);
     else
         noMaskError();
@@ -532,21 +527,31 @@ function pushbuttonCropImageToMask_Callback(hObject, eventdata, handles)
 % NAME-pushbuttonSetMaskToComponent_Callback
 % DESC-Executes on button press, select one mask component and remove all
 % others
-% IN-handles.maskComponent: the component selected by dropdown menu
+% IN-UI: the component selected by dropdown menu
 % OUT-handles.bwContour-the 3D mask, reduced to one component
-% TODO-Add more to ensure this is only called after populating
 function pushbuttonSetMaskToComponent_Callback(hObject, eventdata, handles)
-    try
+    try        
         setStatus(hObject, handles, 'Busy');
-        if handles.maskComponent == 0
-            errorMsg('Mask Component not selected');
-        else
-            % Gets an object from the list of mask components based on the
-            % number (Ordered by size descending)
-            handles.bwContour = bwIndex(handles.bwContour, handles.maskComponent);
-            set(handles.pushbuttonSetMaskToComponent, 'Enable', 'off');
-            guidata(hObject, handles);
+        if isfield(handles, 'bwContour')
+            % Get a sorted list of components by size descending
+            cc = bwconncomp(handles.bwContour);
+            numObj = cc.NumObjects;
+            numPixels = cellfun(@numel,cc.PixelIdxList);
+            [~, I] = sort(numPixels,'descend');
+            % Ask the user to select a component
+            index = 0;
+            while isnan(index) || index <= 0 || index ~= floor(index) 
+                answer = inputdlg(['Select a component 1-' num2str(numObj)]);
+                index = str2double(answer{1});
+            end
+            % Remove all components except the selected one
+            bw = false(size(handles.bwContour));
+            bw(cc.PixelIdxList{(I(index))}) = 1;
+            handles.bwContour = bw;
+            handles = updateContour(handles);
             updateImage(hObject, eventdata, handles);
+        else
+            noMaskError();
         end
         setStatus(hObject, handles, 'Not Busy');
     catch err
@@ -563,7 +568,6 @@ function pushbuttonSetMaskToComponent_Callback(hObject, eventdata, handles)
 function togglebuttonInvertImage_Callback(hObject, eventdata, handles)
     if isfield(handles, 'img')
         handles.img = (2^handles.info.BitDepth)-1 - handles.img;
-        guidata(hObject, handles);
         updateImage(hObject, eventdata, handles);
     else
         noImgError();
@@ -633,11 +637,10 @@ function pushbuttonRotateImage_Callback(hObject, eventdata, handles)
                 for i = 1:handles.abc(3)
                     handles.bwContour(:,:,i) = tmp2{i};
                 end
+                handles = updateContour(handles);
             end
             %set to update graphics stuff
             [hObject, handles] = abcResize(hObject, handles);
-
-            guidata(hObject, handles);
             updateImage(hObject, eventdata, handles);
         else
             noImgError();
@@ -659,9 +662,8 @@ function pushbuttonFlipImage_Callback(hObject, eventdata, handles)
         handles.img = flip(handles.img,handles.rotateAxis);
         if isfield(handles,'bwContour')
             handles.bwContour = flip(handles.bwContour,handles.rotateAxis);
-            % handles = updateContour(handles);
+            handles = updateContour(handles);
         end
-        guidata(hObject, handles);
         updateImage(hObject, eventdata, handles);
     else
         noImgError();
@@ -682,44 +684,7 @@ function popupmenuRotationAxis_Callback(hObject, eventdata, handles)
             handles.rotateAxis = 3;
     end
     guidata(hObject, handles);
-
-% NAME-popupmenuMaskComponents_Callback
-% DESC-Executes on selection change, selects which mask component to
-% isolate
-% IN-handles.popupMenuMaskComponents: The mask component popup menu
-% OUT-handles.mask component: The selected mask component
-function popupmenuMaskComponents_Callback(hObject, eventdata, handles)
-    num=str2double(getPopupSelection(handles.popupmenuMaskComponents));
-    % Ensure selection is a number, default to 0;
-    if isnan(num) 
-        handles.maskComponent = 0;
-    else
-        handles.maskComponent = num;
-    end
-    guidata(hObject, handles);
    
-% NAME-pushbuttonPopulateMaskComponents_Callback    
-% DESC-Executes on button press, identifies all components of the mask and
-% fills the dropdown menu
-% IN-handles.bwContour: the 3D mask
-% OUT-handles.cc: all the components of the mask
-% handles.popupMaskComponents: the list of components in the popup menu
-function pushbuttonPopulateMaskComponents_Callback(hObject, eventdata, handles)
-    try
-        setStatus(hObject, handles, 'Busy');
-        %Identifies all connected components of mask
-        handles.cc = bwconncomp(handles.bwContour);
-        %Create a list of all components in string format
-        connCompInd=compose('%u', 1:length(handles.cc.PixelIdxList));
-        set(handles.popupmenuMaskComponents, 'Value', 1); % Set the default component to the largest, ensures the value is in range
-        set(handles.popupmenuMaskComponents, 'String',connCompInd); % Sets the list of components
-        set(handles.pushbuttonSetMaskToComponent, 'Enable', 'on');
-        setStatus(hObject, handles, 'Not Busy');
-    catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
-    end
-
 % NAME-pushbuttonSetMaskByClicking    
 % DESC-Executes on button press, allows user to select which mask
 % components to keep by clicking on them
@@ -747,8 +712,8 @@ function pushbuttonSetMaskByClicking_Callback(hObject, eventdata, handles)
                     handles.bwContour(cc==label)=1;
                 end
             end
-            %set(handles.pushbuttonSetMaskToComponent, 'Enable', 'off');
-        updateImage(hObject,eventdata,handles);
+            handles = updateContour(handles);
+            updateImage(hObject,eventdata,handles);
         else
             noMaskError();
         end
@@ -807,7 +772,7 @@ function pushbuttonMorphAll_Callback(hObject, eventdata, handles)
                     %bwTemp = flip(bwTemp,3);
                     handles.bwContour(:,:,start+1:stop-1) = bwTemp;
                 end
-                guidata(hObject, handles);
+                handles = updateContour(handles);
                 updateImage(hObject, eventdata, handles);
             end
         else
@@ -859,6 +824,7 @@ function pushbuttonCreatePrimitive_Callback(hObject, eventdata, handles)
                 % Create the mask if it doesn't exist
                 if ~isfield(handles,'bwContour')
                     handles.bwContour = false(handles.abc);
+                    handles = updateContour(handles);
                 end
                 tmp = false(size(handles.bwContour(:,:,handles.slice)));
                     
@@ -880,7 +846,6 @@ function pushbuttonCreatePrimitive_Callback(hObject, eventdata, handles)
                 end
                 % Retain all plots on current axis
                 hold on;
-                % TODO-Find DrawRectangle and inpoly source
                 % TODO-This might need rework to be less dependant on those functions,
                 % could reuse ellipse code
                 [P,R] = DrawRectangle([handles.primitiveHorizontal,handles.primitiveVertical,...
@@ -908,10 +873,8 @@ function pushbuttonCreatePrimitive_Callback(hObject, eventdata, handles)
                 handles.bwContour(:,:,handles.slice) = tmp;
                 hold off;
         end
-        %handles=updateContour(handles);
-        handles.toggleMask = true;
+        handles=updateContour(handles);
         updateImage(hObject, eventdata, handles);
-        guidata(hObject, handles);
     else
         noImgError();
     end
@@ -965,9 +928,9 @@ function pushbuttonZoomtoRegion_Callback(hObject, eventdata, handles)
             handles.img = handles.img(round(rect(2)):round(rect(2))+round(rect(4))-1,round(rect(1)):round(rect(1))+round(rect(3))-1,:);
             if isfield(handles,'bwContour')
                 handles.bwContour = handles.bwContour(round(rect(2)):round(rect(2))+round(rect(4))-1,round(rect(1)):round(rect(1))+round(rect(3))-1,:);
-                set(handles.pushbuttonSetMaskToComponent, 'Enable', 'off');
+                handles = updateContour(handles);
             end
-            %update info as well
+            % Update info as well
 
             handles.info.Height = handles.abc(1);
             handles.info.Width = handles.abc(2);
@@ -976,9 +939,6 @@ function pushbuttonZoomtoRegion_Callback(hObject, eventdata, handles)
 
             [hObject, handles] = abcResize(hObject, handles);
 
-            hold off;
-
-            guidata(hObject, handles);
             updateImage(hObject, eventdata, handles);
         else
             noImgError();
@@ -1002,13 +962,13 @@ function pushbuttonRotate90_Callback(hObject, eventdata, handles)
             handles.img = rot90_3D(handles.img, handles.rotateAxis, 1);
             if isfield(handles,'bwContour')
                 handles.bwContour = rot90_3D(handles.bwContour, handles.rotateAxis, 1);
+                handles = updateContour(handles);
             end
             [hObject, handles] = abcResize(hObject, handles);
 
             handles.theMax = double(max(max(max(handles.img))));
             handles.SliderThreshold = resizeSlider(handles.sliderThreshold, 1, handles.theMax, 1, round(handles.theMax/1000));
 
-            guidata(hObject, handles);
             updateImage(hObject, eventdata, handles);
         else
             noImgError();
@@ -1050,7 +1010,6 @@ function pushbuttonSetUpperThreshold_Callback(hObject, eventdata, handles)
 function togglebuttonToggleMask_Callback(hObject, eventdata, handles)
     handles.toggleMask = get(handles.togglebuttonToggleMask,'Value') == 1;
     updateImage(hObject, eventdata, handles);
-    guidata(hObject, handles);
 
 % NAME-pushbuttonLoadTXMFile_Callback
 % DESC-Executes on button press in pushbuttonLoadTXMFile.
@@ -1101,8 +1060,7 @@ function pushbuttonSetLastSlice_Callback(hObject, eventdata, handles)
 % OUT-handles.bwContour: the inverted mask
 function pushbuttonInvertMask_Callback(hObject, eventdata, handles)
     handles.bwContour = ~handles.bwContour;
-    set(handles.pushbuttonSetMaskToComponent, 'Enable', 'off');
-    guidata(hObject, handles);
+    handles = updateContour(handles);
     updateImage(hObject, eventdata, handles);
 
 % NAME-pushbuttonCopyMask_Callback
@@ -1128,8 +1086,7 @@ function pushbuttonPasteMask_Callback(hObject, eventdata, handles)
     tmp(handles.maskCopy) = 1;
     % Replace mask at current slice with temp mask
     handles.bwContour(:,:,handles.slice) = tmp;
-
-    guidata(hObject, handles);
+    handles = updateContour(handles);
     updateImage(hObject, eventdata, handles);
 
 % NAME-pushbuttonStoreMask_Callback
@@ -1154,7 +1111,6 @@ function pushbuttonStoreMask_Callback(hObject, eventdata, handles)
 % image, default is grey (black to white greyscale)
 function pushbuttonSetColorMap_Callback(hObject, eventdata, handles)
     handles.colormap = getPopupSelection(handles.popupmenuSetColorMap);
-    guidata(hObject, handles);
     updateImage(hObject, eventdata, handles);
 
 % NAME-popupmenuSetColorMap_Callback

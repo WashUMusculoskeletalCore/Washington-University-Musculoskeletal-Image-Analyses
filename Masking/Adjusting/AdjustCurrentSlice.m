@@ -23,7 +23,7 @@ try
             handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
         % Set mask to new mask
         handles.bwContour(:,:,handles.slice) = bw;
-        guidata(hObject, handles);
+        handles = updateContour(handles);
         updateImage(hObject,eventdata,handles);
     end
     setStatus(hObject, handles, 'Not Busy');

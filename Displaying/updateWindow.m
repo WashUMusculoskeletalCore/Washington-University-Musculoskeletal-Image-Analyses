@@ -17,7 +17,6 @@ function [hObject,eventdata,handles] = updateWindow(hObject, eventdata, handles)
         if handles.hOut > 1
             handles.hOut = 1;
         end
-        guidata(hObject, handles);
         updateImage(hObject, eventdata, handles);
     end
 end

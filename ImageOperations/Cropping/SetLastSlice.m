@@ -6,11 +6,10 @@
 function [hObject, eventdata, handles] = SetLastSlice(hObject, eventdata, handles)
     if isfield(handles, 'img')
         handles.img = handles.img(:,:,1:handles.slice);
-
         if isfield(handles,'bwContour') == 1
             handles.bwContour = handles.bwContour(:,:,1:handles.slice);
+            handles = updateContour(handles);
         end
-
         [hObject, handles] = abcResize(hObject, handles);
         handles = windowResize(handles);
 
@@ -18,7 +17,6 @@ function [hObject, eventdata, handles] = SetLastSlice(hObject, eventdata, handle
         set(handles.editSliceNumber,'String',num2str(handles.slice));
         set(handles.sliderIMG,'Value',handles.slice);
 
-        guidata(hObject, handles);
         updateImage(hObject, eventdata, handles);
     end
 end

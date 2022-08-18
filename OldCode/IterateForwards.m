@@ -28,7 +28,6 @@ if ~isempty(find(handles.bwContour(:,:,handles.slice), 1))
         handles.bwContour(:,:,handles.slice+1) = activecontour(handles.img(:,:,handles.slice+1),handles.bwContour(:,:,handles.slice),...
             handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
         handles.slice = handles.slice+1;
-        guidata(hObject,handles);
         updateImage(hObject, eventdata, handles);
         set(handles.sliderIMG,'Value',handles.slice);
         set(handles.editSliceNumber,'String',num2str(handles.slice));
@@ -38,7 +37,6 @@ if ~isempty(find(handles.bwContour(:,:,handles.slice), 1))
     if handles.slice == handles.abc(3)
         handles.bwContour(:,:,end) = activecontour(handles.img(:,:,handles.slice),handles.bwContour(:,:,handles.slice-1),...
             handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
-        guidata(hObject,handles);
         updateImage(hObject, eventdata, handles);
         set(handles.sliderIMG,'Value',handles.slice);
         set(handles.editSliceNumber,'String',num2str(handles.slice));

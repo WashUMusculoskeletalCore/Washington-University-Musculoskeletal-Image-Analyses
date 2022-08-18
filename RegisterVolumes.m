@@ -88,9 +88,8 @@ function pushbuttonFlipAxis_Callback(hObject, eventdata, handles) %#ok<*DEFNU>
 % handles    structure with handles and user data (see GUIDATA)
 str = get(handles.popupmenuAxis,'String');
 val = get(handles.popupmenuAxis,'Value');
-axNum = str2num(str{val});
+axNum = str2double(str{val});
 handles.imgMoving = flip(handles.imgMoving,axNum);
-guidata(hObject, handles);
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
 
@@ -154,7 +153,6 @@ switch plAx
         end
 end
 handles = updateSliders(hObject,eventdata,handles);     
-guidata(hObject, handles);
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
 
@@ -192,7 +190,6 @@ function sliderReference_Callback(hObject, eventdata, handles)
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 handles.sliceReference = round(get(handles.sliderReference,'Value'));
 
-guidata(hObject, handles);
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
 
@@ -219,7 +216,6 @@ function sliderMoving_Callback(hObject, eventdata, handles)
 %        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
 handles.sliceMoving = round(get(handles.sliderMoving,'Value'));
 
-guidata(hObject, handles);
 updateBothImages(hObject, eventdata, handles);
 updateImage(hObject, eventdata, handles);
 
@@ -290,7 +286,6 @@ updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
 updateSliders(hObject, eventdata, handles)
 
-guidata(hObject, handles);
 
 
 
@@ -375,9 +370,6 @@ set(handles.sliderMoving,'min',1);
 set(handles.sliderMoving,'max',handles.abc(3));
 set(handles.sliderMoving,'SliderStep',[1,1]/(handles.abc(3)-1));
 
-
-    
-guidata(hObject, handles);
 updateImage(hObject, eventdata, handles);
 
 % --- Executes on button press in pushbuttonLoadReferenceVolume.
@@ -437,7 +429,6 @@ set(handles.sliderReference,'min',1);
 set(handles.sliderReference,'max',handles.abc(3));
 set(handles.sliderReference,'SliderStep',[1,1]/(handles.abc(3)-1));
     
-guidata(hObject, handles);
 updateImage(hObject, eventdata, handles);
 
 % --- Executes on selection change in popupmenuFileTypeReference.
@@ -554,7 +545,6 @@ elseif c < c1
     handles.imgReference = padarray(handles.imgReference,[0 0 round(cDiff/2)]);
 end
 handles = updateSliders(hObject,eventdata,handles);
-guidata(hObject, handles);
 
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
@@ -588,7 +578,6 @@ switch direction
         handles.imgMoving = [zeroPad;handles.imgMoving];
 end
 handles = updateSliders(hObject,eventdata,handles);
-guidata(hObject, handles);
 
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
@@ -728,7 +717,6 @@ set(handles.sliderReference,'min',1);
 set(handles.sliderReference,'max',c);
 set(handles.sliderReference,'SliderStep',[1,1]/(c-1));
     
-guidata(hObject, handles);
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
 
@@ -738,7 +726,6 @@ set(handles.sliderMoving,'min',1);
 set(handles.sliderMoving,'max',c);
 set(handles.sliderMoving,'SliderStep',[1,1]/(c-1));
     
-guidata(hObject, handles);
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
 
@@ -764,7 +751,6 @@ end
 handles.imgReference = tmp2;
 clear tmp2;
 
-guidata(hObject, handles);
 updateSliders(hObject, eventdata, handles);
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);
@@ -791,7 +777,6 @@ end
 handles.imgMoving = tmp2;
 clear tmp tmp2;
 
-guidata(hObject, handles);
 updateSliders(hObject, eventdata, handles);
 updateImage(hObject, eventdata, handles);
 updateBothImages(hObject, eventdata, handles);

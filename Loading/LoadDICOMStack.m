@@ -5,13 +5,14 @@
 function [hObject, eventdata, handles] = LoadDICOMStack(hObject, eventdata, handles)
     try
         setStatus(hObject, handles, 'Busy');
-        if isfield(handles,'img') == 1
+        if isfield(handles,'img')
             handles.img = [];
             guidata(hObject, handles);
             drawnow();
         end
-        if isfield(handles,'bwContour') == 1
+        if isfield(handles,'bwContour')
             clear handles.bwContour;handles=rmfield(handles,'bwContour');
+            handles = updateContour(handles);
         end
         % Open UI prompt to get directory
         handles.pathstr = uigetdir(pwd,'Please select the folder containing your DICOM files');

@@ -6,15 +6,12 @@
 function [hObject, eventdata, handles] = SetFirstSlice(hObject, eventdata, handles)
     if isfield(handles, 'img')
         handles.img = handles.img(:,:,handles.slice:end);
-
         if isfield(handles,'bwContour')
             handles.bwContour = handles.bwContour(:,:,handles.slice:end);
+            handles = updateContour(handles);
         end
-
         [hObject, handles] = abcResize(hObject, handles);
         handles = windowResize(handles);
-
-        guidata(hObject, handles);
         updateImage(hObject, eventdata, handles);
     end
 end

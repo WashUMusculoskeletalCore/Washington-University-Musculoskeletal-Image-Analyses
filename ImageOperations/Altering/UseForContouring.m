@@ -17,7 +17,6 @@ function [hObject,eventdata,handles] = UseForContouring(hObject,eventdata,handle
             for i = 1:handles.abc(3)
                 handles.img(:,:,i) = imadjust(handles.img(:,:,i),[double(handles.lOut);double(handles.hOut)],[]);
             end
-            guidata(hObject, handles);
             updateImage(hObject, eventdata, handles);
         end
         setStatus(hObject, handles, 'Not Busy');

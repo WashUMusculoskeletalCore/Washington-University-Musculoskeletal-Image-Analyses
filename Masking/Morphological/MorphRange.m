@@ -29,9 +29,8 @@ function [hObject, eventdata, handles] = MorphRange(hObject, eventdata, handles)
             % Get the shape formed by the mask at startMorph and endMorph and
             % apply the it to the mask between start and end
             bwTemp = interp_shape(handles.bwContour(:,:,em), handles.bwContour(:,:,sm), em-sm+1);
-            handles.bwContour(:,:,sm:em) = bwTemp;
-            guidata(hObject, handles);
-            %handles = updateContour(handles);
+            handles.bwContour(:,:,sm:em) = bwTemp;        
+            handles = updateContour(handles);
             updateImage(hObject,eventdata,handles);
         else
             noMaskError();

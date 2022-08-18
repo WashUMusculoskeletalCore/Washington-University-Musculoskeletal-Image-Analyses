@@ -11,10 +11,7 @@ function [hObject, eventdata, handles] = DrawContour(hObject, eventdata, handles
         % Open freehand drawing tool and create a mask
         h = drawfreehand(handles.axesIMG);
         handles.bwContour(:,:,handles.slice) = createMask(h);
-        % Ensure that the mask is displayed
-        handles.toggleMask = true;
-        set(handles.togglebuttonToggleMask,'Value',1);
-        guidata(hObject, handles);
+        handles = updateContour(handles);
         updateImage(hObject, eventdata, handles);
     else
         noImgErorr();

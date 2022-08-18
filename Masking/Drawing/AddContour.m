@@ -9,17 +9,14 @@ function [hObject, eventdata, handles] = AddContour(hObject, eventdata, handles)
         if ~isfield(handles, 'bwContour')
             handles.bwContour = false(size(handles.img));
         end
-        % Ensure that the mask is displayed
-        handles.toggleMask = true;
-        set(handles.togglebuttonToggleMask,'Value',1);
-        updateImage(hObject,eventdata,handles);
+        %clcupdateImage(hObject,eventdata,handles);
         % Open freehand drawing tool and create a mask
         h = drawfreehand(handles.axesIMG);
         % Add new mask to existing mask
         tmp = handles.bwContour(:,:,handles.slice);
         tmp(h.createMask)=1;
-        handles.bwContour(:,:,handles.slice)=tmp;       
-        guidata(hObject, handles);
+        handles.bwContour(:,:,handles.slice)=tmp;
+        handles = updateContour(handles);
         updateImage(hObject,eventdata,handles);
     else
         noImgError();

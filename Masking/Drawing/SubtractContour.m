@@ -6,17 +6,13 @@
 % OUT handles.bwContour: the 3d image mask
 function [hObject, eventdata, handles] = SubtractContour(hObject, eventdata, handles)
     if isfield(handles, 'bwContour')
-        % Ensure that the mask is displayed
-        handles.toggleMask = true;
-        set(handles.togglebuttonToggleMask,'Value',1);
-        updateImage(hObject,eventdata,handles);
         % Open freehand drawing tool and create a mask
         h = drawfreehand(handles.axesIMG);
         % Remove area covered by new mask from existing mask
         tmp = handles.bwContour(:,:,handles.slice);
         tmp(h.createMask)=0;
         handles.bwContour(:,:,handles.slice)=tmp;
-        guidata(hObject, handles);
+        handles = updateContour(handles);
         updateImage(hObject, eventdata, handles);
     else
         noMaskError();

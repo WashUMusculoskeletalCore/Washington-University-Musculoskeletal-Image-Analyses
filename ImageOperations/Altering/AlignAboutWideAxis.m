@@ -36,7 +36,6 @@ function [hObject,eventdata,handles] = AlignAboutWideAxis(hObject,eventdata,hand
             handles.img = imgTmp;
             handles.bwContour = bwContourTmp;
             [hObject, handles] = abcResize(hObject, handles);
-            guidata(hObject, handles);
             updateImage(hObject,eventdata,handles);
         else
             noMaskError();

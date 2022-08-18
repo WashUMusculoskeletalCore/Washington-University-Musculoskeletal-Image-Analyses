@@ -32,7 +32,6 @@ function [hObject,eventdata,handles] = Translate(hObject, eventdata, handles, di
 
         handles.bwContour(:,:,handles.slice) = tmp;
 
-        guidata(hObject, handles);
         updateImage(hObject, eventdata, handles);
     end
 end

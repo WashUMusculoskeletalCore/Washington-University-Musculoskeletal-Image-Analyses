@@ -8,8 +8,7 @@ function [hObject,eventdata,handles] = LoadMask(hObject,eventdata,handles)
         tmp = handles.savedMasks(handles.maskName);
         if isfield(handles, 'img') && isequal(size(tmp), handles.abc)
             handles.bwContour = tmp;
-            guidata(hObject, handles);
-            %handles = updateContour(handles);
+            handles = updateContour(handles);
             updateImage(hObject, eventdata, handles);
         else
             errorMsg('Saved mask is not the same size as image')
