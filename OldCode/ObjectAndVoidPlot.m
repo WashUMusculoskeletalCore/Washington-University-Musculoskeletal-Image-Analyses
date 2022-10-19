@@ -7,9 +7,9 @@
 % identify objects in the image
 % OUT: Displays a 3D plot showing the mask and any voids in the image
 % inside of it
-function [hObject,eventdata,handles] = ObjectAndVoidPlot(hObject,eventdata,handles)
+function ObjectAndVoidPlot(handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         if isfield(handles, 'bwContour')    
             % Create a 3D shape from the mask and plot it
             shp = shpFromBW(handles.bwContour,4);
@@ -26,8 +26,7 @@ function [hObject,eventdata,handles] = ObjectAndVoidPlot(hObject,eventdata,handl
         else
             noMaskError();
         end
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

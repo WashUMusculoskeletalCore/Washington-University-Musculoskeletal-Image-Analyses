@@ -5,9 +5,9 @@
 % OUT-Creates a 3D image showing the relative thickness of each section
 % of the mask
 % TODO-look into this deeper for potential optimization
-function ThicknessVisualization(hObject, handles)
+function ThicknessVisualization(handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         bw = handles.bwContour;
         % Create distance map
         D1 = bwdist(~bw);% does what I want for thickness of spacing
@@ -15,7 +15,7 @@ function ThicknessVisualization(hObject, handles)
         bwUlt = bwulterode(bw);
         % Limit distance map to local maximums
         D1(~bwUlt) = 0;
-        D1 = findSpheres(hObject, handles, D1);
+        D1 = findSpheres(handles, D1);
         % Get a 21x21x3 set of points that form the surface of a sphere with radius 1
         [x, y, z] = sphere;
         [x2, y2, z2] = ind2sub(size(D1),find(D1));
@@ -59,9 +59,7 @@ function ThicknessVisualization(hObject, handles)
             end
         end
         saveas(gcf,fullfile(handles.pathstr,[get(handles.editDICOMPrefix,'String') '.fig']));
-        guidata(hObject, handles);
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-            setStatus(hObject, handles, 'Failed');
-            reportError(err);
+            reportError(err, handles);
     end

@@ -10,9 +10,9 @@
 % by the operation
 % OUT-handles.img: the 3D image
 % handles.bwContour: the 3D mask
-function [hObject,eventdata,handles] = ExecuteMorphologicalOperation(hObject,eventdata,handles)
+function ExecuteMorphologicalOperation(hObject, handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         switch handles.morphologicalImageMask
             case 'Mask'
                 field = 'bwContour';
@@ -54,9 +54,10 @@ function [hObject,eventdata,handles] = ExecuteMorphologicalOperation(hObject,eve
                     handles.(field) = fh(handles.(field), se);
             end
             if strcmp(field, 'bwContour')
-                handles = updateContour(handles);
-            end         
-            updateImage(hObject, eventdata, handles);
+                updateContour(hObject, handles);
+            else        
+                updateImage(hObject, handles);
+            end
         else
             % If the field does not exist, give an error message
             switch handles.morphologicalImageMask
@@ -66,8 +67,7 @@ function [hObject,eventdata,handles] = ExecuteMorphologicalOperation(hObject,eve
                 noImgError();
             end
         end
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

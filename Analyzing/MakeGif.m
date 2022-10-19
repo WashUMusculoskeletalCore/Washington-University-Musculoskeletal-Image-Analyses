@@ -3,14 +3,15 @@
 % IN-handles.img: The 3D image stack
 % handles.pathstr: The pathstring to save the file to
 % OUT-stack.gif: A gif file of the image stack
-function [hObject,eventdata,handles] = MakeGif(hObject,eventdata,handles)
+function MakeGif(handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
+        displayPercentLoaded(handles, 0);
         if isfield(handles, 'img')
             [~, ~, c] = size(handles.img);
             filename = fullfile(handles.pathstr,'stack.gif');
             for i = 1:c
-                displayPercentLoaded(hObject, handles, i/c);
+                displayPercentLoaded(handles, i/c);
                 if i == 1
                     % Create the file
                     imwrite(im2uint8(imadjust(handles.img(:,:,i),[double(handles.lOut);double(handles.hOut)])),filename,'LoopCount',Inf,'DelayTime',0.01);
@@ -22,8 +23,8 @@ function [hObject,eventdata,handles] = MakeGif(hObject,eventdata,handles)
         else
             noImgError();
         end
-        setStatus(hObject, handles, 'Not Busy');
+        displayPercentLoaded(handles, 1);
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

@@ -3,23 +3,25 @@
 % IN-handles.pathstr: the filepath to save to
 % handles: all nongraphics fields will be saved
 % OUT-Workspace.mat: a file containing all saved fields 
-function [hObject,eventdata,handles] = SaveWorkspace(hObject,eventdata,handles)
+function SaveWorkspace(handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
+        displayPercentLoaded(handles, 0);
         fieldNames = fieldnames(handles);
         fieldNum = numel(fieldnames(handles));
         % Add all non-graphic fields to savedHandles
+        setStatus(handles, 'Reading Workspace Data')
         for i = 1:fieldNum
             if ~any(isgraphics(handles.(fieldNames{i}))) | any(handles.(fieldNames{i}) == 0) %#ok<OR2> % 0 is considered a graphics object by isgraphics
                 savedHandles.(fieldNames{i}) = handles.(fieldNames{i});
             end
-            displayPercentLoaded(hObject, handles, i/fieldNum);
+            displayPercentLoaded(handles, i/(2*fieldNum));
         end
         % Save all fields in savedHandles to Workspace.mat
+        setStatus(handles, 'Writing file');
         save(fullfile(handles.pathstr,'Workspace.mat'), '-struct', 'savedHandles', '-v7.3','-nocompression');
-        displayPercentLoaded(hObject, handles, 1);
-        setStatus(hObject, handles, 'Not Busy');
+        displayPercentLoaded(handles, 1);
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

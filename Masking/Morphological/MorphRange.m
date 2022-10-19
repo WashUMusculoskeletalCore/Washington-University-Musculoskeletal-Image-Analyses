@@ -6,9 +6,9 @@
 % handles.bwContour: The 3d mask, must have values at startMorph and 
 % endMorph slices
 % OUT-handles.bwContour: The 3d mask between startMorph and endMorph slices
-function [hObject, eventdata, handles] = MorphRange(hObject, eventdata, handles)
+function MorphRange(hObject, handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         if isfield(handles, 'bwContour')
             % Adjust the morph ranges if needed to ensure they make sense
             sm = handles.startMorph;
@@ -22,7 +22,7 @@ function [hObject, eventdata, handles] = MorphRange(hObject, eventdata, handles)
             if em > handles.abc(3)
                 em = handles.abc(3);
             end
-            if em > sm
+            if em < sm
                em = sm;
             end
             
@@ -30,14 +30,12 @@ function [hObject, eventdata, handles] = MorphRange(hObject, eventdata, handles)
             % apply the it to the mask between start and end
             bwTemp = interp_shape(handles.bwContour(:,:,em), handles.bwContour(:,:,sm), em-sm+1);
             handles.bwContour(:,:,sm:em) = bwTemp;        
-            handles = updateContour(handles);
-            updateImage(hObject,eventdata,handles);
+            updateContour(hObject, handles);
         else
             noMaskError();
         end
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end
 

@@ -3,22 +3,22 @@
 % IN-UI: User draws a line
 % handles.info.SliceThickness: the conversion factor for pixels to mm
 % OUT-UI: Displays the length of the line
-function [hObject,eventdata,handles] = LinearMeasure(hObject,eventdata,handles)
+function LinearMeasure(handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         if isfield(handles, 'img')
             % Create an interactive distance line tool
             % TODO-find a way to end this if image changes
+            setStatus(handles, 'Draw a line');
             ruler = drawline(handles.axesIMG);
             UpdateLabel(ruler, ruler.Position, handles.info.SliceThickness)
             addlistener(ruler, 'MovingROI', @(src, event)MoveLineCallback(src, event, handles.info.SliceThickness));
         else
             noImgError();
         end
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end
 end
 

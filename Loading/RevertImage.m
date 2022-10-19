@@ -2,29 +2,30 @@
 % DESC-Reverts the image to a saved version
 % OUT-handles.img: the image reverted to a the saved version
 % handles.bwContour: the mask, removed if the image is resized
-function [hObject,eventdata,handles] = RevertImage(hObject,eventdata,handles)
+function RevertImage(hObject, handles)
     try
-        setStatus(hObject, handles, 'Busy');
-        prevABC = handles.abc;
-        handles.img = handles.imgOrig;   
-        [hObject, handles] = abcResize(hObject, handles);
-        handles = windowResize(handles);
-
-        %answer = inputdlg('Would you like to reset the contour? If you changed the image size, you must. y or n');
-        %if strcmpi(answer{1}, 'y') == 1
-        if handles.abc ~= prevABC
-            if isfield(handles, 'bwContour') == 1
+        setStatus(handles, 'Busy');
+        if isfield(handles, 'imgOrig')
+            prevABC = handles.abc;
+            handles.img = handles.imgOrig; 
+            % Load resolution info
+            handles.info.PixelSpacing(1) = handles.ResolutionOrig(1);
+            handles.info.PixelSpacing(2) = handles.ResolutionOrig(2);
+            handles.info.SliceThickness = handles.ResolutionOrig(3);
+            % Resize the image to the original size
+            handles = abcResize(handles);
+            handles = windowResize(handles);
+            % If the image has changed size, remove the mask, otherwise keep it
+            if any(handles.abc ~= prevABC) && isfield(handles, 'bwContour')
                 handles.bwContour = [];
                 handles = rmfield(handles,'bwContour');
-                handles = updateContour(handles);
+                updateContour(hObject, handles);
             end
+            updateWindow(hObject, handles);
+        else
+            errorMsg('No original image set');
         end
-        % handles.bwContour = false(size(handles.img));
-        % handles.bwContourOrig = handles.bwContour;
-
-        updateImage(hObject, eventdata, handles);
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

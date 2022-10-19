@@ -22,7 +22,7 @@ function varargout = RegisterVolumes(varargin)
 
 % Edit the above text to modify the response to help RegisterVolumes
 
-% Last Modified by GUIDE v2.5 14-Jun-2018 15:58:55
+% Last Modified by GUIDE v2.5 27-Sep-2022 11:47:52
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -43,859 +43,563 @@ else
 end
 % End initialization code - DO NOT EDIT
 
+% NAME-RegisterVolumes_OpeningFcn
+% DESC-Executes just before RegisterVolumes is made visible, initializes handles
+function RegisterVolumes_OpeningFcn(hObject, ~, handles, varargin)
 
-% --- Executes just before RegisterVolumes is made visible.
-function RegisterVolumes_OpeningFcn(hObject, eventdata, handles, varargin) %#ok<*INUSL>
-% This function has no output args, see OutputFcn.
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to RegisterVolumes (see VARARGIN)
-
-% Choose default command line output for RegisterVolumes
-handles.output = hObject;
-
-handles.sliceMoving = 1;
-handles.sliceReference = 1;
-
-handles.movingFileType = 'dcm';
-handles.referenceFileType = 'dcm';
-
-optimizer.MaximumIterations = 300;
-
-% Update handles structure
-guidata(hObject, handles);
-
-% UIWAIT makes RegisterVolumes wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
-
-
-% --- Outputs from this function are returned to the command line.
-function varargout = RegisterVolumes_OutputFcn(hObject, eventdata, handles) 
-% varargout  cell array for returning output args (see VARARGOUT);
-% hObject    handle to figure
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Get default command line output from handles structure
-varargout{1} = handles.output;
-
-
-% --- Executes on button press in pushbuttonFlipAxis.
-function pushbuttonFlipAxis_Callback(hObject, eventdata, handles) %#ok<*DEFNU>
-% hObject    handle to pushbuttonFlipAxis (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-str = get(handles.popupmenuAxis,'String');
-val = get(handles.popupmenuAxis,'Value');
-axNum = str2double(str{val});
-handles.imgMoving = flip(handles.imgMoving,axNum);
-updateImage(hObject, eventdata, handles);
-updateBothImages(hObject, eventdata, handles);
-
-
-
-% --- Executes on selection change in popupmenuAxis.
-function popupmenuAxis_Callback(hObject, eventdata, handles) %#ok<*INUSD>
-% hObject    handle to popupmenuAxis (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenuAxis contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenuAxis
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenuAxis_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenuAxis (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbuttonRotate.
-function pushbuttonRotate_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonRotate (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-deg = str2num(cell2mat(get(handles.editDegrees,'String')));
-str = get(handles.popupmenuPlanarAxial,'String');
-val = get(handles.popupmenuPlanarAxial,'Value');
-try
-    plAx = str{val};
-catch
-    plAx = str;
-end
-
-switch plAx
-    case 'planar'
-        % Rotate the image around the center point
-        handles.imgMoving = imrotate(handles.imgMoving,deg);
-    case 'axial'
-        str = get(handles.popupmenuAxialAxis,'String');
-        val = get(handles.popupmenuAxialAxis,'Value');
-        ax = str2num(str{val});
-        switch ax
-            case 1
-                % 3D Rotate around x axis
-                handles.imgMoving = imrotate3(handles.imgMoving,deg,[1,0,0]);
-            case 2
-                % 3D Rotate around y axis
-                handles.imgMoving = imrotate3(handles.imgMoving,deg,[0,1,0]);
-            case 3
-                % 3D Rotate around z axis
-                handles.imgMoving = imrotate3(handles.imgMoving,deg,[0,0,1]);
-        end
-end
-handles = updateSliders(hObject,eventdata,handles);     
-updateImage(hObject, eventdata, handles);
-updateBothImages(hObject, eventdata, handles);
-
-
-
-function editDegrees_Callback(hObject, eventdata, handles)
-% hObject    handle to editDegrees (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of editDegrees as text
-%        str2double(get(hObject,'String')) returns contents of editDegrees as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function editDegrees_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to editDegrees (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on slider movement.
-function sliderReference_Callback(hObject, eventdata, handles)
-% hObject    handle to sliderReference (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-handles.sliceReference = round(get(handles.sliderReference,'Value'));
-
-updateImage(hObject, eventdata, handles);
-updateBothImages(hObject, eventdata, handles);
-
-
-% --- Executes during object creation, after setting all properties.
-function sliderReference_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to sliderReference (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-end
-
-
-% --- Executes on slider movement.
-function sliderMoving_Callback(hObject, eventdata, handles)
-% hObject    handle to sliderMoving (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-handles.sliceMoving = round(get(handles.sliderMoving,'Value'));
-
-updateBothImages(hObject, eventdata, handles);
-updateImage(hObject, eventdata, handles);
-
-% --- Executes during object creation, after setting all properties.
-function sliderMoving_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to sliderMoving (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-end
-
-
-% --- Executes on button press in pushbuttonRegisterVolumes.
-function pushbuttonRegisterVolumes_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonRegisterVolumes (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Configure image registration for images with similar brightness and
-% contrast (monomodal)
-[optimizer, metric] = imregconfig('monomodal');
-% Set the Mattes Mutual Information algorithm as the metric to use during
-% registration
-metric = registration.metric.MattesMutualInformation;
-optimizer.MaximumIterations = round(str2num(cell2mat(get(handles.editIterations,'String'))));
-% optimizer.MinimumStepLength = 1.00e-8;
-% optimizer.MaximumStepLength = 0.5;
-
-% try
-%     mov = gpuArray(handles.imgMoving);
-%     ref = gpuArray(handles.imgReference);
-%     handles.imgRegistered = imregister(mov,ref,'rigid',optimizer,metric,...
-%         'DisplayOptimization',1,'PyramidLevels',4);
-% catch
-%     handles.imgRegistered = imregister(handles.imgMoving,handles.imgReference,'rigid',optimizer,metric,...
-%         'DisplayOptimization',1,'PyramidLevels',4);
-    % Identify a rigid transformation that will make the moving image matcg
-    % the reference image
-    handles.imgRegTform = imregtform(handles.imgMoving,handles.imgReference,'rigid',optimizer,metric,...
-        'DisplayOptimization',1,'PyramidLevels',4);
-    % Transform and display the moving image at the same size as the
-    % reference image
-    handles.imgRegistered = imwarp(handles.imgMoving,handles.imgRegTform,'OutputView',imref3d(size(handles.imgReference)));
-   
+    % Choose default command line output for RegisterVolumes
+    handles.output = hObject;
     
-% end
-
-[~, ~, c] = size(handles.imgRegistered);
-% Create a composite of the reference and registered images slice by slice
-clear fused;
-for i = 1:c
-    fused(:,:,i) = imfuse(handles.imgReference(:,:,i),handles.imgRegistered(:,:,i),'blend');
-end
-
-handles.fused = fused;
-% Update sliders to size of fused image
-[~, ~, c] = size(handles.fused);
-set(handles.sliderFused,'Value',1);
-set(handles.sliderFused,'min',1);
-set(handles.sliderFused,'max',c);
-set(handles.sliderFused,'SliderStep',[1,1]/(c-1));
-% Display the fused image
-imshow(handles.fused(:,:,1),'Parent',handles.axesFused);
-updateImage(hObject, eventdata, handles);
-updateBothImages(hObject, eventdata, handles);
-updateSliders(hObject, eventdata, handles)
-
-
-
-
-
-function editIterations_Callback(hObject, eventdata, handles)
-% hObject    handle to editIterations (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of editIterations as text
-%        str2double(get(hObject,'String')) returns contents of editIterations as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function editIterations_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to editIterations (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in pushbuttonLoadMovingVolume.
-function pushbuttonLoadMovingVolume_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonLoadMovingVolume (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Select directory containing DICOM Stack in UI
-if strcmpi(handles.movingFileType,'dcm')
-    handles.pathstrMoving = uigetdir(pwd,'Please select the folder of the volume to be registered');
-    [handles.imgMoving, handles.infoMoving] = readDICOMStack(handles.pathstrMoving);
+    handles.sliceMoving = 1;
+    handles.sliceReference = 1;
+    handles.fusedSlice = 1;
     
-% Select txm file in UI
-elseif strcmpi(handles.movingFileType,'txm')
-    [handles.movingFileName, handles.movingPathName] = uigetfile([pwd '\*.txm'],'Please select your TXM file');
-    [handles.header, handles.headerShort] = txmheader_read8(fullfile(handles.movingPathName,handles.movingFileName));
-    % Fills infoMoving with preset value
-    % TODO- Move presets to configuraion file
-    handles.infoMoving = handles.headerShort;
-    handles.infoMoving.SliceThickness = handles.infoMoving.PixelSize;
-    handles.infoMoving.SliceThickness = handles.infoMoving.SliceThickness / 1000;
-    handles.infoMoving.Height = handles.infoMoving.ImageHeight;%may need to be switched with below
-    handles.infoMoving.Width = handles.infoMoving.ImageWidth;
-    handles.infoMoving.BitDepth = 16;
-    handles.infoMoving.Format = 'DICOM';
-    handles.infoMoving.FileName = handles.infoMoving.File;
-    handles.infoMoving.FileSize = handles.infoMoving.Height * handles.infoMoving.Width * 2^16;
-    handles.infoMoving.FormatVersion = 3;
-    handles.infoMoving.ColorType = 'grayscale';
-    handles.infoMoving.Modality = 'CT';
-    handles.infoMoving.Manufacturer = 'Zeiss';
-    handles.infoMoving.InstitutionName = 'Washington University in St. Louis';
-    handles.infoMoving.PatientName = handles.movingFileName(1:end-4);
-    handles.infoMoving.KVP = txmdata_read8(handles.header,'Voltage');
-    handles.infoMoving.DeviceSerialNumber = '8802030299';
-    handles.infoMoving.BitsAllocated = 16;
-    handles.infoMoving.BitsStored = 15;
-    handles.infoMoving.SliceLocation = 20;
-    handles.infoMoving.ImagePositionPatient = [0;0;handles.infoMoving.SliceLocation];
-    handles.infoMoving.PixelSpacing = [handles.infoMoving.SliceThickness;handles.infoMoving.SliceThickness];
+    % Update handles structure
+    guidata(hObject, handles);
 
-    handles.img = zeros([handles.headerShort.ImageWidth handles.headerShort.ImageHeight handles.headerShort.NoOfImages],'uint16');
-    % Load txm file one slice at a time into moving image
-    ct=0;
-    for i = 1:handles.headerShort.NoOfImages
-        ct=ct+1;
-        handles.imgMoving(:,:,i) = txmimage_read8(handles.header,ct,0,0);
+
+% NAME-RegisterVolumes_OutputFcn
+% DESC-Returns the handle for the RegisterVolumes figure to the calling function
+function varargout = RegisterVolumes_OutputFcn(~, ~, handles) 
+    % Get default command line output from handles structure
+    varargout{1} = handles.output;
+
+
+% NAME-pushbuttonFlipAxis_Callback
+% DESC-Flips the moving image over the selected axis
+% IN-handles.popupmenuAxis: The axis popup menu
+% OUT-handles.imgMoving: The moving image
+function pushbuttonFlipAxis_Callback(hObject, ~, handles)
+    if isfield(handles, 'imgMoving')
+        axNum = str2double(handles.axis);
+        handles.imgMoving = flip(handles.imgMoving, axNum);
+        updateImage(hObject, handles);
+    else
+        noImgError;
     end
 
-end
+% NAME-pushbuttonRotate_Callback
+% DESC-Rotates the image the specified number of degrees
+% IN-handles.degrees: The angle to rotate
+% handles.popupmenuPlanarAxial: The popup menu to select planar or axial rotation
+% OUT-handles.imgMoving: The moving image
+function pushbuttonRotate_Callback(hObject, ~, handles)
+    if isfield(handle, 'imgMoving')
+        switch handles.plAx
+            case 'planar'
+                % Rotate the image around the center point
+                handles.imgMoving = imrotate(handles.imgMoving,handles.degrees);
+            case 'axial'
+                % Select the axis to rotate around
+                ax = str2double(handles.axis);
+                matrix = [0,0,0];
+                matrix(ax)=1;
+                handles.imgMoving = imrotate3(handles.imgMoving,handles.degrees,matrix);
+        end
+        updateSliders(hObject,handles);  
+    else
+        noImgError;
+    end
 
-% handles.imgMoving = padarray(handles.imgMoving,[50 50 50]);
-% Adjust slider to new size
-handles.abc = size(handles.imgMoving);
-set(handles.sliderMoving,'Value',1);
-set(handles.sliderMoving,'min',1);
-set(handles.sliderMoving,'max',handles.abc(3));
-set(handles.sliderMoving,'SliderStep',[1,1]/(handles.abc(3)-1));
+% NAME-pushbuttonRegisterVolumes_Callback
+% DESC-Attempts to allign the moving image to the reference image
+% IN-handles.imgMoving: The moving image
+% handles.imgReference: The reference image
+% handles.iterations
+% OUT-handles.imgRegistered: The transformed moving image
+% handles.imgRegTform: The transformation used to created the registered image
+function pushbuttonRegisterVolumes_Callback(hObject, ~, handles)
+    if isfield(handles, 'imgReference') && isfield(handles, 'imgMoving')
+        % Configure image registration for images with similar brightness and
+        % contrast (monomodal)
+        [optimizer, ~] = imregconfig('monomodal');
+        % Set the Mattes Mutual Information algorithm as the metric to use during
+        % registration
+        metric = registration.metric.MattesMutualInformation;
+        optimizer.MaximumIterations = handles.iterations;
+    
+        % Identify a rigid transformation that will make the moving image matcg
+        % the reference image
+        handles.imgRegTform = imregtform(handles.imgMoving,handles.imgReference,'rigid',optimizer,metric,...
+            'DisplayOptimization',1,'PyramidLevels',4);
+        % Transform and display the moving image at the same size as the
+        % reference image
+        handles.imgRegistered = imwarp(handles.imgMoving,handles.imgRegTform,'OutputView',imref3d(size(handles.imgReference)));
+        
+        [~, ~, c] = size(handles.imgRegistered);
+        % Create a composite of the reference and registered images slice by slice
+        % Preallocated array
+        sz = max(size(handles.imgReference, [1 2 3]), size(handles.imgRegistered, [1 2 3]));
+        handles.fused = zeros(sz, "uint16");
+        for i = 1:c
+            handles.fused(:,:,i) = im2uint16(imfuse(handles.imgReference(:,:,i),handles.imgRegistered(:,:,i),'blend'));
+        end
+        % Update sliders to size of fused image
+        [~, ~, c] = size(handles.fused);
+        handles.sliderFused = resizeSlider(handles.sliderFused, c);
+        % Display the fused image
+        imshow(handles.fused(:,:,1),'Parent',handles.axesFused);
+        updateSliders(hObject, handles)
+    else
+        noImgError;
+    end
 
-updateImage(hObject, eventdata, handles);
+% NAME-pushbuttonLoadMovingVolume_Callback
+% DESC-Loads a DICOM or txm file into the moving image
+% IN-Gets a filename from the user
+% handles.movingFileType: The moving image filetype selected
+% OUT-handles.imgMoving: The moving image
+% handles.infoMoving: The moving image data
+function pushbuttonLoadMovingVolume_Callback(hObject, ~, handles)
+    loadVolume(hObject, handles, 'moving');
 
-% --- Executes on button press in pushbuttonLoadReferenceVolume.
-function pushbuttonLoadReferenceVolume_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonLoadReferenceVolume (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+% NAME-pushbuttonLoadReferenceVolume_Callback
+% DESC-Loads a DICOM or txm file into the reference image
+% IN-Gets a filename from the user
+% handles.referenceFileType: The reference image filetype selected
+% OUT-handles.imgReference: The reference image
+% handles.infoReference: The reference image data
+function pushbuttonLoadReferenceVolume_Callback(hObject, ~, handles)
+    loadVolume(hObject, handles, 'reference');
 
-% Select directory containing DICOM stack in UI
-if strcmpi(handles.referenceFileType,'dcm')
-    handles.pathstrReference = uigetdir(pwd,'Please select the folder of the volume to be registered');
-    [handles.imgReference, handles.infoReference] = readDICOMStack(handles.pathstrReference);
-% Select txm file in UI
-elseif strcmpi(handles.referenceFileType,'txm')
-    [handles.referenceFileName, handles.referencePathName] = uigetfile([pwd '\*.txm'],'Please select your TXM file');
-    [handles.header, handles.headerShort] = txmheader_read8(fullfile(handles.referencePathName,handles.referenceFileName));
-    % Fills infoReference with preset value
-    % TODO- Move presets to configuraion file
-    handles.infoReference = handles.headerShort;
-    handles.infoReference.SliceThickness = handles.infoReference.PixelSize;
-    handles.infoReference.SliceThickness = handles.infoReference.SliceThickness / 1000;
-    handles.infoReference.Height = handles.infoReference.ImageHeight;%may need to be switched with below
-    handles.infoReference.Width = handles.infoReference.ImageWidth;
-    handles.infoReference.BitDepth = 16;
-    handles.infoReference.Format = 'DICOM';
-    handles.infoReference.FileName = handles.infoReference.File;
-    handles.infoReference.FileSize = handles.infoReference.Height * handles.infoReference.Width * 2^16;
-    handles.infoReference.FormatVersion = 3;
-    handles.infoReference.ColorType = 'grayscale';
-    handles.infoReference.Modality = 'CT';
-    handles.infoReference.Manufacturer = 'Zeiss';
-    handles.infoReference.InstitutionName = 'Washington University in St. Louis';
-    handles.infoReference.PatientName = handles.referenceFileName(1:end-4);
-    handles.infoReference.KVP = txmdata_read8(handles.header,'Voltage');
-    handles.infoReference.DeviceSerialNumber = '8802030299';
-    handles.infoReference.BitsAllocated = 16;
-    handles.infoReference.BitsStored = 15;
-    handles.infoReference.SliceLocation = 20;
-    handles.infoReference.ImagePositionPatient = [0;0;handles.infoReference.SliceLocation];
-    handles.infoReference.PixelSpacing = [handles.infoReference.SliceThickness;handles.infoReference.SliceThickness];
+% NAME-loadVolume
+% DESC-Loads a DICOM or txm file
+% IN-image: Determines whether to load the moving or refernce image
+% OUT-handles.(img): The loaded image
+% handles.(info): The info data structure
+function loadVolume(hObject, handles, image)
+    switch image
+        case 'moving'
+            filetype = 'movingFileType';
+            pathstr = 'pathstrMoving';
+            img = 'imgMoving';
+            info = 'infoMoving';
+            slider = 'sliderMoving';
+        case 'reference'
+            filetype = 'referenceFileType';
+            pathstr = 'pathstrReference';
+            img = 'imgReference';
+            info = 'infoReference';
+            slider =  'sliderReference';
+    end
+    
+    switch handles.(filetype)
+        % Select directory containing DICOM stack in UI
+        case 'DICOM'
+            handles.(pathstr) = uigetdir(pwd,'Please select the folder of the volume to be registered');
+            [handles.(img), handles.(info)] = readDICOMStack(handles.(pathstr));
+        % Select txm file in UI
+        case'TXM'
+            [fileName, pathName] = uigetfile([pwd '\*.txm'],'Please select your TXM file');
+            [header, headerShort] = txmheader_read8(fullfile(pathName,fileName));
+            % Fills info with preset value
+            % TODO- Move presets to configuraion file
+            handles.(info) = headerShort;
+            handles.(info).SliceThickness = handles.(info).PixelSize;
+            handles.(info).SliceThickness = handles.(info).SliceThickness / 1000;
+            handles.(info).Height = handles.(info).ImageHeight;%may need to be switched with below
+            handles.(info).Width = handles.(info).ImageWidth;
+            handles.(info).BitDepth = 16;
+            handles.(info).Format = 'DICOM';
+            handles.(info).FileName = handles.(info).File;
+            handles.(info).FileSize = handles.(info).Height * handles.(info).Width * 2^16;
+            handles.(info).FormatVersion = 3;
+            handles.(info).ColorType = 'grayscale';
+            handles.(info).Modality = 'CT';
+            handles.(info).Manufacturer = 'Zeiss';
+            handles.(info).InstitutionName = 'Washington University in St. Louis';
+            handles.(info).PatientName = fileName(1:end-4);
+            handles.(info).KVP = txmdata_read8(header,'Voltage');
+            handles.(info).DeviceSerialNumber = '8802030299';
+            handles.(info).BitsAllocated = 16;
+            handles.(info).BitsStored = 15;
+            handles.(info).SliceLocation = 20;
+            handles.(info).ImagePositionPatient = [0;0;handles.(info).SliceLocation];
+            handles.(info).PixelSpacing = [handles.(info).SliceThickness;handles.(info).SliceThickness];
+        
+            handles.(img) = zeros([headerShort.ImageWidth headerShort.ImageHeight headerShort.NoOfImages],'uint16');
+            % Adjust slider to new size
+            ct=0;
+            for i = 1:headerShort.NoOfImages
+                ct=ct+1;
+                handles.(img)(:,:,i) = txmimage_read8(header,ct,0,0);
+            end
+    
+    end
 
-    handles.img = zeros([handles.headerShort.ImageWidth handles.headerShort.ImageHeight handles.headerShort.NoOfImages],'uint16');
     % Adjust slider to new size
-    ct=0;
-    for i = 1:handles.headerShort.NoOfImages
-        ct=ct+1;
-        handles.imgReference(:,:,i) = txmimage_read8(handles.header,ct,0,0);
+    [~,~,c] = size(handles.(img));
+    handles.(slider) = resizeSlider(handles.(slider), c);    
+    updateImage(hObject, handles);
+
+% NAME-updateImage
+% DESC-Displays the moving and reference images
+% IN-handles.imgMoving: The moving image
+% handles.imgReference: The reference image
+% handles.sliceMoving: The moving image current slice
+% handles.sliceReference: The reference image current slice
+% OUT-Displays the images on the axes
+function updateImage(hObject, handles)
+    % Show the moving image
+    if isfield(handles,'imgMoving')
+        imshow(imadjust(handles.imgMoving(:,:,handles.sliceMoving)),'Parent',handles.axesMovingXY);
+    end
+    % Show the reference image
+    if isfield(handles,'imgReference')
+        imshow(imadjust(handles.imgReference(:,:,handles.sliceReference)),'Parent',handles.axesReferenceXY);
+    end
+    % Show the fused image
+    if isfield(handles,'fused')
+            imshow(handles.fused(:,:,handles.fusedSlice),'Parent',handles.axesFused);   
+    end
+    guidata(hObject, handles);
+
+
+% NAME-pushbuttonCenterMovingToReference_Callback
+% DESC-Pads the moving and reference images to align their centers
+% OUT-handles.imgReference: The reference image
+% handles.imgMoving: The moving image
+function pushbuttonCenterMovingToReference_Callback(hObject, ~, handles)
+    if isfield(handles, 'imgReference') && isfield(handles, 'imgMoving')
+        % For each dimension, if either image is larger than the other, pad the
+        % start of the array by half the difference
+        [ar, br, cr] = size(handles.imgReference);
+        [am, bm, cm] = size(handles.imgMoving);
+        
+        if ar > am
+            aDiff = ar - am;
+            handles.imgMoving = padarray(handles.imgMoving,[round(aDiff/2) 0 0]);
+        elseif ar < am
+            aDiff = am - ar;
+            handles.imgReference = padarray(handles.imgReference,[round(aDiff/2) 0 0]);
+        end
+        
+        if br > bm
+            bDiff = br - bm;
+            handles.imgMoving = padarray(handles.imgMoving,[0 round(bDiff/2) 0]);
+        elseif br < bm
+            bDiff = bm - br;
+            handles.imgReference = padarray(handles.imgReference,[0 round(bDiff/2) 0]);
+        end
+        
+        if cr > cm
+            cDiff = cr - cm;
+            handles.imgMoving = padarray(handles.imgMoving,[0 0 round(cDiff/2)]);
+        elseif cr < cm
+            cDiff = cm - cr;
+            handles.imgReference = padarray(handles.imgReference,[0 0 round(cDiff/2)]);
+        end
+        updateSliders(hObject,handles);    
+    else
+        noImgError;
     end
 
-end
+% NAME-pushbuttonMove_Callback
+% DESC-Moves the moving image in the chosen direction
+% IN-handles.popupmenuUDLR: The direction popup menu
+% handles.numVox: The number of voxels to move the image
+% OUT-handles.imgMoving: The moving image
+function pushbuttonMove_Callback(hObject, ~, handles)
+    if isfield(handles, 'imgMoving')
+        [a, b, c] = size(handles.imgMoving);
+        
+        switch handles.direction
+            case 'Left'
+                handles.imgMoving = handles.imgMoving(:,handles.numVox:end,:);
+                handles.imgMoving(:,end:end+handles.numVox-1,:) = 0;
+            case 'Up'
+                handles.imgMoving = handles.imgMoving(handles.numVox:end,:,:);
+                handles.imgMoving(end:end+handles.numVox-1,:,:) = 0;
+            case 'Right'
+                handles.imgMoving = handles.imgMoving(:,1:end-handles.numVox,:);
+                zeroPad = zeros(a,handles.numVox,c, "uint16");
+                handles.imgMoving = [zeroPad,handles.imgMoving];
+            case 'Down'
+                handles.imgMoving = handles.imgMoving(1:end-handles.numVox,:,:);
+                zeroPad = zeros(handles.numVox,b,c,"uint16");
+                handles.imgMoving = [zeroPad;handles.imgMoving];
+        end
+        updateSliders(hObject,handles);
+    else
+        noImgError;
+    end
 
-% handles.imgReference = padarray(handles.imgReference,[50 50 50]);
+% NAME-updateSliders
+% DESC-Resize sliders based on resized image
+% IN-handles.imgReference: The reference image
+% handles.imgMoving: The moving image
+% OUT-handles.sliderReference: The reference image slider
+% handles. sliderMoving: The moving image slider
+function handles = updateSliders(hObject, handles)
+    % Resize reference slider
+    if isfield(handles, 'imgReference')
+        [~, ~, c] = size(handles.imgReference);
+        handles.sliderReference = resizeSlider(handles.sliderReference, c); 
+    end   
+    % Resize moving slider
+    if isfield(handles, 'imgMoving')
+        [~, ~, c] = size(handles.imgMoving);
+        handles.sliderMoving = resizeSlider(handles.sliderMoving, c);
+    end       
+    updateImage(hObject, handles);
 
-handles.abc = size(handles.imgReference);
-set(handles.sliderReference,'Value',1);
-set(handles.sliderReference,'min',1);
-set(handles.sliderReference,'max',handles.abc(3));
-set(handles.sliderReference,'SliderStep',[1,1]/(handles.abc(3)-1));
+% NAME-pushbuttonCropReference_Callback
+% DESC-Creates a cropping tool to crop the reference image
+% IN-User selects region to crop
+% OUT-handles.imgReference: The reference image
+function pushbuttonCropReference_Callback(hObject, ~, handles)
+    if isfield(handles, 'imgReference')
+        handles.imgReference = cropImageTool(handles.axesReferenceXY, handles.imgReference);
+        updateImage(hObject, handles);
+    else
+        noImgError;
+    end
+
+% NAME-pushbuttonCropMoving_Callback
+% DESC-Creates a cropping tool to crop the moving image
+% IN-User selects region to crop
+% OUT-handles.imgMoving: The moving image
+function pushbuttonCropMoving_Callback(hObject, ~, handles)
+    if isfield(handles, 'imgMoving')
+        handles.imgMoving = cropImageTool(handles.axesMovingXY, handles.imgMoving);
+        updateImage(hObject, handles);
+    else
+        noImgError;
+    end
+
+% NAME-cropImageTool
+% DESC-Creates a cropping tool to crop an image
+% IN-User selects region to crop
+% axes-The axes containing the image to crop
+% OUT-image: The cropped image
+function image = cropImageTool(axes, image)
+    % Create an interactive croping tool
+    [~,rect] = imcrop(axes);
+    [~, ~, c] = size(image);
+    % Initialize temporary image with size of cropped image
+    tmpImg = zeros([size(imcrop(image(:,:,1),rect), [1 2]), size(image, 3)], "uint16");
+    % Crop every slice of moving image using rect
+    for i = 1:c
+        tmpImg(:,:,i) = imcrop(image(:,:,i),rect);
+    end  
+    image = tmpImg;
+
+% NAME-pushbuttonWrite_Callback
+% DESC-Writes the registered image to a file
+% IN-handles.imgRegistered-The registed image
+% handles.infoMoving: The info struct from the moving image
+% handles.pathstrMoving: The pathastring from the moving image
+% OUT-Writes the registered image as a DICOM
+function pushbuttonWrite_Callback(~, ~, handles)
+    % Save files from registered image
+    if isfield(handles, 'imgRegistered')
+        writeCurrentImageStackToDICOM(handles.imgRegistered,handles.infoMoving,handles.pathstrMoving);
+        tform = handles.imgRegTform;
+        save([handles.pathstrMoving '\Registered\Tform.mat'],'tform');
+        % Creates directory for fused images
+        mkdir(fullfile(handles.pathstrMoving,'Fused'));
     
-updateImage(hObject, eventdata, handles);
-
-% --- Executes on selection change in popupmenuFileTypeReference.
-function popupmenuFileTypeReference_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenuFileTypeReference (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenuFileTypeReference contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenuFileTypeReference
-str = get(handles.popupmenuFileTypeReference,'String');
-val = get(handles.popupmenuFileTypeReference,'Value');
-switch str{val}
-    case 'TXM'
-        handles.referenceFileType = 'txm';
-    case 'DICOM'
-        handles.referenceFileType = 'dcm';
-end
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function popupmenuFileTypeReference_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenuFileTypeReference (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on selection change in popupmenuFileTypeMoving.
-function popupmenuFileTypeMoving_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenuFileTypeMoving (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenuFileTypeMoving contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenuFileTypeMoving
-str = get(handles.popupmenuFileTypeMoving,'String');
-val = get(handles.popupmenuFileTypeMoving,'Value');
-switch str{val}
-    case 'TXM'
-        handles.movingFileType = 'txm';
-    case 'DICOM'
-        handles.movingFileType = 'dcm';
-end
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function popupmenuFileTypeMoving_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenuFileTypeMoving (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function updateImage(hObject,eventdata,handles)
-% If there is a moving and refence image show both side by side
-if isfield(handles,'imgMoving') && isfield(handles,'imgReference')
-    imshow(imadjust(handles.imgMoving(:,:,handles.sliceMoving)),'Parent',handles.axesMovingXY);
-    imshow(imadjust(handles.imgReference(:,:,handles.sliceReference)),'Parent',handles.axesReferenceXY);
-% If there is only one, show it alone
-elseif isfield(handles,'imgMoving') && ~isfield(handles,'imgReference')
-    imshow(imadjust(handles.imgMoving(:,:,handles.sliceMoving)),'Parent',handles.axesMovingXY);
-elseif ~isfield(handles,'imgMoving') && isfield(handles,'imgReference')
-    imshow(imadjust(handles.imgReference(:,:,handles.sliceReference)),'Parent',handles.axesReferenceXY);
-end
-
-guidata(hObject, handles);
-
-
-% --- Executes on button press in pushbuttonCenterMovingToReference.
-function pushbuttonCenterMovingToReference_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonCenterMovingToReference (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% For each dimension, if either image is larger than the other, pad the
-% start of the array by half the difference
-[a, b, c] = size(handles.imgReference);
-
-[a1, b1, c1] = size(handles.imgMoving);
-
-if a >= a1
-    aDiff = a - a1;
-    handles.imgMoving = padarray(handles.imgMoving,[round(aDiff/2) 0 0]);
-elseif a < a1
-    aDiff = a1 - a;
-    handles.imgReference = padarray(handles.imgReference,[round(aDiff/2) 0 0]);
-end
-
-if b >= b1
-    bDiff = b - b1;
-    handles.imgMoving = padarray(handles.imgMoving,[0 round(bDiff/2) 0]);
-elseif b < b1
-    bDiff = b1 - b;
-    handles.imgReference = padarray(handles.imgReference,[0 round(bDiff/2) 0]);
-end
-
-if c >= c1
-    cDiff = c - c1;
-    handles.imgMoving = padarray(handles.imgMoving,[0 0 round(cDiff/2)]);
-elseif c < c1
-    cDiff = c1 - c;
-    handles.imgReference = padarray(handles.imgReference,[0 0 round(cDiff/2)]);
-end
-handles = updateSliders(hObject,eventdata,handles);
-
-updateImage(hObject, eventdata, handles);
-updateBothImages(hObject, eventdata, handles);
-
-
-% --- Executes on button press in pushbuttonMove.
-function pushbuttonMove_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonMove (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-str = get(handles.popupmenuUDLR,'String');
-val = get(handles.popupmenuUDLR,'Value');
-direction = str{val};
-numVox = str2num(cell2mat(get(handles.editMoveVoxels,'String')));
-[a, b, c] = size(handles.imgMoving);
-
-switch direction
-    case 'L'
-        handles.imgMoving = handles.imgMoving(:,numVox:end,:);
-        handles.imgMoving(:,end:end+numVox-1,:) = 0;
-    case 'U'
-        handles.imgMoving = handles.imgMoving(numVox:end,:,:);
-        handles.imgMoving(end:end+numVox-1,:,:) = 0;
-    case 'R'
-        handles.imgMoving = handles.imgMoving(:,1:end-numVox,:);
-        zeroPad = uint16(zeros(a,numVox,c));
-        handles.imgMoving = [zeroPad,handles.imgMoving];
-    case 'D'
-        handles.imgMoving = handles.imgMoving(1:end-numVox,:,:);
-        zeroPad = uint16(zeros(numVox,b,c));
-        handles.imgMoving = [zeroPad;handles.imgMoving];
-end
-handles = updateSliders(hObject,eventdata,handles);
-
-updateImage(hObject, eventdata, handles);
-updateBothImages(hObject, eventdata, handles);
-
-% --- Executes on selection change in popupmenuUDLR.
-function popupmenuUDLR_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenuUDLR (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenuUDLR contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenuUDLR
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenuUDLR_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenuUDLR (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-function editMoveVoxels_Callback(hObject, eventdata, handles)
-% hObject    handle to editMoveVoxels (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'String') returns contents of editMoveVoxels as text
-%        str2double(get(hObject,'String')) returns contents of editMoveVoxels as a double
-
-
-% --- Executes during object creation, after setting all properties.
-function editMoveVoxels_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to editMoveVoxels (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: edit controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-function updateBothImages(hObject, eventdata, handles)
-
-% if isfield(handles,'imgMoving') && isfield(handles,'imgReference')
-%     imshowpair(handles.imgMoving(:,:,handles.sliceMoving),handles.imgReference(:,:,handles.sliceMoving),'Parent',handles.axesMovingOverlapSlice);
-%     imshowpair(handles.imgReference(:,:,handles.sliceReference),handles.imgMoving(:,:,handles.sliceReference),'Parent',handles.axesReferenceOverlapSlice);
-% end
-
-guidata(hObject, handles);
-
-
-% --- Executes on slider movement.
-function sliderFused_Callback(hObject, eventdata, handles)
-% hObject    handle to sliderFused (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: get(hObject,'Value') returns position of slider
-%        get(hObject,'Min') and get(hObject,'Max') to determine range of slider
-handles.fusedSlice = round(get(handles.sliderFused,'Value'));
-imshow(handles.fused(:,:,handles.fusedSlice),'Parent',handles.axesFused);
-
-guidata(hObject, handles);
-
-% --- Executes during object creation, after setting all properties.
-function sliderFused_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to sliderFused (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: slider controls usually have a light gray background.
-if isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor',[.9 .9 .9]);
-end
-
-
-% --- Executes on selection change in popupmenuPlanarAxial.
-function popupmenuPlanarAxial_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenuPlanarAxial (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenuPlanarAxial contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenuPlanarAxial
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenuPlanarAxial_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenuPlanarAxial (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on selection change in popupmenuAxialAxis.
-function popupmenuAxialAxis_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenuAxialAxis (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenuAxialAxis contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenuAxialAxis
-
-
-% --- Executes during object creation, after setting all properties.
-function popupmenuAxialAxis_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenuAxialAxis (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-% Resize sliders based on resized image
-% TODO- Make this more generic so it can be used more
-% Function slider = updateSlider(slider, image) or (slider, sliderLength)
-function handles = updateSliders(hObject,eventdata,handles)
-[~, ~, c] = size(handles.imgReference);
-set(handles.sliderReference,'Value',1);
-set(handles.sliderReference,'min',1);
-set(handles.sliderReference,'max',c);
-set(handles.sliderReference,'SliderStep',[1,1]/(c-1));
-    
-updateImage(hObject, eventdata, handles);
-updateBothImages(hObject, eventdata, handles);
-
-[~, ~, c] = size(handles.imgMoving);
-set(handles.sliderMoving,'Value',1);
-set(handles.sliderMoving,'min',1);
-set(handles.sliderMoving,'max',c);
-set(handles.sliderMoving,'SliderStep',[1,1]/(c-1));
-    
-updateImage(hObject, eventdata, handles);
-updateBothImages(hObject, eventdata, handles);
-
-
-% --- Executes on button press in pushbuttonCropReference.
-function pushbuttonCropReference_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonCropReference (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% Create an interactive croping tool
-[~,rect] = imcrop(handles.axesReferenceXY);
-[a b c] = size(handles.imgReference);
-% Crop every slice of reference image using rect
-for i = 1:c
-    tmp{i} = imcrop(handles.imgReference(:,:,i),rect);
-end
-% Clear reference image and relace with cropped version
-clear handles.imgReference;
-for i = 1:c
-    % TODO- can we skip using tmp2 and insert directly into imgReference
-   tmp2(:,:,i) = tmp{i};
-end
-handles.imgReference = tmp2;
-clear tmp2;
-
-updateSliders(hObject, eventdata, handles);
-updateImage(hObject, eventdata, handles);
-updateBothImages(hObject, eventdata, handles);
-%TODO- combine both of these
-% --- Executes on button press in pushbuttonCropMoving.
-function pushbuttonCropMoving_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonCropMoving (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% Create an interactive croping tool
-[~,rect] = imcrop(handles.axesMovingXY);
-[a b c] = size(handles.imgMoving);
-% Crop every slice of moving image using rect
-for i = 1:c
-    tmp{i} = imcrop(handles.imgMoving(:,:,i),rect);
-end
-% Clear moving image and relace with cropped version
-clear handles.imgMoving;
-rmfield(handles,'imgMoving');
-guidata(hObject, handles);
-for i = 1:c
-    tmp2(:,:,i) = tmp{i};
-end
-handles.imgMoving = tmp2;
-clear tmp tmp2;
-
-updateSliders(hObject, eventdata, handles);
-updateImage(hObject, eventdata, handles);
-updateBothImages(hObject, eventdata, handles);
-
-
-% --- Executes on button press in pushbuttonWrite.
-function pushbuttonWrite_Callback(hObject, eventdata, handles)
-% hObject    handle to pushbuttonWrite (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-% Save files from registered image
-writeCurrentImageStackToDICOM(handles.imgRegistered,handles.infoMoving,handles.pathstrMoving);
-tform = handles.imgRegTform;
-save([handles.pathstrMoving '\Registered\Tform.mat'],'tform');
-% Creates directory for fused images
-mkdir(fullfile(handles.pathstrMoving,'Fused'));
-
-zers = '00000';
-[a b c] = size(handles.fused);
-for i = 1:c
-    % Give every filename a unique 5 digit number with leading zeroes
-    fName = ['Fused -' zers(1:end-length(num2str(i))) num2str(i) '.tif'];
-    % TODO- Move myDir declaration outside loop
-    myDir = fullfile(handles.pathstrMoving,'Fused');
-    % Save the file
-    imwrite(handles.fused(:,:,i),fullfile(myDir,fName));
-end
-
-%TODO-Major rework, get configuration files set up first
+        zers = '00000';
+        [~, ~, c] = size(handles.fused);
+        myDir = fullfile(handles.pathstrMoving,'Fused');
+        for i = 1:c
+            % Give every filename a unique 5 digit number with leading zeroes
+            fName = ['Fused -' zers(1:end-length(num2str(i))) num2str(i) '.tif'];
+            % Save the file
+            imwrite(handles.fused(:,:,i),fullfile(myDir,fName));
+        end
+    else
+        noImgError;
+    end
+
+% NAME-writeCurrentImageStackToDICOM
+% DESC-Writes an image to a DICOM file
+% IN-img: The image to write
+% info: The DICOM info structure
+% pathstr: The filepath to write to
 function writeCurrentImageStackToDICOM(img,info,pathstr)
-
-DICOMPrefix = 'Registered';
-
-[a b c] = size(img);
-
-zers = '00000';
-info.Rows = a;
-info.Columns = b;
-info.InstitutionName = 'Washington University in St. Louis';
-% info.SliceThickness = info.SliceThickness / imgScale;
-info.Height = a;
-info.Width = b;
-info.PixelSpacing = [info.SliceThickness;info.SliceThickness];
-info.StudyDescription = DICOMPrefix;
-
-%for ZEISS scans
-if ~isempty(strfind(info.Manufacturer,'Zeiss'))
-    mkdir(fullfile(pathstr, DICOMPrefix));
-    tmpDir = fullfile(pathstr,DICOMPrefix);
-    tmp = dicominfo(fullfile(pwd,'ZeissDICOMTemplate.dcm'));%read info from a known working Zeiss DICOM
-    tmp2 = tmp;
-    for i = 1:c
-        tmp2.FileName = [DICOMPrefix zers(1:end - length(num2str(i))) num2str(i) '.dcm'];
-        tmp2.Rows = info.Rows;
-        tmp2.Columns = info.Columns;
-        tmp2.InstitutionName = info.InstitutionName;
-        tmp2.SliceThickness = info.SliceThickness;
-        tmp2.Height = info.Height;
-        tmp2.Width = info.Width;
-        tmp2.PixelSpacing = info.PixelSpacing;
-        tmp2.StudyDescription = info.StudyDescription;
-        tmp2.KVP = info.KVP;
-        zers2 = '000000';
-        slice = num2str(i);
-        len = length(slice);
-        tmp2.MediaStorageSOPInstanceUID = ['1.2.826.0.1.3680043.8.435.3015486693.35541.' zers(1:end-len) num2str(i)];
-        tmp2.SOPInstanceUID = tmp2.MediaStorageSOPInstanceUID;
-        tmp2.PatientName.FamilyName = DICOMPrefix;
-        tmp2.ImagePositionPatient(3) = tmp2.ImagePositionPatient(3) + tmp2.SliceThickness;
-        set(textPercentLoaded,'String',num2str(i/c));
-        drawnow();
-        fName = [DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i)  '.dcm'];
-        dicomwrite(img(:,:,i),fullfile(tmpDir,fName),tmp2);
-    end
-elseif ~isempty(strfind(info.Manufacturer,'SCANCO'))
-    mkdir(fullfile(pathstr,DICOMPrefix));
-    tmpDir = fullfile(pathstr,DICOMPrefix);
-    %sort out info struct for writing; dicomwrite won't write private fields
-    tmp = info;
-    if isfield(tmp,'Private_0029_1000')%identifies as Scanco original DICOM file
-        info.ReferringPhysicianName.FamilyName = num2str(tmp.Private_0029_1004);%will be slope for density conversion
-        info.ReferringPhysicianName.GivenName = num2str(tmp.Private_0029_1005);%intercept
-        info.ReferringPhysicianName.MiddleName = num2str(tmp.Private_0029_1000);%scaling
-        info.ReferringPhysicianName.NamePrefix = num2str(tmp.Private_0029_1006);%u of water
-    end
-    for i = 1:c
-        if i == 1
-            info.FileName = fullfile(pathstr,[DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i) '.dcm']);
-        else
-            info.SliceLocation = info.SliceLocation + info.SliceThickness;
-            info.ImagePositionPatient = info.ImagePositionPatient + info.SliceThickness;
-            info.FileName = fullfile(pathstr,[DICOMPrefix zers(1:end-length(num2str(i))) num2str(i)  '.dcm']);
+    
+    DICOMPrefix = 'Registered';
+    
+    [a, b, c] = size(img);
+    
+    zers = '00000';
+    info.Rows = a;
+    info.Columns = b;
+    info.InstitutionName = 'Washington University in St. Louis';
+    info.Height = a;
+    info.Width = b;
+    info.PixelSpacing = [info.SliceThickness;info.SliceThickness];
+    info.StudyDescription = DICOMPrefix;
+    
+    %for ZEISS scans
+    if ~isempty(strfind(info.Manufacturer,'Zeiss'))
+        mkdir(fullfile(pathstr, DICOMPrefix));
+        tmpDir = fullfile(pathstr,DICOMPrefix);
+        tmp = dicominfo(fullfile(pwd,'ZeissDICOMTemplate.dcm'));%read info from a known working Zeiss DICOM
+        tmp2 = tmp;
+        for i = 1:c
+            tmp2.FileName = [DICOMPrefix zers(1:end - length(num2str(i))) num2str(i) '.dcm'];
+            tmp2.Rows = info.Rows;
+            tmp2.Columns = info.Columns;
+            tmp2.InstitutionName = info.InstitutionName;
+            tmp2.SliceThickness = info.SliceThickness;
+            tmp2.Height = info.Height;
+            tmp2.Width = info.Width;
+            tmp2.PixelSpacing = info.PixelSpacing;
+            tmp2.StudyDescription = info.StudyDescription;
+            tmp2.KVP = info.KVP;
+            slice = num2str(i);
+            len = length(slice);
+            tmp2.MediaStorageSOPInstanceUID = ['1.2.826.0.1.3680043.8.435.3015486693.35541.' zers(1:end-len) num2str(i)];
+            tmp2.SOPInstanceUID = tmp2.MediaStorageSOPInstanceUID;
+            tmp2.PatientName.FamilyName = DICOMPrefix;
+            tmp2.ImagePositionPatient(3) = tmp2.ImagePositionPatient(3) + tmp2.SliceThickness;
+            set(textPercentLoaded,'String',num2str(i/c));
+            drawnow();
+            fName = [DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i)  '.dcm'];
+            dicomwrite(img(:,:,i),fullfile(tmpDir,fName),tmp2);
         end
-%         set(textPercentLoaded,'String',num2str(i/c));
-%         drawnow();
-        fName = [DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i)  '.dcm'];
-        dicomwrite(img(:,:,i),fullfile(tmpDir,fName),info);
-    end
-else
-    mkdir(fullfile(pathstr,DICOMPrefix))
-    tmpDir = fullfile(pathstr,DICOMPrefix);
-    %sort out info struct for writing; dicomwrite won't write private fields
-    tmp = info;
-    for i = 1:c
-        if i == 1
-            info = info;
-            info.SliceLocation = 1;
-            info.FileName = fullfile(pathstr,[DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i) '.dcm']);
-        else
-            info.SliceLocation = info.SliceLocation + info.SliceThickness;
-            info.ImagePositionPatient = info.ImagePositionPatient + info.SliceThickness;
-            info.FileName = fullfile(pathstr,[DICOMPrefix zers(1:end-length(num2str(i))) num2str(i)  '.dcm']);
-            %         info.MediaStorageSOPInstanceUID = num2str(str2num(info.MediaStorageSOPInstanceUID) + 1);
-            %         info.SOPInstanceUID = num2str(str2num(info.SOPInstanceUID) + 1);
-
+    elseif ~isempty(strfind(info.Manufacturer,'SCANCO'))
+        mkdir(fullfile(pathstr,DICOMPrefix));
+        tmpDir = fullfile(pathstr,DICOMPrefix);
+        %sort out info struct for writing; dicomwrite won't write private fields
+        tmp = info;
+        if isfield(tmp,'Private_0029_1000')%identifies as Scanco original DICOM file
+            info.ReferringPhysicianName.FamilyName = num2str(tmp.Private_0029_1004);%will be slope for density conversion
+            info.ReferringPhysicianName.GivenName = num2str(tmp.Private_0029_1005);%intercept
+            info.ReferringPhysicianName.MiddleName = num2str(tmp.Private_0029_1000);%scaling
+            info.ReferringPhysicianName.NamePrefix = num2str(tmp.Private_0029_1006);%u of water
         end
-        set(textPercentLoaded,'String',num2str(i/c));
-        drawnow();
-        fName = [DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i)  '.dcm'];
-        dicomwrite(img(:,:,i),fullfile(tmpDir,fName),info);
+        for i = 1:c
+            if i == 1
+                info.FileName = fullfile(pathstr,[DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i) '.dcm']);
+            else
+                info.SliceLocation = info.SliceLocation + info.SliceThickness;
+                info.ImagePositionPatient = info.ImagePositionPatient + info.SliceThickness;
+                info.FileName = fullfile(pathstr,[DICOMPrefix zers(1:end-length(num2str(i))) num2str(i)  '.dcm']);
+            end
+            fName = [DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i)  '.dcm'];
+            dicomwrite(img(:,:,i),fullfile(tmpDir,fName),info);
+        end
+    else
+        mkdir(fullfile(pathstr,DICOMPrefix))
+        tmpDir = fullfile(pathstr,DICOMPrefix);
+        %sort out info struct for writing; dicomwrite won't write private fields
+        for i = 1:c
+            if i == 1
+                info.SliceLocation = 1;
+                info.FileName = fullfile(pathstr,[DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i) '.dcm']);
+            else
+                info.SliceLocation = info.SliceLocation + info.SliceThickness;
+                info.ImagePositionPatient = info.ImagePositionPatient + info.SliceThickness;
+                info.FileName = fullfile(pathstr,[DICOMPrefix zers(1:end-length(num2str(i))) num2str(i)  '.dcm']);
+            end
+            set(textPercentLoaded,'String',num2str(i/c));
+            drawnow();
+            fName = [DICOMPrefix '-' zers(1:end-length(num2str(i))) num2str(i)  '.dcm'];
+            dicomwrite(img(:,:,i),fullfile(tmpDir,fName),info);
+        end
     end
-end
+
+% Generic Callbacks
+% Parameters for these should be set in the Callback property of the
+% appropriate UIControl
+
+% NAME-editTextBox_CreateFcn  
+% DESC-Executes on object creation, sets the backup background color to white     
+function editTextBox_CreateFcn(hObject, ~, ~)
+    setBackground(hObject, 'white');
+
+% NAME-slider_CreateFcn
+% DESC-Executes on object creation, sets the backup background color to dark grey 
+function slider_CreateFcn(hObject, ~, ~)
+    setBackground(hObject, [.9, .9, .9]);
+
+% NAME-slider_Callback
+% DESC-Gets a value from a slider
+% IN-hObject: The slider
+% model: The name of the field to store the value in
+% textbox: The textbox connected with the slider
+% update_Fcn: The function to call after the values are updated
+% OUT-handles.(model): The selected value 
+% handles.(textbox) String: The value displayed in the textbox       
+function slider_Callback(hObject, ~, handles, model)
+    % Check if the value has changed since the last callback to prevent
+    % callback queue buildup
+    if isfield(handles, model) && handles.(model) ~= round(get(hObject,'Value'))
+        handles.(model) = round(get(hObject,'Value'));
+        updateImage(hObject, handles);       
+    end    
+
+% NAME-popupmenu_Callback
+% IN-hObject: The popup menu
+% model: The fieldname to store the data in
+% OUT-handles.(model): The selected filetype
+function popupmenu_Callback(hObject, ~, handles, model)
+    handles.(model) = getPopupSelection(hObject);
+    guidata(hObject, handles);
+
+% NAME-editPopup_CreateFcn
+% DESC-Executes on object creation, sets the backup background color to white, initialize the model value 
+% IN-hObject: The popup menu
+% model: The name of the field to store the value in
+% OUT-handles.(model): The selected value      
+ function editPopup_CreateFcn(hObject, eventdata, handles, model)
+    editTextBox_CreateFcn(hObject, eventdata, handles);
+    popupmenu_Callback(hObject, eventdata, handles, model);  
+
+% NAME-editNumberTextBox_Callback
+% DESC-Gets a number entered in a text box and automatically corrects
+% incorrect values if possible
+% IN-hObject: The textbox
+% model: The name of the field to store the value in
+% isInt: True if the value must be an int
+% nonzero: True if the vale must be nonzero
+% min: The minimum value
+% max: The maximum value
+% OUT-handles.(model): The selected value      
+function editNumberTextBox_Callback(hObject, ~, handles, model, isInt, nonzero, min, max)
+    value = str2double(get(hObject,'String'));    
+    if ~isnan(value) % Check that the value is a number
+        % Ensure that the value matches all requirements and fix it if it
+        % doesn't
+        changed = false; % Flag to determine if the value must be adjusted
+        if exist('isInt', 'var') && isInt && value ~= round(value)
+            value = round(value);
+            changed = true;
+        end
+        if exist('min', 'var') && value < min
+            value = min;
+            changed = true;
+        elseif exist('max', 'var') && value > max
+            value = max;
+            changed = true;
+        end
+        if ~(exist('nonzero', 'var') && nonzero && value == 0)
+            handles.(model) = value;
+            % If the value has been fixed, update the textbox
+            if changed
+                set(hObject, 'String', num2str(value));
+            end
+            guidata(hObject, handles);
+            return;
+        end
+    end
+    % If the value entered is not a fixable, replace the text with the
+    % original value if it exists, or a blank
+    if isfield(handles, model)
+        set(hObject, 'String', num2str(handles.(model)));
+    else
+        set(hObject, 'String', '');
+    end
+
+% NAME-editNumberTextBox_CreateFcn  
+% DESC-Executes on object creation, sets the backup background color to white, initialize the model value 
+% IN-hObject: The text box
+% model: The name of the field to store the value in
+% OUT-handles.(model): The selected value   
+function editNumberTextBox_CreateFcn(hObject, eventdata, handles, model)
+    editTextBox_CreateFcn(hObject, eventdata, handles)
+    handles.(model) = str2double(get(hObject,'String'));
+    guidata(hObject, handles);

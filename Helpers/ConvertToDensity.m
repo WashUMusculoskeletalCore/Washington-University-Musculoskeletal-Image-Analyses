@@ -5,29 +5,32 @@
 % handles.info: the DICOM info struct
 % type: the density tyoe to use, 1 for mgHA/cc, 2 for Hounsfield units
 % OUT-handles.img: The density map
-function [handles, eventdata, hObject] = ConvertToDensity(hObject, eventdata, handles, type)
-    if isfield(handles, 'imgOrig')
-        answer = questdlg('There is a saved image. Do you want to overwrite it?', 'Save Image?', 'Overwrite', 'Proceed without saving', 'Cancel', 'Cancel');
-        switch answer
-            case 'Overwrite'
-                % Save the current image
-                handles.imgOrig = handles.img;
-            case 'Proceed without saving'
-                % Do nothing
-            otherwise
-                setStatus(hObject, handles, 'Canceled');
-                return;
+function ConvertToDensity(hObject, handles, type)
+    if isfield(handles, 'img')
+        if isfield(handles, 'imgOrig')
+            answer = questdlg('There is a saved image. Do you want to overwrite it?', 'Save Image?', 'Overwrite', 'Proceed without saving', 'Cancel', 'Cancel');
+            switch answer
+                case 'Overwrite'
+                    % Save the current image
+                    handles = SaveImage(handles);
+                case 'Proceed without saving'
+                    % Do nothing
+                otherwise
+                    setStatus(handles, 'Canceled');
+                    return;
+            end
+        else
+            % Save the current image
+            handles = SaveImage(handles);
+        end    
+        switch type
+            case 1
+                [handles.img, ~] = calculateDensityFromDICOM(handles.info, handles.img);
+            case 2
+                [~, handles.img] = calculateDensityFromDICOM(handles.info, handles.img);
         end
+        handles = windowResize(handles);   
+        updateWindow(hObject, handles);
     else
-        % Save the current image
-        handles.imgOrig = handles.img;
+        noImgError;
     end
-    switch type
-        case 1
-            [handles.img, ~] = calculateDensityFromDICOM(handles.info, handles.img);
-        case 2
-            [~, handles.img] = calculateDensityFromDICOM(handles.info, handles.img);
-    end
-    handles = windowResize(handles);   
-    guidata(hObject, handles);
-    updateWindow(hObject, eventdata, handles);

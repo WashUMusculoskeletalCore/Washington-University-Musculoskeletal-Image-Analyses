@@ -4,21 +4,21 @@
 % IN-handles.img: the 3D black and white image
 % OUT-UI: a histogram representing how many voxels in the image fall within
 % various ranges
-function [hObject,eventdata,handles] = GenerateHistogram(hObject,eventdata,handles)
+%TODO-Change to per slice?
+function GenerateHistogram(handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         if isfield(handles, 'img')
             % Reshape the image into a 1D arrray
             [a, b, c] = size(handles.img);
             img = reshape(handles.img, [1,a*b*c]);
             figure;
-            % Generate the histogram of all nonzero value in img
+            % Generate the histogram of all nonzero value in the image with 320 bins
             histogram(nonzeros(img), 320);
         else
             noImgError();
         end
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

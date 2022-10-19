@@ -6,9 +6,9 @@
 % handles.img: the 3D image
 % OUT-handles.img: the 3D image, set to the map
 % handles.imgOrig: saved copy of the original image 
-function [hObject,eventdata,handles] = DistanceMap(hObject,eventdata,handles)
+function DistanceMap(hObject, handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         if isfield(handles, 'bwContour')
             % Confirm that it is ok to overwrite the saved
             if isfield(handles, 'imgOrig')
@@ -16,28 +16,28 @@ function [hObject,eventdata,handles] = DistanceMap(hObject,eventdata,handles)
                 switch answer
                     case 'Overwrite'
                         % Save the current image
-                        handles.imgOrig = handles.img;
+                        handles = SaveImage(handles);
                     case 'Proceed without saving'
                         % Do nothing
                     otherwise
-                        setStatus(hObject, handles, 'Canceled');
+                        setStatus(handles, 'Canceled');
                         return;
                 end
             else
                 % Save the current image
-                handles.imgOrig = handles.img;
+                handles = SaveImage(handles);
             end
+            setStatus(handles, 'Creating map');
             % Get the distance map
             bwDist = bwdist(handles.bwContour);
             % Rescale the distance map and replace the original image
             maxDist = max(uint16(bwDist(:)));
             handles.img = uint16(bwDist).*((2^16-1)/maxDist);
-            updateImage(hObject,eventdata,handles);
+            updateImage(hObject, handles);
         else
             noMaskError();
         end
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

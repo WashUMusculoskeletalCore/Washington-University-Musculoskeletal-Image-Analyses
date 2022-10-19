@@ -2,9 +2,10 @@
 % DESC-Uses a distance map to find a set of non-intersecting sphere
 % IN-dm: The 3D distance map
 % OUT-dm: The distance map reduced to the sphere centers
-function dm = findSpheres(hObject, handles, dm)
+function dm = findSpheres(handles, dm)
+    displayPercentLoaded(handles, 0);
     % Find maximum radius in distance map 
-    maxRad = ceil(max(max(max(double(dm)))));
+    maxRad = ceil(max(double(dm),[],"all"));
     % Extend the array by the radius in all dirrections
     dm = padarray(dm,[ceil(maxRad)+1 ceil(maxRad)+1 ceil(maxRad)+1]);
     [a, b, c] = size(dm);
@@ -15,12 +16,12 @@ function dm = findSpheres(hObject, handles, dm)
     [~, I]= sort(reshaped,'descend');
     % Get the location of each point in sorted order
     [x, y, z] = ind2sub(size(dm), I(1:initLen));
-    displayPercentLoaded(hObject, handles, 0);
+    displayPercentLoaded(handles, 0);
     % Check every point
     for i = 1:length(x)
         if mod(i,500) == 0
             % Update loading percentage
-            displayPercentLoaded(hObject, handles, i/initLen);
+            displayPercentLoaded(handles, i/initLen);
         end
         if dm(x(i),y(i),z(i)) > 0
             % Get the distance at the point
@@ -60,7 +61,7 @@ function dm = findSpheres(hObject, handles, dm)
             end
         end
     end
-    displayPercentLoaded(hObject, handles, 1);
+    displayPercentLoaded(handles, 1);
     % Remove padding
     dm = dm((ceil(maxRad)+1):end-(ceil(maxRad)+1),...
     (ceil(maxRad)+1):end-(ceil(maxRad)+1),...

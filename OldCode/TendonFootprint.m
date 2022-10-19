@@ -1,7 +1,7 @@
 % NAME-TendonFootprint
-function [hObject,eventdata,handles] = TendonFootprint(hObject,eventdata,handles)
+function TendonFootprint(handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         try
             bwBone = selectMask(handles, 'Please type in the name of the mask representing the bone');      
             bwTendon = selectMask(handles, 'Please type in the name of the mask representing the tendon');
@@ -11,6 +11,9 @@ function [hObject,eventdata,handles] = TendonFootprint(hObject,eventdata,handles
             error('User exited without selecting a mask.');
         end
         answer = inputdlg('Show 3D figure? y/n');
+        if isempty(answer)
+            error('ContouringGUI:InputCanceled', 'Input dialog canceled');
+        end
         if answer{1} =='y'
         % Plot bone shape
             
@@ -80,9 +83,7 @@ function [hObject,eventdata,handles] = TendonFootprint(hObject,eventdata,handles
         fprintf(fid,'%s\n',num2str(area));
         fclose(fid);
 
-        guidata(hObject, handles);
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err)
+        reportError(err, handles)
     end

@@ -4,7 +4,7 @@
 % IN-Freehand 2D image draw by user
 % handles.slice: the current active slice
 % OUT handles.bwContour: the 3d image mask
-function [hObject, eventdata, handles] = SubtractContour(hObject, eventdata, handles)
+function SubtractContour(hObject, handles)
     if isfield(handles, 'bwContour')
         % Open freehand drawing tool and create a mask
         h = drawfreehand(handles.axesIMG);
@@ -12,8 +12,7 @@ function [hObject, eventdata, handles] = SubtractContour(hObject, eventdata, han
         tmp = handles.bwContour(:,:,handles.slice);
         tmp(h.createMask)=0;
         handles.bwContour(:,:,handles.slice)=tmp;
-        handles = updateContour(handles);
-        updateImage(hObject, eventdata, handles);
+        updateContour(hObject, handles);
     else
-        noMaskError();
+        noMaskError;
     end

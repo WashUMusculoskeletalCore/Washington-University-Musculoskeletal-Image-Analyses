@@ -5,6 +5,10 @@
 function selection = getPopupSelection(menu)
     str=get(menu, 'String');
     val=get(menu, 'Value');
-    selection = str{val};
+    if isempty(str)
+        selection = '';
+    else
+        selection = str{val};
+    end
 end
 

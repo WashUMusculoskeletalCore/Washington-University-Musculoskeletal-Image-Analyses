@@ -17,7 +17,7 @@ function slider = resizeSlider(varargin)
         slider=varargin{1}; 
         min=varargin{2};
         max=varargin{3};
-        button_step=1;c
+        button_step=1;
         trough_step=1;  
     elseif nargin == 5 % Slider, min, max, and step sizes
         slider=varargin{1};

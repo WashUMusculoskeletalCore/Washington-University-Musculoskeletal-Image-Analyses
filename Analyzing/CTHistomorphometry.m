@@ -1,94 +1,57 @@
-function [handles,events,hObject] = CTHistomorphometry(hObject,events,handles)
-
-movingPathstr = uigetdir(handles.pathstr,'Please select the folder containing your registered DICOM files');
-[tformPathstr,tformPathDir] = uigetfile(handles.pathstr,'Please select the transformation object to use');
-
-setStatus(hObject, handles, 'Loading DICOM Files');
-[registeredIMG,registeredInfo] = readDICOMStack(movingPathstr);
-
-if tformPathstr ~= 0
-    load(fullfile(tformPathDir,tformPathstr));
+% NAME-CTHistomorphometry
+% DESC-Determines the difference between the image and a loaded image
+% IN-handles.img: The 3D image
+% IO: Loads a DICOM and a tranformation file
+% OUT-IO: Creates a file showing the difference
+function CTHistomorphometry(handles)
+try
+    movingPathstr = uigetdir(handles.pathstr,'Please select the folder containing your registered DICOM files');
+    if isequal(movingPathstr, 0)
+        error('ContouringGUI:InputCanceled', 'No folder selected');
+    end
+    [tformPathstr,tformPathDir] = uigetfile(handles.pathstr,'Please select the transformation object to use');
+    if isequal(tformPathstr, 0) && isequal(tformPathDir, 0)
+        error('ContouringGUI:InputCanceled', 'No file slected');
+    end
+    setStatus(handles, 'Loading DICOM Files');
+    [registeredIMG,~] = readDICOMStack(movingPathstr);
+    
+    tform=load(fullfile(tformPathDir,tformPathstr));
     registeredIMG = imwarp(registeredIMG,tform,'OutputView',imref3d(size(handles.img)));
-end
-
-% [a b c] = size(registeredIMG);
-% h = figure;
-% hold on;
-% for i = 1:c
-%     fused(:,:,i,1:3) = imfuse(handles.img(:,:,i),registeredIMG(:,:,i));
-%     imshow(squeeze(fused(:,:,i,1:3)));
-%     drawnow()
-% end
-% hold off;
-% StackSlider(fused);
-% uiwait();
-% StackSlider(handles.img);
-% StackSlider(registeredIMG);
-
-% answer = inputdlg('Is this registration acceptable? y/n');
-answer{1} = 'y';
-if strcmpi(answer{1},'y') == 1
-
-    setStatus(hObject, handles, 'Cropping Images');
-%     [x y z] = ind2sub(size(handles.bwContour),find(handles.bwContour));
-%     xMin = min(x);
-%     xMax = max(x);
-%     yMin = min(y);
-%     yMax = max(y);
-%     zMin = min(z);
-%     zMax = max(z);
-%     handles.img = handles.img(xMin:xMax,yMin:yMax,zMin:zMax);
-%     registeredIMG = registeredIMG(xMin:xMax,yMin:yMax,zMin:zMax);
-
-    setStatus(hObject, handles, 'Masking Images');
+    
+    
+    setStatus(handles, 'Masking Images');
     % Remove area outside thresholds from image
     bwFixed = handles.img > handles.lowerThreshold;
     bwFixedHigh = handles.img > handles.upperThreshold;
     bwFixed(bwFixedHigh) = 0;
     % Remove area outside thresholds from registered image
     bwRegistered = registeredIMG > handles.lowerThreshold;
-    bwRegisteredHigh = registeredIMG > handles.upperThreshold;
     bwRegistered(bwFixedHigh) = 0;
-
-    setStatus(hObject, handles, 'Finding Mask Differences');
+    
+    setStatus(handles, 'Finding Mask Differences');
     % Calculate difference in volume between image and registered image
-    bwFixedVolume = length(find(bwFixed)) * handles.info.SliceThickness^3;
-    bwRegisteredVolume = length(find(bwRegistered)) * handles.info.SliceThickness^3;
+    bwFixedVolume = nnz(bwFixed) * handles.info.SliceThickness^3;
+    bwRegisteredVolume = nnz(bwRegistered) * handles.info.SliceThickness^3;
     bwDifferenceVolume = bwFixedVolume - bwRegisteredVolume;
-    newVolume = length(find(bwRegistered(~bwFixed))) * handles.info.SliceThickness^3;
-    oldVolume = length(find(bwFixed(~bwRegistered))) * handles.info.SliceThickness^3;
+    newVolume = nnz(bwRegistered(~bwFixed)) * handles.info.SliceThickness^3;
+    oldVolume = nnz(bwFixed(~bwRegistered)) * handles.info.SliceThickness^3;
     % Output results to file
     header = {'Rat ID','Date Performed','Threshold','BV Fixed (pre-scan)','BV Registered (post-scan)','BV Difference','Fixed-Only Volume',...
         'Moving-Only Volume'};
-    
+    results = {movingPathstr, datestr(now), handles.lowerThreshold, bwFixedVolume, bwRegisteredVolume, bwDifferenceVolume, oldVolume, newVolume};
     fid = fopen(fullfile(movingPathstr,'RegistrationDifferenceResults.txt'),'a');
-    for i = 1:length(header)
-        if i == length(header)
-            fprintf(fid,'%s\n',header{i});
-        else
-            fprintf(fid,'%s\t',header{i});
-        end
-    end
-    fprintf(fid,'%s\t',movingPathstr);
-    fprintf(fid,'%s\t',datestr(now));
-    fprintf(fid,'%s\t',num2str(handles.lowerThreshold));
-    fprintf(fid,'%s\t',num2str(bwFixedVolume));
-    fprintf(fid,'%s\t',num2str(bwRegisteredVolume));
-    fprintf(fid,'%s\t',num2str(bwDifferenceVolume));
-    fprintf(fid,'%s\t',num2str(oldVolume));
-    fprintf(fid,'%s\n',num2str(newVolume));
-    fclose(fid);
+    PrintReport(fid, header, results);
     
-    [a b c] = size(bwFixed);
     % Display data as a graphic
     shpFixed = shpFromBW(bwFixed,2);
     shpRegistered = shpFromBW(bwRegistered,2);
-    tmp = bwFixed;
-    tmp(bwRegistered) = 0;
-    shpOld = shpFromBW(tmp,2);
-    tmp = bwRegistered;
-    tmp(bwFixed) = 0;
-    shpNew = shpFromBW(tmp,2);
+    bwOld = bwFixed;
+    bwOld(bwRegistered) = 0;
+    shpOld = shpFromBW(bwOld,2);
+    bwNew = bwRegistered;
+    bwNew(bwFixed) = 0;
+    shpNew = shpFromBW(bwNew,2);
     
     
     figure;
@@ -117,4 +80,6 @@ if strcmpi(answer{1},'y') == 1
     hold off;
     camlight();
     savefig(fullfile(movingPathstr,'shpCombined.fig'));
+catch err
+    reportError(err, handles);
 end

@@ -5,22 +5,24 @@
 % handles.lOut: the lower range of the brightness window
 % handles.hOut: the upper range of the brightness window
 % OUT-handles.imgOrig: a saved copy of the original image
-function [hObject,eventdata,handles] = UseForContouring(hObject,eventdata,handles)
+function UseForContouring(hObject,handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         if isfield(handles, 'img')
             % Save original image so it can be reverted to when done contouring
-            if isfield(handles,'imgOrig') == 0
-                handles.imgOrig = handles.img;
+            if ~isfield(handles,'imgOrig')
+                handles = SaveImage(handles);
             end
             % Adjust image threshold to the window
             for i = 1:handles.abc(3)
-                handles.img(:,:,i) = imadjust(handles.img(:,:,i),[double(handles.lOut);double(handles.hOut)],[]);
+                handles.img(:,:,i) = uint16(imadjust(handles.img(:,:,i),[double(handles.lOut);double(handles.hOut)]));
             end
-            updateImage(hObject, eventdata, handles);
+            handles = windowResize(handles);
+            updateWindow(hObject, handles);
+        else
+            noImgError;
         end
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

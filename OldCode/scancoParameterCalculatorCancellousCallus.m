@@ -5,46 +5,29 @@ function [out,outHeader] = scancoParameterCalculatorCancellousCallus(bw,bw2,img,
 %img is the original DICOM images
 %info is one of the info structs for metadata
 
-% info.SliceThickness = info.SliceThickness / 1000;
+[BV, TV, BVTV] = BoneVolume(bw, bw2, info.SliceThickness);
 
-%Find bone volume
-BV = length(find(bw)) * info.SliceThickness^3;
-%find total volume
-TV = length(find(bw2)) * info.SliceThickness^3;
-%find BV/TV
-BVTV = BV/TV;
-
-bwFilled = bw2;
-clear bw2;
-
-%find the ultimate erosion to identify the local maxima in the binary array
-bwUlt = bwulterode(bw);
 %identify the background of the binary array
 bwBackground = ~bw;
-bwBackground(~bwFilled) = 0;
+bwBackground(~bw2) = 0;
 D1 = bwdist(bw);%does what I want for thickness of spacing
 D2 = bwdist(bwBackground);%does what I want for thickness of structures
-D2(~bwFilled) = 0;
-D1(~bwFilled) = 0;
+D2(~bw2) = 0;
+D1(~bw2) = 0;
 
 %do foreground structure
-rads = D2(find(D2));%(find(bwUlt));%find the radii of the spheres at the local maxima
-[r c v] = ind2sub(size(bwUlt),find(bwUlt));
-xyzUlt = [r c v];%find xyz coords of the local maxima
-xyzUlt = xyzUlt .* info.SliceThickness;%convert to physical units
+rads = nonzeros(D2);%(find(bwUlt));%find the radii of the spheres at the local maxima
 diams = 2 * rads .* info.SliceThickness;%convert to diameters and in physical units
 
 TbTh = mean(diams);%mean structure thickness
 TbThSTD = std(diams);%standard deviation of structure thicknesses
 
 %do background structure
-bwNotFilled = bwFilled;
+bwNotFilled = bw2;
 bwNotFilled(bw) = 0;
 bwUlt = bwulterode(bwNotFilled);
-rads = D1(find(bwUlt));%find the radii of the spheres at the local maxima
-[r c v] = ind2sub(size(bwUlt),find(bwUlt));
-% xyzUlt = [r c v];%find xyz coords of the local maxima
-% xyzUlt = xyzUlt .* info.SliceThickness;%convert to physical units
+rads = D1(bwUlt);%find the radii of the spheres at the local maxima
+
 diams = 2 * rads .* info.SliceThickness;%convert to diameters and in physical units
 
 TbSp = mean(diams);%mean structure thickness
@@ -54,10 +37,9 @@ TN = 1/TbSp;
 
 %find TMD and vBMD
 if isfield(info,'Private_0029_1004')
-    [densityMatrix junk] = calculateDensityFromDICOM(info,img);
-    clear junk;
-    TMD = mean(densityMatrix(find(bw)));
-    vBMD = mean(densityMatrix(find(bwFilled)));
+    [densityMatrix, ~] = calculateDensityFromDICOM(info,img);
+    TMD = mean(densityMatrix(bw));
+    vBMD = mean(densityMatrix(bw2));
 else
     TMD = 0;
     vBMD = 0;

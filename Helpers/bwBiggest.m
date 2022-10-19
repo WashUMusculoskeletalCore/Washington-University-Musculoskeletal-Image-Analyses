@@ -8,6 +8,9 @@ function [bw] = bwBiggest(bw)
     % find the component with the most pixels
     numPixels = cellfun(@numel,cc.PixelIdxList);
     [~, idx] = max(numPixels);
-    % Remove all other components
+    % Remove all components
     bw = false(size(bw));
-    bw(cc.PixelIdxList{idx}) = 1;
+    if idx > 0
+        % If there is a largest component, add it to the empty mask
+        bw(cc.PixelIdxList{idx}) = 1;
+    end

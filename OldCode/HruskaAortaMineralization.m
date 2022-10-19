@@ -1,7 +1,7 @@
-function [hObject,eventdata,handles] = HruskaAortaMineralization(hObject,eventdata,handles)
+function HruskaAortaMineralization(handles)
 
 try
-    setStatus(hObject, handles, 'Busy');
+    setStatus(handles, 'Busy');
     %startSlice = handles.slice;
     %endSlice = startSlice + 1049;
     
@@ -44,8 +44,7 @@ try
     fprintf(fid,'%s\n',num2str(calcificationThresh));
     fclose(fid);
     %     close all;
-    setStatus(hObject, handles, 'Not Busy');
+    setStatus(handles, 'Not Busy');
 catch err
-    setStatus(hObject, handles, 'Failed');
-    reportError(err);
+    reportError(err, handles);
 end

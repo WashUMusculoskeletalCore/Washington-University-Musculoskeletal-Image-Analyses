@@ -1,7 +1,7 @@
-function [hObject,eventdata,handles] = LoadTXM(hObject,eventdata,handles)
+function LoadTXM(hObject, handles)
 
 try
-    setStatus(hObject, handles, 'Busy');
+    setStatus(handles, 'Busy');
 
     if isfield(handles,'img') == 1
         clear handles.img;
@@ -13,6 +13,9 @@ try
     set(handles.editScaleImageSize,'String',num2str(handles.imgScale));
     
     [fName, pName] = uigetfile(fullfile(pwd,'*.txm'),'Please select your TXM file');
+    if isequal(fName, 0) && isequal(pName, 0)
+        error('ContouringGUI:InputCanceled', 'File selection canceled')
+    end
     handles.pathstr = [pName fName];
     
     set(handles.textCurrentDirectory,'String',[pName fName]);
@@ -51,19 +54,19 @@ try
     ct=0;
     for i = 1:handles.headerShort.NoOfImages
         ct=ct+1;
-        displayPercentLoaded(hObject, handles, ct/double(handles.headerShort.NoOfImages));
+        displayPercentLoaded(handles, ct/double(handles.headerShort.NoOfImages));
         handles.img(:,:,i) = txmimage_read8(handles.header,ct,0,0);
     end
     
-    handles.dataMax = max(max(max(handles.img)));
+    handles.dataMax = max(handles.img, [], "all");
     cameratoolbar('Show');
     
-    handles.info.LargestImagePixelValue = max(max(max(handles.img)));
-    handles.info.SmallestImagePixelValue = min(min(min(handles.img)));
+    handles.info.LargestImagePixelValue = max(handles.img, [], "all");
+    handles.info.SmallestImagePixelValue = min(handles.img, [], "all");
     
     handles.startMorph = 1;
     set(handles.editStartMorph, 'String', num2str(handles.startMorph));
-    [hObject, handles] = abcResize(hObject, handles);
+    handles = abcResize(handles);
     handles = windowResize(handles);
     
     handles.colormap = 'gray';
@@ -75,9 +78,8 @@ try
     set(gcf,'menubar','none');
     set(gcf,'toolbar','none');
     
-    updateImage(hObject, eventdata, handles);
-    setStatus(hObject, handles, 'Not Busy');
+    updateImage(hObject, handles);
+    setStatus(handles, 'Not Busy');
 catch err
-    setStatus(hObject, handles, 'Failed');
-    reportError(err);
+    reportError(err, handles);
 end

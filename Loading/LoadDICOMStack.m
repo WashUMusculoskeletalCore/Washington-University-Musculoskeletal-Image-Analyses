@@ -2,29 +2,32 @@
 % DESC-loads the image from a stack of DICOM files
 % IN-UI: loads files selected by user
 % OUT-handles.img: the image loaded from the files
-function [hObject, eventdata, handles] = LoadDICOMStack(hObject, eventdata, handles)
+% handles.abc: The size of the image
+% handles.dataMax: The maximum brigtness value of the image
+% handles.dataMin: The minimum brightness value of the image
+% handles.pathstr: The filepath used by the application
+% handles.info: The information data structure
+function LoadDICOMStack(hObject, handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
+        displayPercentLoaded(handles, 0);
+        % Clear the image
         if isfield(handles,'img')
             handles.img = [];
-            guidata(hObject, handles);
-            drawnow();
-        end
-        if isfield(handles,'bwContour')
-            clear handles.bwContour;handles=rmfield(handles,'bwContour');
-            handles = updateContour(handles);
         end
         % Open UI prompt to get directory
-        handles.pathstr = uigetdir(pwd,'Please select the folder containing your DICOM files');
-        % Get all files in directory containing .dcm
-        handles.files = dir(fullfile(handles.pathstr, '*.dcm*'));
-        %     mrFlag = 0;
-        % If there are no dcm files found, get all files starting with IM
-        if isempty(handles.files)
-            handles.files = dir(fullfile(handles.pathstr, 'IM*'));
-            %         mrFlag = 1;
+        pathstr = uigetdir(pwd,'Please select the folder containing your DICOM files');
+        if isequal(pathstr, 0)
+            error('ContouringGUI:InputCanceled', 'File selection canceled')
         end
-        handles.info = dicominfo(fullfile(handles.pathstr,handles.files(1).name));
+        handles.pathstr = pathstr;
+        % Get all files in directory containing .dcm
+        files = dir(fullfile(handles.pathstr, '*.dcm*'));
+        % If there are no dcm files found, throw an error
+        if isempty(files)
+            error('ContouringGUI:InputError', 'No DICOMS found');
+        end
+        handles.info = dicominfo(fullfile(handles.pathstr, files(1).name));
         % Autofill missing info
         % TODO- Use configuration files
         if ~isfield(handles.info,'Manufacturer')
@@ -42,57 +45,59 @@ function [hObject, eventdata, handles] = LoadDICOMStack(hObject, eventdata, hand
         if ~isfield(handles.info,'SliceThickness')
             handles.info.SliceThickness = handles.info.PixelSpacing(1);
         end
-
-        handles.img = zeros(handles.info.Height, handles.info.Width, length(handles.files), 'uint16');
-
-        % Convert each file to an image slice
-        for i = 1:length(handles.files)
-            displayPercentLoaded(hObject, handles, i/length(handles.files));
-            handles.img(:,:,i) = dicomread(fullfile(handles.pathstr,handles.files(i).name));
-        end
-
+        setStatus(handles, 'Loading Image');
+        try
+            % Read the full stack
+            tmp = dicomreadVolume(handles.pathstr);
+            handles.img=squeeze(tmp(:,:,1,:));
+            clear tmp;
+            displayPercentLoaded(handles, 1);
+        catch
+            % Convert each file to an image slice
+            handles.img = zeros(handles.info.Height, handles.info.Width, length(files), 'uint16');
+            l = length(files);
+            for i = 1:l
+                handles.img(:,:,i) = dicomread(fullfile(handles.pathstr,files(i).name));
+                displayPercentLoaded(handles, i/l);
+            end
+        end      
+        setStatus(handles, 'Initializing Data');
+        handles.img = uint16(handles.img);
+        
         % Convert pixels from bit depth of 8 to 16
-        if isfield(handles.info,'LargestImagePixelValue') == 1
+        if isfield(handles.info,'LargestImagePixelValue')
             if handles.info.LargestImagePixelValue == 255
                 handles.img = uint16((double(handles.img) ./ 255) .* (2^16-1));
                 handles.info.LargestImagePixelValue = 2^16-1;
                 handles.info.BitDepth = 16;
             end
         end
-
-        cameratoolbar('Show');
-        handles.dataMax = max(max(max(handles.img)));
         
         handles.startMorph = 1;
         set(handles.editStartMorph, 'String', num2str(handles.startMorph));
         
-        [hObject, handles] = abcResize(hObject, handles);
+        handles = abcResize(handles);
         handles = windowResize(handles);
 
-        set(handles.editScaleImageSize,'String',num2str(handles.imgScale));
-
-        % handles.bwContour = false(size(handles.img));
-        % handles.bwContourOrig =  handles.bwContour;
+        if handles.dataMax > 0 && handles.dataMin < 0
+            handles.threshold = 0;
+            set(handles.editThreshold,'String',num2str(handles.threshold))
+            set(handles.sliderThreshold,'Value',handles.threshold);
+        end
 
         set(handles.textCurrentDirectory,'String',handles.pathstr);
 
-        handles.lowerThreshold = 1;
-        set(handles.textLowerThreshold,'String',num2str(handles.lowerThreshold));
-        
-        handles.upperThreshold = max(max(max(handles.img)));
-        set(handles.textUpperThreshold,'String',num2str(handles.upperThreshold));
-
-        handles.hOut = 1;
-        handles.lOut = 0;
 
         % imshowpair(imadjust(handles.img(:,:,handles.slice),[double(handles.lOut);double(handles.hOut)],[double(0);double(1)]),handles.bwContour(:,:,handles.slice),'blend','Parent',handles.axesIMG);
         set(handles.textVoxelSize,'String',num2str(handles.info.SliceThickness));
-        updateImage(hObject,eventdata,handles);
-
-        set(gcf,'menubar','none');
-        set(gcf,'toolbar','none');
-        setStatus(hObject, handles, 'Not Busy');
+        updateWindow(hObject,handles);
+        % Clear the mask if it exists
+        if isfield(handles,'bwContour')
+            clear handles.bwContour;
+            handles=rmfield(handles,'bwContour');
+            updateContour(hObject, handles);
+        end
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        disp(err.message);
+        reportError(err, handles);
     end

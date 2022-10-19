@@ -3,12 +3,9 @@
 % IN-message: the message to be displayed
 % title: the title of the error textbox
 % OUT-UI: display an error message textbox
-function message = errorMsg(varargin)
+function message = errorMsg(message, title)
     if nargin > 0
-        message = varargin{1};
-        if nargin > 1
-            title=varargin{2};
-        else
+        if nargin == 1
             title = 'Error';
         end
     else

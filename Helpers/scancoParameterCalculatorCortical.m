@@ -9,8 +9,8 @@
 % OUT-out: the parameters for the report
 % outHeader: the headers for the report
 % out2: the parameters for the continuous report
-function [out,outHeader,out2] = scancoParameterCalculatorCortical(img,bw,info,threshold,robust)
-
+function [out,outHeader,out2,outHeader2] = scancoParameterCalculatorCortical(handles, img, bw,info,threshold,robust)
+    displayPercentLoaded(handles, 0);
     % Get the number of slices
     [~, ~, c] = size(bw);
 
@@ -24,6 +24,7 @@ function [out,outHeader,out2] = scancoParameterCalculatorCortical(img,bw,info,th
     bwFilled = false(size(bw));
     for i = 1:c
         bwFilled(:,:,i) = imfill(imclose(bw(:,:,i),strel('disk',5,0)),'holes');
+        displayPercentLoaded(handles, i/(5*c));
     end
     TV = nnz(bwFilled) * info.SliceThickness^3; % Total Volume
 
@@ -32,6 +33,8 @@ function [out,outHeader,out2] = scancoParameterCalculatorCortical(img,bw,info,th
     TAr = TV / (c*info.SliceThickness); % Total Area
 
     porosity = 1 - (nnz(bwPorosity) / length(find(bw)));
+
+    displayPercentLoaded(handles, 2/5);
 
     % Find the ultimate erosion to identify the local maxima in the binary array
     cc = bwconncomp(bw);
@@ -43,27 +46,27 @@ function [out,outHeader,out2] = scancoParameterCalculatorCortical(img,bw,info,th
 
     %identify the background of the binary array
     bwBackground = ~bw;
-    D2 = bwdist(bwBackground);% Get the distance from the edges
+    dist = bwdist(bwBackground);% Get the distance from the edges
 
+    displayPercentLoaded(handles, 3/5);
 
     if robust == 1
-        [meanRad,stdRad,~] = calculateThickness(hObject, handles, D2);
+        [meanRad,stdRad,~] = calculateThickness(handles, dist);
         TbTh = meanRad * 2 * info.SliceThickness;
         TbThSTD = stdRad * 2 * info.SliceThickness;
     else
         % Do foreground structure
-        rads = D2(bwUlt);% Find the radii of the spheres at the local maxima
+        rads = dist(bwUlt);% Find the radii of the spheres at the local maxima
         diams = 2 * rads .* info.SliceThickness;% Convert to diameters and in physical units
         TbTh = mean(diams);% Mean structure thickness
         TbThSTD = std(diams);% Standard deviation of structure thicknesses
     end
 
+
     % Find TMD(Tissue Mineral Density)
     if isfield(info,'Private_0029_1004')
         [densityMatrix , ~] = calculateDensityFromDICOM(info,img);
         TMD = mean(densityMatrix(bwPorosity));
-        %TODO-should this be added back in?
-        %vBMD = mean(densityMatrix(bwFilled));
     else
         TMD = 0;
     end
@@ -103,6 +106,20 @@ function [out,outHeader,out2] = scancoParameterCalculatorCortical(img,bw,info,th
         'Lower Threshold',...
         'pMOI (mm)'};
     
+    outHeader2 = {'Date Analysis Performed',...
+        'File ID',...
+        'Bone Volume mm^3',...
+        'Bone Area (mm^2)',...
+        'Medullary Area (mm^2)',...
+        'Total Area (mm^2)',...
+        'Volumetric Bone Density(mgHA/cm^3)',...
+        'Tissue Mineral Density(mgHA/cm^3)',...
+        'Mean Cortical Thickness (mm)',...
+        'Cortical Thickness Standard Deviation (mm)',...
+        'Porosity'};
+
+    displayPercentLoaded(handles, 4/5);
+
     % Divide the image into bins of slices and calculate parameters for
     % each bin
     
@@ -110,15 +127,8 @@ function [out,outHeader,out2] = scancoParameterCalculatorCortical(img,bw,info,th
     slicesPerBin = round(0.1 / info.SliceThickness);
     if c < slicesPerBin
         % If there is only one bin, reuse values
-        out2.BV2(1) = BV;
-        out2.BAr2(1) = BAr;
-        out2.MAr2(1) = MAr;
-        out2.TAr2(1) = TAr;
-        out2.vBMD2(1) = 0;
-        out2.TMD2(1) = TMD;
-        out2.TbTh2(1) = TbTh;
-        out2.TbThSTD2(1) = TbThSTD;
-        out2.porosity2(1) = porosity;
+        out2 = {BV, BAr, MAr, TAr, 0, TMD,TbTh, TbThSTD, porosity};
+        displayPercentLoaded(handles, 1);
         return
     end
     % Preallocate all arrays
@@ -167,7 +177,7 @@ function [out,outHeader,out2] = scancoParameterCalculatorCortical(img,bw,info,th
         D1(~bwUlt) = 0;
 
         if robust == 1
-            [meanRad2(ct),stdRad2(ct)] = calculateThickness(hObject, handles, D1);
+            [meanRad2(ct),stdRad2(ct)] = calculateThickness(handles, D1);
             TbTh2(ct) = meanRad2(ct) * 2 * info.SliceThickness;% Mean structure thickness
             TbThSTD2(ct) = stdRad2(ct) * 2 * info.SliceThickness;% Standard deviation of structure thicknesses
         else
@@ -187,15 +197,7 @@ function [out,outHeader,out2] = scancoParameterCalculatorCortical(img,bw,info,th
                 vBMD2(ct) = mean(densityMatrix(bwFilled2));
             end
         end
-
+        displayPercentLoaded(handles, (4/5)+i/(c*5))
     end
-    %TODO-use headers instead of fieldnames?
-    out2.BV2 = BV2;
-    out2.BAr2 = BAr2;
-    out2.MAr2 = MAr2;
-    out2.TAr2 = TAr2;
-    out2.vBMD2 = vBMD2;
-    out2.TMD2 = TMD2;
-    out2.TbTh2 = TbTh2;
-    out2.TbThSTD2 = TbThSTD2;
-    out2.porosity2 = porosity2;
+    out2 = {BV2, BAr2, MAr2, TAr2, vBMD2, TMD2,TbTh2, TbThSTD2, porosity2};
+    displayPercentLoaded(handles, 1);

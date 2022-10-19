@@ -13,7 +13,7 @@
 % handles.slice: will move down
 % UI: display the new masks
 % TODO- merge with IterateBackwards 
-function [hObject, eventdata, handles] = IterateForwards(hObject, eventdata, handles)
+functionIterateForwards(hObject, handles)
 
 if ~isempty(find(handles.bwContour(:,:,handles.slice), 1))
     handles.startStop = get(handles.togglebuttonIterateForwards,'Value');
@@ -28,7 +28,7 @@ if ~isempty(find(handles.bwContour(:,:,handles.slice), 1))
         handles.bwContour(:,:,handles.slice+1) = activecontour(handles.img(:,:,handles.slice+1),handles.bwContour(:,:,handles.slice),...
             handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
         handles.slice = handles.slice+1;
-        updateImage(hObject, eventdata, handles);
+        updateImage(hObject, handles);
         set(handles.sliderIMG,'Value',handles.slice);
         set(handles.editSliceNumber,'String',num2str(handles.slice));
         drawnow();
@@ -37,7 +37,7 @@ if ~isempty(find(handles.bwContour(:,:,handles.slice), 1))
     if handles.slice == handles.abc(3)
         handles.bwContour(:,:,end) = activecontour(handles.img(:,:,handles.slice),handles.bwContour(:,:,handles.slice-1),...
             handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
-        updateImage(hObject, eventdata, handles);
+        updateImage(hObject, handles);
         set(handles.sliderIMG,'Value',handles.slice);
         set(handles.editSliceNumber,'String',num2str(handles.slice));
         drawnow();

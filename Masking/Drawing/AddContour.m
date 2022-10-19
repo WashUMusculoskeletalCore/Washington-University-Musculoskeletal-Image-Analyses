@@ -4,21 +4,19 @@
 % IN-Freehand 2D image draw by user
 % handles.slice: the current active slice
 % OUT handles.bwContour: the 3d image mask
-function [hObject, eventdata, handles] = AddContour(hObject, eventdata, handles)
+function AddContour(hObject, handles)
     if isfield(handles, 'img') 
         if ~isfield(handles, 'bwContour')
             handles.bwContour = false(size(handles.img));
         end
-        %clcupdateImage(hObject,eventdata,handles);
         % Open freehand drawing tool and create a mask
         h = drawfreehand(handles.axesIMG);
         % Add new mask to existing mask
         tmp = handles.bwContour(:,:,handles.slice);
         tmp(h.createMask)=1;
         handles.bwContour(:,:,handles.slice)=tmp;
-        handles = updateContour(handles);
-        updateImage(hObject,eventdata,handles);
+        updateContour(hObject, handles);
     else
-        noImgError();
+        noImgError;
     end
 

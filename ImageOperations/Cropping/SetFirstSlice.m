@@ -3,15 +3,19 @@
 % IN-handles.slice: the slice to become the new first slice
 % OUT-handles.img: the cropped image
 % handles.bwCountour: the cropped mask
-function [hObject, eventdata, handles] = SetFirstSlice(hObject, eventdata, handles)
+function SetFirstSlice(hObject, handles)
     if isfield(handles, 'img')
-        handles.img = handles.img(:,:,handles.slice:end);
-        if isfield(handles,'bwContour')
-            handles.bwContour = handles.bwContour(:,:,handles.slice:end);
-            handles = updateContour(handles);
-        end
-        [hObject, handles] = abcResize(hObject, handles);
+        first = handles.slice;
+        handles.img = handles.img(:,:,first:end);
+        handles = abcResize(handles);
         handles = windowResize(handles);
-        updateImage(hObject, eventdata, handles);
+        if isfield(handles,'bwContour')
+            handles.bwContour = handles.bwContour(:,:,first:end);
+            updateContour(hObject, handles);
+        else
+            updateImage(hObject, handles);
+        end
+    else
+        noImgError;
     end
 end

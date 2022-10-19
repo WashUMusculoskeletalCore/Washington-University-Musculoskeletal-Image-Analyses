@@ -9,51 +9,46 @@
 % OUT-TangIVDPMAResults.txt: a tab delimited text file containing the
 % results of the analysis
 % Disc.fig: a 3D image file showing the masks
-function [hObject,eventdata,handles] = TangIVDPMAMorphology(hObject,eventdata,handles,notocord)
+function TangIVDPMAMorphology(handles, notocord)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
+        displayPercentLoaded(handles, 0);
         if isfield(handles, 'img')
             % Get two masks from saved masks, NP and total
-%             answer = inputdlg('Please type in the name of the mask representing the NP');
-%             while ~isKey(handles.savedMasks, answer{1})
-%                 answer = inputdlg('Not a valid saved mask name. Please type in the name of the mask representing the NP or enter nothing to quit');
-%                 if answer{1} == ""
-%                     error('No mask selected');
-%                 end
-%             end
-%             bwNP = handles.savedMasks(answer{1});
             bwNP = selectMask(handles, 'Please type in the name of the mask representing the NP');
-%             answer = inputdlg('Please type in the name of the mask representing the complete disc');
-%             while ~isKey(handles.savedMasks, answer{1})
-%                 answer = inputdlg('Not a valid saved mask name. Please type in the name of the mask representing the complete disc or enter nothing to quit');
-%                 if answer{1} == ""
-%                     error('No mask selected');
-%                 end
-%             end
-%             bwTotal = handles.savedMasks(answer{1});
             bwTotal = selectMask(handles, 'Please type in the name of the mask representing the complete disc');
-                
+            displayPercentLoaded(handles, 1/5);
+            setStatus(handles, 'Analyzing');
+            % Crop the image to the area covered by either mask
+            bw = bwNP | bwTotal;
+            [~, ~, bwNP, bwTotal, img] = CropImg(bw, bwNP, bwTotal, handles.img);
+            displayPercentLoaded(handles, 2/5);
             % Get the area in the disk but not NP to find AF(annulus fibrosus)
             bwAF = bwTotal(~bwNP);
             % Find average value of the area of the image covered by each mask
             meanTotal = mean(handles.img(bwTotal));
-            meanAF = mean(handles.img(bwAF));
-            meanNP = mean(handles.img(bwNP));
+            meanAF = mean(img(bwAF));
+            meanNP = mean(img(bwNP));
             % Calculate volume
             afVolume = nnz(bwAF) * handles.info.SliceThickness^3;
             totalVolume = nnz(bwTotal) * handles.info.SliceThickness^3;
             npVolume = nnz(bwNP) * handles.info.SliceThickness^3;    
             if notocord
-                bwNC = handles.img(bwNP) > handles.lowerThreshold;
-                meanNC = mean(handles.img(bwNC));
+                % Calculate the notocord only parameters
+                bwNC = img(bwNP) > handles.lowerThreshold;
+                meanNC = mean(img(bwNC));
                 ncVolume = nnz(bwNC) * handles.info.SliceThickness^3;
-                ncArea = shpFromBW(bwNC,3);
-                ncArea = ncArea.surfaceArea * handles.info.SliceThickness^2;
+                ncShp = shpFromBW(bwNC,3);
+                ncArea = ncShp.surfaceArea * handles.info.SliceThickness^2;
             end
-            
+            displayPercentLoaded(handles, 3/5);
             % Generate a graphic
             answer = inputdlg('Do you want to generate a picture? y or n');
+            if isempty(answer)
+                error('ContouringGUI:InputCanceled', 'Input dialog canceled');
+            end
             if strcmpi(answer{1},'y')
+                setStatus(handles, 'Creating figure');
                 shp = shpFromBW(bwTotal,3);
                 figure;
                 plot(shp,'FaceColor','b','LineStyle','none','FaceAlpha',0.3);
@@ -68,51 +63,32 @@ function [hObject,eventdata,handles] = TangIVDPMAMorphology(hObject,eventdata,ha
                 saveas(gcf,fullfile(handles.pathstr,'Disc.fig'));
             end
             % Output to file
-            fid = fopen(fullfile(handles.pathstr,'TangIVDPMAResults.txt'),'a');
-            fprintf(fid,'%s\t','Date Analysis Performed');
-            fprintf(fid,'%s\t','DICOM Path');
-            fprintf(fid,'%s\t','Total Volume (mm^3)');
-            fprintf(fid,'%s\t','AF Volume (mm^3)');
-            fprintf(fid,'%s\t','NP Volume (mm^3)');
+            setStatus(handles, 'Writing report');
+            displayPercentLoaded(handles, 4/5)
+            % Create the notocord only headers and parameters
             if notocord
-                fprintf(fid,'%s\t','NC Volume (mm^3)');
-                fprintf(fid,'%s\t','NC Area (mm^2)');
-            end
-            fprintf(fid,'%s\t','Lower Threshold');
-            fprintf(fid,'%s\t','Upper Threshold');
-            fprintf(fid,'%s\t','Mean Total');
-            fprintf(fid,'%s\t','Mean AF');         
-            if notocord
-               fprintf(fid,'%s\t','Mean NP');
-               fprintf(fid,'%s\n','Mean NC'); 
+                ncHeaders = ["NC Volume (mm^3)","NC Area (mm^2)"];
+                meanNCHeader = "Mean NC";
+                ncData = {ncVolume, ncArea};
+                meanNCData = meanNC;
             else
-                fprintf(fid,'%s\n','Mean NP');
+                ncHeaders = [];
+                meanNCHeader = [];
+                ncData = [];
+                meanNCData = [];
             end
-            fprintf(fid,'%s\t',datestr(now));
-            fprintf(fid,'%s\t',handles.pathstr);
-            fprintf(fid,'%s\t',num2str(totalVolume));
-            fprintf(fid,'%s\t',num2str(afVolume));
-            fprintf(fid,'%s\t',num2str(npVolume));
-            if notocord
-                fprintf(fid,'%s\t',num2str(ncVolume));
-                fprintf(fid,'%s\t',num2str(ncArea));
-            end
-            fprintf(fid,'%s\t',num2str(handles.lowerThreshold));
-            fprintf(fid,'%s\t',num2str(handles.upperThreshold));
-            fprintf(fid,'%s\t',num2str(meanTotal));
-            fprintf(fid,'%s\t',num2str(meanAF));
-            if notocord
-                fprintf(fid,'%s\t',num2str(meanNP));
-                fprintf(fid,'%s\n',num2str(meanNC));
-            else
-                fprintf(fid,'%s\n',num2str(meanNP));
-            end
-            fclose(fid);
+            headers = num2cell(["Date Analysis Performed","DICOM Path","Total Volume (mm^3)","AF Volume (mm^3)","NP Volume (mm^3)", ncHeaders,...
+                "Lower Threshold","Upper Threshold","Mean Total","Mean AF","Mean NP",meanNCHeader]);
+
+            data = num2cell([string(datestr(now)),string(handles.pathstr),totalVolume,afVolume,npVolume,ncData,...
+                handles.lowerThreshold,handles.upperThreshold,meanTotal,meanAF,meanNP,meanNCData]);
+
+            PrintReport(fullfile(handles.pathstr,'TangIVDPMAResults.txt'), headers, data);
         else
-            noImageError();
+            noImgError;
         end
-        setStatus(hObject, handles, 'Not Busy');
+        displayPercentLoaded(handles, 1);
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

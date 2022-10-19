@@ -4,7 +4,7 @@
 % handles.bwContour: the 3D mask
 % handles.axesIMG: the axes to display the image on
 % OUT: displays an image of the current slice
-function [hObject,eventdata,handles] = updateImage(hObject,eventdata,handles)
+function updateImage(hObject, handles)
     if isfield(handles, 'img')
         if isfield(handles,'bwContour') && handles.toggleMask
             % Show the mask and image blended together

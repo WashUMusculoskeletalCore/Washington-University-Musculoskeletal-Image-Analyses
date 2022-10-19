@@ -1,11 +1,11 @@
-function [hObject,eventdata,handles] = MarrowFat(hObject,eventdata,handles)
+function MarrowFat(handles)
 
 try
-    setStatus(hObject, handles, 'Busy');
+    setStatus(handles, 'Busy');
     handles.img(~handles.bwContour) = 0;
-    handles.bwGlobules = handles.img > handles.lowerThreshold;
-    handles.bwGlobules(handles.img > handles.upperThreshold) = 0;
-    bw = handles.bwGlobules;
+    bwGlobules = handles.img > handles.lowerThreshold;
+    bwGlobules(handles.img > handles.upperThreshold) = 0;
+    bw = bwGlobules;
     bw = bwareaopen(bw,20);
     %fatVol = length(find(bw)) * handles.info.SliceThickness^3;
     %totVol = length(find(handles.bwContour)) * handles.info.SliceThickness^3;
@@ -23,7 +23,7 @@ try
     bw3(Ld2 == 0) = 0;
     %     bwTmp = imdilate(bw3,true(3,3,3));
     for i = 1:handles.abc(3)
-        handles.blended(:,:,i) = imfuse(bw3(:,:,i),handles.img(:,:,i),'blend');
+        blended(:,:,i) = imfuse(bw3(:,:,i),handles.img(:,:,i),'blend');
     end
     clear bwTmp;
     cc = bwconncomp(bw3);
@@ -101,15 +101,14 @@ try
     
     mkdir(fullfile(handles.pathstr,'overlay images'));
     
-    [~, ~, c] = size(handles.blended);
+    [~, ~, c] = size(blended);
     for i = 1:c
         pathTemp = fullfile(handles.pathstr,'overlay images');
         fName = ['Image' num2str(i) '.tif'];
-        imwrite(handles.blended(:,:,i),fullfile(pathTemp,fName));
+        imwrite(blended(:,:,i),fullfile(pathTemp,fName));
     end
     
-    setStatus(hObject, handles, 'Not Busy');
+    setStatus(handles, 'Not Busy');
 catch err
-    setStatus(hObject, handles, 'Failed');
-    reportError(err);
+    reportError(err, handles);
 end

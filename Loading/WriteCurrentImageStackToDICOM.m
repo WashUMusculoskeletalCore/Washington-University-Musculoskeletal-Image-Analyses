@@ -4,9 +4,10 @@
 % handles.DICOMPrefix: the prefix to add to the beginning of every output filename
 % handles.info: the info struct to be copied added to the files
 % OUT-IO:Writes a set of DICOM files to output directory
-function WriteCurrentImageStackToDICOM(hObject, eventdata, handles)
+function WriteCurrentImageStackToDICOM(handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
+        displayPercentLoaded(handles, 0);
         if isfield(handles, 'img')
             handles.info.Rows = handles.abc(1);
             handles.info.Columns = handles.abc(2);
@@ -41,7 +42,7 @@ function WriteCurrentImageStackToDICOM(hObject, eventdata, handles)
                     info.SOPInstanceUID = info.MediaStorageSOPInstanceUID;
                     info.PatientName.FamilyName = handles.DICOMPrefix;
                     info.ImagePositionPatient(3) = info.ImagePositionPatient(3) + info.SliceThickness;
-                    displayPercentLoaded(hObject, handles, i/handles.abc(3));
+                    displayPercentLoaded(handles, i/handles.abc(3));
                     fName = [handles.DICOMPrefix sprintf('%05d', i) '.dcm'];
                     dicomwrite(handles.img(:,:,i),fullfile(outDir,fName),info);
                 end
@@ -53,7 +54,7 @@ function WriteCurrentImageStackToDICOM(hObject, eventdata, handles)
                     info.ImagePositionPatient = info.ImagePositionPatient + info.SliceThickness;
                     fName = [handles.DICOMPrefix '-' sprintf('%05d', i)  '.dcm'];
                     info.FileName = fullfile(outDir, fName);
-                    displayPercentLoaded(hObject, handles, i/handles.abc(3));
+                    displayPercentLoaded(handles, i/handles.abc(3));
                     if ~isempty(strfind(handles.info.Manufacturer,'SCANCO'))
                         dicomwrite(handles.img(:,:,i),fullfile(outDir, fName), 'WritePrivate', true, info);
                     else
@@ -64,8 +65,8 @@ function WriteCurrentImageStackToDICOM(hObject, eventdata, handles)
         else
             noImgError();
         end
-        setStatus(hObject, handles, 'Not Busy');
+        displayPercentLoaded(handles, 1);
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

@@ -1,6 +1,6 @@
 % NAME-SaveMasksAsLabelMatrix
 % TODO-this isn't connected to the main program yet
-function SaveMasksAsLabelMatrix(hObject,eventdata,handles)
+function SaveMasksAsLabelMatrix(handles)
     names = fieldnames(handles);
     % Determine the path to save to
     pathstr = fullfile(handles.pathstr,'labelImage.tif');

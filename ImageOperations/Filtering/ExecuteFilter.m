@@ -4,15 +4,17 @@
 % handles.sigma: the wieght to use for the filters
 % handles,radius: the radius to use for the filters
 % OUT-handles.img: the filtered image
-function [hObject,eventdata,handles] = ExecuteFilter(hObject,eventdata,handles)
+function ExecuteFilter(hObject, handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         if isfield(handles, 'img')
             % Apply the filter to the image
             switch handles.filter
                 case '3D Median'
+                    oddIntegerCheck(handles.radius);
                     handles.img = uint16(smooth3(handles.img, 'box', [handles.radius handles.radius handles.radius]));
                 case '3D Gaussian'
+                    oddIntegerCheck(handles.radius);
                     handles.img = imgaussfilt3(handles.img, handles.sigma, 'FilterSize', handles.radius);
                 case '2D Median'
                     for i = 1:handles.abc(3)
@@ -26,14 +28,27 @@ function [hObject,eventdata,handles] = ExecuteFilter(hObject,eventdata,handles)
                 case 'Local Standard Deviation'
                     handles.img = stdfilt(handles.img,true([handles.radius handles.radius handles.radius]));
                 case 'Range'
+                    oddIntegerCheck(handles.radius);
                     handles.img = rangefilt(handles.img,true([handles.radius handles.radius handles.radius]));
                 case 'Entropy'
+                    oddIntegerCheck(handles.radius);
                     handles.img = entropyfilt(handles.img,true([handles.radius handles.radius handles.radius]));
             end
-            updateImage(hObject, eventdata, handles);
+            updateImage(hObject, handles);
+        else
+            noImgError;
         end
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end
+end
+
+% NAME-oddIntegerCheck
+% DESC-Checks that the radius is an odd integer, throws an error if not
+% IN-radius: The radius to check
+function oddIntegerCheck(radius)
+    if mod(radius, 2) ~= 1
+        error('ContouringGUI:InputError', 'Radius must be an odd integer for this filter.');
+    end
+end

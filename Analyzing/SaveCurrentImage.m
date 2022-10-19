@@ -3,9 +3,9 @@
 % IN: handle.axesIMG: the axes for displaying the image
 % handles.editDICOMPrefix: the filename to save the image as.
 % OUT: outfile: writes a tif file to the current directory
-function [hObject,eventdata,handles] = SaveCurrentImage(hObject,eventdata,handles)
+function SaveCurrentImage(handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         if isfield(handles, 'img')
             % Write the image to [prefix].tif in the current folder
             outFile = fullfile(handles.pathstr,[get(handles.editDICOMPrefix,'String') '.tif']);
@@ -13,8 +13,7 @@ function [hObject,eventdata,handles] = SaveCurrentImage(hObject,eventdata,handle
         else
             noImgError();
         end
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

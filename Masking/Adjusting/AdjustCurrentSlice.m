@@ -9,25 +9,24 @@
 % handles.contractionBias: the contraction bias to be used by the algorithm
 % handles.iterations: The number of iterations to be used by the algorithm
 % OUT-Handles.bwCountor: The 3d mask, with the current slice adjusted
-function [hObject, eventdata, handles] = AdjustCurrentSlice(hObject, eventdata, handles)
-
-try
-    setStatus(hObject, handles, 'Busy');
-    if isfield(handles, 'img') && isfield(handles, 'bwContour')
-        % Get image and mask for current slice
-        img = handles.img(:,:,handles.slice);
-        bw = handles.bwContour(:,:,handles.slice);
-        % Apply active contour algorithm to match mask to nearby object
-        % boundaries in image
-        bw = activecontour(img,bw,...
-            handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
-        % Set mask to new mask
-        handles.bwContour(:,:,handles.slice) = bw;
-        handles = updateContour(handles);
-        updateImage(hObject,eventdata,handles);
+function AdjustCurrentSlice(hObject, handles)
+    try
+        setStatus(handles, 'Busy');
+        if isfield(handles, 'bwContour')
+            % Get image and mask for current slice
+            img = handles.img(:,:,handles.slice);
+            bw = handles.bwContour(:,:,handles.slice);
+            % Apply active contour algorithm to match mask to nearby object
+            % boundaries in image
+            bw = activecontour(img,bw,...
+                handles.iterations,handles.contourMethod,'SmoothFactor',handles.smoothFactor,'ContractionBias',handles.contractionBias);
+            % Set mask to new mask
+            handles.bwContour(:,:,handles.slice) = bw;
+            updateContour(hObject, handles);
+        else
+            noMaskError;
+        end
+        setStatus(handles, 'Not Busy');
+    catch err
+        reportError(err, handles);
     end
-    setStatus(hObject, handles, 'Not Busy');
-catch err
-    setStatus(hObject, handles, 'Failed');
-    reportError(err);
-end

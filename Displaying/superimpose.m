@@ -10,11 +10,12 @@
 % handles.colormap: the image colormap
 % OUT-Displays the image(s)
 function superimpose(handles, varargin)
+    adjusted = imadjust(handles.img(:,:,handles.slice),[double(handles.lOut);double(handles.hOut)]);
     if nargin >= 2
         % Show the current slice of handles.img and img2 superimposed
-        imshowpair(imadjust(handles.img(:,:,handles.slice),[double(handles.lOut);double(handles.hOut)],[double(0);double(1)]),varargin{1},'blend','Parent',handles.axesIMG);
+        imshowpair(adjusted,varargin{1},'blend','Parent',handles.axesIMG);
     else
-        imshow(imadjust(handles.img(:,:,handles.slice),[double(handles.lOut);double(handles.hOut)],[]),'Parent',handles.axesIMG);  
+        imshow(adjusted,'Parent',handles.axesIMG);  
     end
     % Set the colormap
     colormap(handles.axesIMG,handles.colormap);   

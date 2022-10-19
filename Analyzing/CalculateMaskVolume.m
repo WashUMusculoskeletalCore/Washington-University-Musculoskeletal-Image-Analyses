@@ -4,7 +4,7 @@
 % handles.info.SliceThickness: the thickness of each slice in mm, used for
 % voxel size
 % OUT-UI: displays a textbox with the volume
-function [hObject,eventdata,handles] = CalculateMaskVolume(hObject,eventdata,handles)
+function CalculateMaskVolume(handles)
     % Get the number of nonzero elements of bwContour
     nz = nnz(handles.bwContour);
     % Multiply by the voxel size cubed

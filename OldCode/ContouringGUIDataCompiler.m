@@ -1,3 +1,4 @@
+% TODO-this is currently unused
 function ContouringGUIDataCompiler()
 
 %%Assumes text files are in measurement folder; select the parent folder to
@@ -43,9 +44,7 @@ try
     line = fgetl(fid);
     fprintf(out,'%s\n',line);
 catch err
-    % TODO-More general error
-    disp('Cannot create result file, see Dan');
-    reportError(err);
+    reportError(err, handles);
 end
 
 function CollectCancellousData(pathstrParent)
@@ -85,6 +84,5 @@ try
     fprintf(out,'%s\t','File Location');
     fprintf(out,'%s\n',line);
 catch err
-    disp('Cannot create result file, see Dan');
-    reportError(err);
+    reportError(err, handles);
 end

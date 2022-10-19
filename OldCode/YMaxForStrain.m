@@ -5,7 +5,7 @@
 % IO: Point selected by user
 % OUT-dPix: The distance in pixels, displayed in a message box
 % dPhys: The distance in milimeters, displayed in a message box
-function YMaxForStrain(hObject, eventdata, handles)
+function YMaxForStrain(handles)
     if isfield(handles, 'bwContour')
         % Find position of Centroid
         [I , ~] = find(handles.bwContour(:,:,handles.slice) > 0);

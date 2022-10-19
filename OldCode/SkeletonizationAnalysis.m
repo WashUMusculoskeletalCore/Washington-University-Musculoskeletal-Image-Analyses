@@ -3,9 +3,9 @@
 % IN-handles.bwContour: The 3D mask
 % OUT-Displays and outputs a thickness map for the skeleton
 % Outputs a tsv file containing the skeleton link data
-function [hObject,eventdata,handles] = SkeletonizationAnalysis(hObject,eventdata,handles)
+function SkeletonizationAnalysis(handles)
     try
-        setStatus(hObject, handles, 'Busy');
+        setStatus(handles, 'Busy');
         if isfield(handles, 'bwContour')
             %generates uncorrected skeleton
             bwSkeleton = Skeleton3D(handles.bwContour);
@@ -21,7 +21,7 @@ function [hObject,eventdata,handles] = SkeletonizationAnalysis(hObject,eventdata
             hold on;
             bwDist = bwdist(~handles.bwContour); % Gets distance map to edge for area in mask
             bwDist(~bwSkeleton) = 0; % Limit distance map to skeleton
-            spheres = findSpheres(hObject, handles, bwDist); % Find the local maxima spheres
+            spheres = findSpheres(handles, bwDist); % Find the local maxima spheres
             % Get the points in the distance map
             [a, b, c] = ind2sub(size(spheres),find(spheres));
             xyzUlt = [a b c];
@@ -36,7 +36,7 @@ function [hObject,eventdata,handles] = SkeletonizationAnalysis(hObject,eventdata
             Y = discretize(rads,64); % Sort rads into 64 bins
             cmap = jet(64); % Creates a colormap coresponding to each bucket
             for i = 1:length(rads)
-                displayPercentLoaded(hObject, handles, i/length(rads));
+                displayPercentLoaded(handles, i/length(rads));
                 % Creates a colored surface map
                 surf((x*rads(i)+xyzUlt(i,1)),(y*rads(i)+xyzUlt(i,2)),(z*rads(i)+xyzUlt(i,3)),'LineStyle','none','FaceColor',cmap(Y(i),:));
                 axis tight;
@@ -46,7 +46,7 @@ function [hObject,eventdata,handles] = SkeletonizationAnalysis(hObject,eventdata
             saveas(hfig,fullfile(handles.pathstr,'SkeletonizedFigure.fig')); % Save the figure
             out = struct;
             for i = 1:length(link)
-                displayPercentLoaded(hObject, handles, i/length(link));
+                displayPercentLoaded(handles, i/length(link));
                 % Get each node from the link, and the xyz coordinates of each node 
                 out(i).nodes = [link(i).n1, link(i).n2];
                 out(i).nodeLocs(1,:) = [node(link(i).n1).comx, node(link(i).n1).comy, node(link(i).n1).comz];
@@ -127,8 +127,7 @@ function [hObject,eventdata,handles] = SkeletonizationAnalysis(hObject,eventdata
             else
             noMaskError();
         end
-        setStatus(hObject, handles, 'Not Busy');
+        setStatus(handles, 'Not Busy');
     catch err
-        setStatus(hObject, handles, 'Failed');
-        reportError(err);
+        reportError(err, handles);
     end

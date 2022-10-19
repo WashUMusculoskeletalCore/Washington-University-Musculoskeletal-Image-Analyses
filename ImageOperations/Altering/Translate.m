@@ -7,7 +7,7 @@
 % direction: the direction to translate in, options are 'Up', 'Down',
 % 'Left', and 'Right'
 % OUT-handles.bwContour: the mask to be translated
-function [hObject,eventdata,handles] = Translate(hObject, eventdata, handles, direction)
+function Translate(hObject, handles, direction)
     if isfield(handles, 'bwContour')
         [row, col] = find(handles.bwContour(:,:,handles.slice));
         switch direction
@@ -27,12 +27,10 @@ function [hObject,eventdata,handles] = Translate(hObject, eventdata, handles, di
             tmp(row(i), col(i)) = 1;
         end
 
-        %cent = [round(mean(row)) round(mean(col))];
-        %set(handles.textCenterLocation,'String',[num2str(cent(1)) ' ' num2str(cent(2))]);
-
         handles.bwContour(:,:,handles.slice) = tmp;
-
-        updateImage(hObject, eventdata, handles);
+        updateImage(hObject, handles);
+    else
+        noMaskError;
     end
 end
 

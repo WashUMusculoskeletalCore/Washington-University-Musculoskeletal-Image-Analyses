@@ -1,4 +1,4 @@
-function [out,outHeader] = scancoParameterCalculatorCancellous(bw,bw2,img,info,robust)
+function [out,outHeader] = scancoParameterCalculatorCancellous(handles,bw,bw2,img,info,robust)
 %scancoParameterCalculatorCancellous
 % DESC-Calculates all parameters for the cancellous analysis
 % IN-bw: A black and white mask of the trabecular structures
@@ -9,14 +9,8 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(bw,bw2,img,info,r
 % OUT-out:the list of parameters. Note that Analysis Path is not included
 % outHeaders: the list of headers for the output
 
-    
-    img(~bw2) = 0;
-    %Find bone volume
-    BV = length(find(bw)) * info.SliceThickness^3;
-    %find total volume
-    TV = length(find(bw2)) * info.SliceThickness^3;
-    %find BV/TV
-    BVTV = BV/TV;
+    displayPercentLoaded(handles, 0);
+    [BV, TV, BVTV] = BoneVolume(bw, bw2, info.SliceThickness);
 
     % Find the ultimate erosion to identify the local maxima in the binary array
     bwUlt = bwulterode(bw);
@@ -31,10 +25,12 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(bw,bw2,img,info,r
     D1(~bw2) = 0;
     D2(~bwUlt) = 0;
     D1(~bwBackUlt) = 0;
-    
-    if robust == 1
-        [meanRad,stdRad,~] = calculateThickness(hObject, handles, D2);
-        [meanRadSpace,stdRadSpace,~] = calculateThickness(hObject, handles, D1);
+
+    displayPercentLoaded(handles, 1/5);
+
+    if robust == 1        
+        [meanRad,stdRad,~] = calculateThickness(handles, D2);
+        [meanRadSpace,stdRadSpace,~] = calculateThickness(handles, D1);
     else
         % do foreground structure
         rads = nonzeros(D2); % Find the radii of the spheres at the local maxima
@@ -54,20 +50,27 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(bw,bw2,img,info,r
 
     TN = 1/TbSp; % Trabecular Number
 
+    displayPercentLoaded(handles, 2/5);
+
     %find TMD and vBMD
     try
-        [densityMatrix , ~] = calculateDensityFromDICOM(info,img);
+        [densityMatrix , ~] = calculateDensityFromDICOM(info,img.*bw2);
         TMD = mean(densityMatrix(bw)); % Volumetric Bone Mineral Density       
         vBMD = mean(densityMatrix(bw2)); % Tissue Mineral Density
     catch
         TMD = 0;
         vBMD = 0;
     end
+    
+    displayPercentLoaded(handles, 3/5);
 
     % Calculate Structural Model Index
     dr = 0.000001;
     shp = shpFromBW(bw,3);
     faces = shp.boundaryFacets;
+    if isempty(faces)
+        error('ContouringGUI:InputError', 'Mask must form a 3D shape.')
+    end
     vertices = shp.Points;
     vertexNormals = vertexNormal2(vertices,faces);% Calculate vertex normals for expansion
     newVertices = vertices + dr*vertexNormals;% Generate new vertex locations for different mesh
@@ -76,6 +79,8 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(bw,bw2,img,info,r
     dS = meshSurfaceArea(newVertices,faces);
     dS = abs(BS - dS);
     SMI = (6 * BV * (dS/dr)) / BS^2;
+
+    displayPercentLoaded(handles, 4/5)
 
     cc = bwconncomp(bw);
     numPixels = cellfun(@numel,cc.PixelIdxList);
@@ -86,7 +91,8 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(bw,bw2,img,info,r
     [connectivity , ~] = imEuler3d(bw,26);%calculate Euler characteristic of foreground structure
     ConnD = (1-connectivity) / TV;
 
-    out = {datestr(now),TV,BV,BVTV,ConnD,SMI,TbTh,TbThSTD,TbSp,TbSpSTD,TN,vBMD,TMD,info.SliceThickness};
+    % Compile output and headers
+    out = {datestr(now),handles.pathstr,TV,BV,BVTV,ConnD,SMI,TbTh,TbThSTD,TbSp,TbSpSTD,TN,vBMD,TMD,info.SliceThickness,handles.lowerThreshold};
     outHeader = {'Date Completed',...
         'Analysis Path',...
         'Total Volume (mm^3)',...
@@ -104,3 +110,4 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(bw,bw2,img,info,r
         'Voxel Dimension (mm^3)'...
         'Threshold'...
         };
+        displayPercentLoaded(handles, 1);
