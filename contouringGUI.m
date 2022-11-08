@@ -510,7 +510,7 @@ function pushbuttonInvertImage_Callback(hObject, ~, handles)
 % DESC-Executes on selection change, sets the STL color to match the
 % selected option
 % IN-handles.popupmenuSTLColor-the color chosen in the popup memu
-% OUT-handle.STLColor-the color used in STL files, in rgb format
+% OUT-handles.STLColor-the color used in STL files, in rgb format
 function popupmenuSTLColor_Callback(hObject, ~, handles)
     switch getPopupSelection(handles.popupmenuSTLColor)
         case 'Red'
@@ -761,7 +761,7 @@ function pushbuttonMorphAll_Callback(hObject, ~, handles)
 % handles.primitiveWidth: the width of the shape
 % handles.primitiveHeight: the height of the shape
 % handles.primitiveRotationAngle: the angle of the shape
-% OUT-handle.bwContour: the mask will be set to the chosen shape
+% OUT-handles.bwContour: the mask will be set to the chosen shape
 function pushbuttonCreatePrimitive_Callback(hObject, ~, handles)
     if isfield(handles, 'img') 
         switch handles.primitiveShape

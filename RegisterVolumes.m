@@ -84,7 +84,7 @@ function pushbuttonFlipAxis_Callback(hObject, ~, handles)
 % handles.popupmenuPlanarAxial: The popup menu to select planar or axial rotation
 % OUT-handles.imgMoving: The moving image
 function pushbuttonRotate_Callback(hObject, ~, handles)
-    if isfield(handle, 'imgMoving')
+    if isfield(handles, 'imgMoving')
         switch handles.plAx
             case 'planar'
                 % Rotate the image around the center point

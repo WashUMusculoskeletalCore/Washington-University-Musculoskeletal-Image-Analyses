@@ -1,6 +1,6 @@
 % NAME-SaveCurrentImage
 % DESC-Saves the image of the current slice, including any overlays, as a .tif
-% IN: handle.axesIMG: the axes for displaying the image
+% IN: handles.axesIMG: the axes for displaying the image
 % handles.editDICOMPrefix: the filename to save the image as.
 % OUT: outfile: writes a tif file to the current directory
 function SaveCurrentImage(handles)

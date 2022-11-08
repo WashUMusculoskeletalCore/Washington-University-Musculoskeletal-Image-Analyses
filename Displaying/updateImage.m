@@ -1,6 +1,6 @@
 % NAME-updateImage
 % DESC-updates the display of the image and the mask
-% IN-handle.img: the 3D image
+% IN-handles.img: the 3D image
 % handles.bwContour: the 3D mask
 % handles.axesIMG: the axes to display the image on
 % OUT: displays an image of the current slice

@@ -1,11 +1,11 @@
 % NAME-MakeDatasetIsotropic
 % DESC-Makes a non-isotropic image isotropic. (All pixels are the same size
 % in all dimensions.)
-% IN-handle.img: The 3D image
+% IN-handles.img: The 3D image
 % handles.bwContour: The 3D mask
 % handles.info.PixelSpacing: The size of a pixel in each dimension
 % handles.info.SliceThickness: The size of a pixel in the z dimension
-% OUT-handle.img: The 3D image
+% OUT-handles.img: The 3D image
 % handles.bwContour: The 3D mask
 % handles.info.PixelSpacing: The size of a pixel in each dimension
 % handles.info.SliceThickness: The size of a pixel in the z dimension
