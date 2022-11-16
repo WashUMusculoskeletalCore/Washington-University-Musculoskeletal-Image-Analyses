@@ -1,4 +1,4 @@
-# ContouringGUI
+# Washington University Musculoskeletal Image Analyses 
 medical image processing software
 
 Joseph Szatkowski
