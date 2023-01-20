@@ -30,7 +30,7 @@ function Translate(hObject, handles, direction)
         handles.bwContour(:,:,handles.slice) = tmp;
         updateImage(hObject, handles);
     else
-        noMaskError;
+        noMaskError();
     end
 end
 

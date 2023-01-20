@@ -21,7 +21,7 @@ function CancellousAnalysis(handles)
             setStatus(handles, 'Writing report');
             PrintReport(fullfile(handles.pathstr,'CancellousResults.txt'), outHeaderCancellous, outCancellous);
         else
-            noMaskErr();
+            noMaskError();
         end
         setStatus(handles, 'Not Busy');
     catch err

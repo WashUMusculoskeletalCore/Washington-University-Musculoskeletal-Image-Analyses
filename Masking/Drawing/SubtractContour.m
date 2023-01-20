@@ -14,5 +14,5 @@ function SubtractContour(hObject, handles)
         handles.bwContour(:,:,handles.slice)=tmp;
         updateContour(hObject, handles);
     else
-        noMaskError;
+        noMaskError();
     end

@@ -24,7 +24,7 @@ function AdjustCurrentSlice(hObject, handles)
             handles.bwContour(:,:,handles.slice) = bw;
             updateContour(hObject, handles);
         else
-            noMaskError;
+            noMaskError();
         end
         setStatus(handles, 'Not Busy');
     catch err

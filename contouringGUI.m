@@ -241,7 +241,7 @@ function pushbuttonClearMaskRange_Callback(hObject, ~, handles)
         handles.bwContour(:,:,startRange:endRange) = false(size(handles.bwContour(:,:,startRange:endRange)));
         updateContour(hObject, handles);
     else
-        noMaskError;
+        noMaskError();
     end
 
 % NAME-pushbuttonClearAllMasks_Callback
@@ -252,7 +252,7 @@ function pushbuttonClearAllMasks_Callback(hObject, ~, handles)
         handles = rmfield(handles,'bwContour');
         updateContour(hObject, handles);
     else
-        noMaskError;
+        noMaskError();
     end
         
 
@@ -458,7 +458,7 @@ function pushbuttonCropImageToMask_Callback(hObject, ~, handles)
 % NAME-pushbuttonSetMaskToComponent_Callback
 % DESC-Executes on button press, select one mask component and remove all
 % others
-% IN-UI: the component selected by dropdown menu
+% IN-UI: the component selected by popup
 % OUT-handles.bwContour-the 3D mask, reduced to one component
 function pushbuttonSetMaskToComponent_Callback(hObject, ~, handles)
     try        
@@ -1033,7 +1033,7 @@ function pushbuttonInvertMask_Callback(hObject, ~, handles)
         handles.bwContour = ~handles.bwContour;
         updateContour(hObject, handles);
     else
-        noMaskError;
+        noMaskError();
     end
 
 % NAME-pushbuttonCopyMask_Callback
@@ -1045,7 +1045,7 @@ function pushbuttonCopyMask_Callback(hObject, ~, handles)
         handles.maskCopy = handles.bwContour(:,:,handles.slice);
         guidata(hObject, handles);
     else
-        noMaskError;
+        noMaskError();
     end
 
 % NAME-pushbuttonPasteMask_Callback
@@ -1089,7 +1089,7 @@ function pushbuttonStoreMask_Callback(hObject, ~, handles)
         set(handles.popupmenuEditMaskName, 'String', keys(handles.savedMasks));
         guidata(hObject, handles);
     else
-        noMaskError;
+        noMaskError();
     end
     setStatus(handles, 'Not Busy')
 
