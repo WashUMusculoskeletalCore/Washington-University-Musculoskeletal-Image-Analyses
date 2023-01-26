@@ -5,7 +5,7 @@
 % OUT-textPercentLoaded-the percentage value displayed as text
 function displayPercentLoaded(handles, percentage)
     % Formats as an integer percentage
-    set(handles.textPercentLoaded,'String', [sprintf('%u', percentage.*100), ' %']);
+    set(handles.textPercentLoaded,'String', [int2str(floor(percentage.*100)), ' %']);
     drawnow;
 end
 

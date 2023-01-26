@@ -9,11 +9,11 @@ function Rotate(hObject, handles, angle)
     if mod(handles.rotateDegrees, 90) == 0
         % Get the number of 90 degree rotations needed
         numRotate = mod(handles.rotateDegrees, 360)/90;
-        % 2 is X-axis
-        handles.img = rot90_3D(handles.img, 2, numRotate);
+        % 3 is Z-axis
+        handles.img = rot90_3D(handles.img, 3, numRotate);
         handles = abcResize(handles);
         if isfield(handles,'bwContour')
-            handles.bwContour = rot90_3D(handles.bwContour, 2, numRotate);
+            handles.bwContour = rot90_3D(handles.bwContour, 3, numRotate);
             updateContour(hObject, handles);
         else
             updateImage(hObject, handles);

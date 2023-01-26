@@ -5,10 +5,10 @@
 % handles.info: the DICOM info struct
 % OUT-2DResults.txt: A file containing information about the image desnity
 function DensityAnalysis(handles)
-    try
+    try        
         setStatus(handles, 'Busy');
         displayPercentLoaded(handles, 0);
-        if isfield(handles, 'img')
+        if isfield(handles, 'bwContour')
             headers = {'Date Analyzed', 'Measurement', 'Area by slice', 'Mean Density by Slice',...
                 'Standard Deviation of Density by Slice', 'Min Density by Slice',...
                 'Max Density by Slice', 'Mean Area', 'Standard Deviation of Area', 'Min Area',...
@@ -53,7 +53,7 @@ function DensityAnalysis(handles)
             PrintReport(fullfile(handles.pathstr,'2DResults.txt'), headers, results);
             displayPercentLoaded(handles, 1);
         else
-            noImgError();
+            noMaskError();
         end
         setStatus(handles, 'Not Busy');
     catch err
