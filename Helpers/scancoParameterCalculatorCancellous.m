@@ -54,9 +54,9 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(handles,bw,bw2,im
 
     %find TMD and vBMD
     try
-        [densityMatrix , ~] = calculateDensityFromDICOM(info,img.*bw2);
-        TMD = mean(densityMatrix(bw)); % Tissue Mineral Density      
-        vBMD = mean(densityMatrix(bw2)); % Volumetric Bone Mineral Density 
+        [densityMatrix , ~] = calculateDensityFromDICOM(info,img.*uint16(bw2));
+        TMD = mean(densityMatrix(bw), 'all'); % Tissue Mineral Density      
+        vBMD = mean(densityMatrix(bw2), 'all' ); % Volumetric Bone Mineral Density 
     catch
         TMD = 0;
         vBMD = 0;
