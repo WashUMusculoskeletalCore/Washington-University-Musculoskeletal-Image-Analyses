@@ -1272,7 +1272,6 @@ function editSliderTextBox_Callback(hObject, ~, handles, model, slider, update_F
         end
         set(handles.(slider),'Value',handles.(model));
         update_Fcn(hObject, handles);
-        guidata(hObject, handles);
         return;
     end
     % If the value entered is not a fixable, replace the text with the

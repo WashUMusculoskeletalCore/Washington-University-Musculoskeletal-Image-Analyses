@@ -73,12 +73,13 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(handles,bw,bw2,im
     end
     vertices = shp.Points;
     vertexNormals = vertexNormal2(vertices,faces);% Calculate vertex normals for expansion
+    vertexNormals(isnan(vertexNormals))=0;
     newVertices = vertices + dr*vertexNormals;% Generate new vertex locations for different mesh
     % Get difference of surface area between meshes
     BS = meshSurfaceArea(vertices,faces);
     dS = meshSurfaceArea(newVertices,faces);
     dS = abs(BS - dS);
-    SMI = (6 * BV * (dS/dr)) / BS^2;
+    SMI = (6 * (BV/info.SliceThickness^3) * (dS/dr)) / BS^2;
 
     displayPercentLoaded(handles, 4/5)
 
@@ -107,7 +108,7 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(handles,bw,bw2,im
         'Trabecular Number',...
         'Volumetric Bone Mineral Density (mgHA/cm^3)',...
         'Tissue Mineral Density(mgHA/cm^3)',...
-        'Voxel Dimension (mm^3)'...
+        'Voxel Dimension (mm)'...
         'Threshold'...
         };
         displayPercentLoaded(handles, 1);
