@@ -8,7 +8,8 @@
 % BVTV: The fraction of the total volume that is bone
 function [BV,TV,BVTV] = BoneVolume(boneMask,totalMask,pixelSize)
     % Find bone volume
-    BV = nnz(boneMask) * pixelSize^3;
+    shp = shpFromBW(boneMask,1.9);
+    BV = volume(shp) * pixelSize^3;
     % Find total volume
     TV = nnz(totalMask) * pixelSize^3;
     % Find bone volume ratio

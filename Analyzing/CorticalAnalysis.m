@@ -20,7 +20,7 @@ function CorticalAnalysis(handles)
             if isFullMask(contour)
                 setStatus(handles, 'Analyzing');
                 [outCortical, outHeaderCortical, outCorticalContinuous, outHeaderContinuous] = scancoParameterCalculatorCortical(handles, img, contour, handles.info, handles.lowerThreshold, get(handles.togglebuttonRobustThickness,'Value'));
-                [~, twoDData] = twoDAnalysisSub(img,handles.info,handles.lowerThreshold,contour);
+                [~, twoDData] = twoDAnalysisSub(img,handles.info,handles.lowerThreshold,contour&(img>=handles.lowerThreshold));
                 % Print main results
                 setStatus(handles, 'Writing report');
                 PrintReport(fullfile(handles.pathstr,'CorticalResults.txt'), outHeaderCortical, [outCortical, num2str(twoDData(2) + twoDData(3))]);

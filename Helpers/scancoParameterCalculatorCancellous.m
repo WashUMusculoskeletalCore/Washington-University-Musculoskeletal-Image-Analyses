@@ -10,28 +10,32 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(handles,bw,bw2,im
 % outHeaders: the list of headers for the output
 
     displayPercentLoaded(handles, 0);
+
     [BV, TV, BVTV] = BoneVolume(bw, bw2, info.SliceThickness);
 
-    % Find the ultimate erosion to identify the local maxima in the binary array
-    bwUlt = bwulterode(bw);
-    % Identify the background of the binary array and the local maxima
+    
+    % Identify the background of the binary array
     bwBackground = bw2 & ~bw;
-    bwBackUlt = bwulterode(bwBackground);
-    % Find the distance from the edge for each local maxima in the binary
+    % Find the distance from the edge for each point in the binary
     % array and background
     D1 = bwdist(bw);
     D2 = bwdist(bwBackground);
     D2(~bw2) = 0;
     D1(~bw2) = 0;
-    D2(~bwUlt) = 0;
-    D1(~bwBackUlt) = 0;
+    
 
     displayPercentLoaded(handles, 1/5);
 
     if robust == 1        
-        [meanRad,stdRad,~] = calculateThickness(handles, D2);
-        [meanRadSpace,stdRadSpace,~] = calculateThickness(handles, D1);
+        [meanRad,stdRad,~] = calculateThickness(D2);
+        [meanRadSpace,stdRadSpace,~] = calculateThickness(D1);
     else
+        % Find the ultimate erosion to identify the local maxima in the
+        % binary array
+        bwUlt = bwulterode(bw);
+        bwBackUlt = bwulterode(bwBackground);
+        D2(~bwUlt) = 0;
+        D1(~bwBackUlt) = 0;
         % do foreground structure
         rads = nonzeros(D2); % Find the radii of the spheres at the local maxima
         meanRad = mean(rads);
@@ -54,9 +58,9 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(handles,bw,bw2,im
 
     %find TMD and vBMD
     try
-        [densityMatrix , ~] = calculateDensityFromDICOM(info,img.*uint16(bw2));
+        [densityMatrix , ~] = calculateDensityFromDICOM(info,img);%.*uint16(bw2));
         TMD = mean(densityMatrix(bw), 'all'); % Tissue Mineral Density      
-        vBMD = mean(densityMatrix(bw2), 'all' ); % Volumetric Bone Mineral Density 
+        vBMD = mean(densityMatrix(bw2), 'all' ); % Volumetric Bone Mineral Density
     catch
         TMD = 0;
         vBMD = 0;
@@ -66,31 +70,40 @@ function [out,outHeader] = scancoParameterCalculatorCancellous(handles,bw,bw2,im
 
     % Calculate Structural Model Index
     dr = 0.000001;
-    shp = shpFromBW(bw,3);
-    faces = shp.boundaryFacets;
+    [X,Y,Z]=meshgrid(1:size(bw,2),1:size(bw,1),1:size(bw,3));
+    [faces, vertices] = MarchingCubes(X,Y,Z,double(bw), 0.99999999999);
     if isempty(faces)
         error('ContouringGUI:InputError', 'Mask must form a 3D shape.')
     end
-    vertices = shp.Points;
+    
     vertexNormals = vertexNormal2(vertices,faces);% Calculate vertex normals for expansion
-    vertexNormals(isnan(vertexNormals))=0;
     newVertices = vertices + dr*vertexNormals;% Generate new vertex locations for different mesh
     % Get difference of surface area between meshes
-    BS = meshSurfaceArea(vertices,faces);
-    dS = meshSurfaceArea(newVertices,faces);
-    dS = abs(BS - dS);
-    SMI = (6 * (BV/info.SliceThickness^3) * (dS/dr)) / BS^2;
+    BS = meshSurfaceArea(vertices,faces)*info.SliceThickness^2;
+    dS = meshSurfaceArea(newVertices,faces)*info.SliceThickness^2;
+    dS = dS - BS;
+    dr = dr*info.SliceThickness;
+    SMI = (6 * BV * (dS/dr)) / BS^2;
 
     displayPercentLoaded(handles, 4/5)
 
-    cc = bwconncomp(bw);
+    % Clean any isolated holes and bone
+    cc = bwconncomp(bwBackground, 6);
+    numPixels = cellfun(@numel,cc.PixelIdxList);
+    [~,idx] = max(numPixels);
+    bw = bw2;
+    bw(cc.PixelIdxList{idx}) = false;
+
+
+    cc = bwconncomp(bw, 26);
     numPixels = cellfun(@numel,cc.PixelIdxList);
     [~,idx] = max(numPixels);
     bw = false(size(bw));
     bw(cc.PixelIdxList{idx}) = true;
 
-    [connectivity , ~] = imEuler3d(bw,26);%calculate Euler characteristic of foreground structure
-    ConnD = (1-connectivity) / TV;
+
+    [chi , ~] = imEuler3d(bw,6);%calculate Euler characteristic
+    ConnD = (1-chi) / TV;
 
     % Compile output and headers
     out = {datestr(now),handles.pathstr,TV,BV,BVTV,ConnD,SMI,TbTh,TbThSTD,TbSp,TbSpSTD,TN,vBMD,TMD,info.SliceThickness,handles.lowerThreshold};

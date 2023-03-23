@@ -13,6 +13,6 @@ function [densityMatrixmgHACCM, densityMatrixHU] = calculateDensityFromDICOM(inf
     scale = info.Private_0029_1000; % u-scaling
     water = info.Private_0029_1006; % Density of water
     % Miligrams of Hydroxyapatite per cubic centimeter
-    densityMatrixmgHACCM = uint16(single(matrix) ./ scale .* slope + intercept);
+    densityMatrixmgHACCM = int16(double(matrix) ./ scale .* slope + intercept);
     % Hounsfield Units
-    densityMatrixHU = uint16(-1000 + double(matrix) ./ scale .* 1000 ./ water);
+    densityMatrixHU = int16(-1000 + double(matrix) ./ scale .* 1000 ./ water);

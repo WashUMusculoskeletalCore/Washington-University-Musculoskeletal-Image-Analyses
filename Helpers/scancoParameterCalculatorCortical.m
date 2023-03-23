@@ -19,14 +19,14 @@ function [out,outHeader,out2,outHeader2] = scancoParameterCalculatorCortical(han
     img(~bw) = 0;
 
     bwPorosity = img > threshold;
-    BV = nnz(bwPorosity) * info.SliceThickness^3; % Bone Volume
 
     bwFilled = false(size(bw));
     for i = 1:c
         bwFilled(:,:,i) = imfill(imclose(bw(:,:,i),strel('disk',5,0)),'holes');
         displayPercentLoaded(handles, i/(5*c));
     end
-    TV = nnz(bwFilled) * info.SliceThickness^3; % Total Volume
+    TV = nnz(bwFilled) * info.SliceThickness^3;
+    BV = nnz(bw) * info.SliceThickness^3;
 
     BAr = BV / (c*info.SliceThickness); % Bone Area
     MAr = (TV - BV) / (c*info.SliceThickness); % Medullary Area
@@ -51,15 +51,15 @@ function [out,outHeader,out2,outHeader2] = scancoParameterCalculatorCortical(han
     displayPercentLoaded(handles, 3/5);
 
     if robust == 1
-        [meanRad,stdRad,~] = calculateThickness(handles, dist);
-        TbTh = meanRad * 2 * info.SliceThickness;
-        TbThSTD = stdRad * 2 * info.SliceThickness;
+        [meanRad,stdRad,~] = calculateThickness(dist);
+        CtTh = meanRad * 2 * info.SliceThickness;
+        CtThSTD = stdRad * 2 * info.SliceThickness;
     else
         % Do foreground structure
         rads = dist(bwUlt);% Find the radii of the spheres at the local maxima
         diams = 2 * rads .* info.SliceThickness;% Convert to diameters and in physical units
-        TbTh = mean(diams);% Mean structure thickness
-        TbThSTD = std(diams);% Standard deviation of structure thicknesses
+        CtTh = mean(diams);% Mean structure thickness
+        CtThSTD = std(diams);% Standard deviation of structure thicknesses
     end
 
 
@@ -79,8 +79,8 @@ function [out,outHeader,out2,outHeader2] = scancoParameterCalculatorCortical(han
 
     out = {datestr(now),...
         file,...
-        TbTh,...
-        TbThSTD,...
+        CtTh,...
+        CtThSTD,...
         TMD,...
         porosity,...
         TAr,...
@@ -104,7 +104,7 @@ function [out,outHeader,out2,outHeader2] = scancoParameterCalculatorCortical(han
         'Stop Slice',...
         'Voxel Dimension (mm)',...
         'Lower Threshold',...
-        'pMOI (mm)'};
+        'pMOI (mm^4)'};
     
     outHeader2 = {'Date Analysis Performed',...
         'File ID',...
@@ -127,7 +127,7 @@ function [out,outHeader,out2,outHeader2] = scancoParameterCalculatorCortical(han
     slicesPerBin = round(0.1 / info.SliceThickness);
     if c < slicesPerBin
         % If there is only one bin, reuse values
-        out2 = {BV, BAr, MAr, TAr, 0, TMD,TbTh, TbThSTD, porosity};
+        out2 = {BV, BAr, MAr, TAr, 0, TMD,CtTh, CtThSTD, porosity};
         displayPercentLoaded(handles, 1);
         return
     end
@@ -177,7 +177,7 @@ function [out,outHeader,out2,outHeader2] = scancoParameterCalculatorCortical(han
         D1(~bwUlt) = 0;
 
         if robust == 1
-            [meanRad2(ct),stdRad2(ct)] = calculateThickness(handles, D1);
+            [meanRad2(ct),stdRad2(ct)] = calculateThickness(D1);
             TbTh2(ct) = meanRad2(ct) * 2 * info.SliceThickness;% Mean structure thickness
             TbThSTD2(ct) = stdRad2(ct) * 2 * info.SliceThickness;% Standard deviation of structure thicknesses
         else

@@ -8,7 +8,7 @@
 function ThicknessVisualization(handles)
     try
         setStatus(handles, 'Busy');
-        bw = handles.bwContour;
+        [~, bw] = CropImg(handles.bwContour);
         % Create distance map
         D1 = bwdist(~bw);% does what I want for thickness of spacing
         % Find local maximums
@@ -24,8 +24,9 @@ function ThicknessVisualization(handles)
         shp = shpFromBW(bw,3);
         % Create the visualization
         figure;
+        ax = gca;
         plot(shp,'FaceColor','w','LineStyle','none');
-        alpha(gca,0.4);
+        alpha(ax,0.4);
         camlight;
         hold on;
         % Find the range of all radii and convert it to a scale of 256
@@ -52,7 +53,7 @@ function ThicknessVisualization(handles)
         for i = 1:length(find(D1))
             for j = 2:length(bin)
                 if rads(i)-min(rads) > bin(j-1) && rads(i)-min(rads) <= bin(j)
-                    surf(x*rads(i)+x2(i), y*rads(i)+y2(i), z*rads(i)+z2(i),'FaceColor',map(j-1,:),'FaceAlpha',trans(j),'LineStyle','none');
+                    surf(ax, x*rads(i)+x2(i), y*rads(i)+y2(i), z*rads(i)+z2(i),'FaceColor',map(j-1,:),'FaceAlpha',trans(j),'LineStyle','none');
                     axis tight;
                     drawnow();
                 end
