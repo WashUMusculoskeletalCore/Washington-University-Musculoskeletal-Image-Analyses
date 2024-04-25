@@ -24,9 +24,9 @@ function TangIVDPMAMorphology(handles, notocord)
             [~, ~, bwNP, bwTotal, img] = CropImg(bw, bwNP, bwTotal, handles.img);
             displayPercentLoaded(handles, 2/5);
             % Get the area in the disk but not NP to find AF(annulus fibrosus)
-            bwAF = bwTotal(~bwNP);
+            bwAF = bwTotal & ~bwNP;
             % Find average value of the area of the image covered by each mask
-            meanTotal = mean(handles.img(bwTotal));
+            meanTotal = mean(img(bwTotal));
             meanAF = mean(img(bwAF));
             meanNP = mean(img(bwNP));
             % Calculate volume
